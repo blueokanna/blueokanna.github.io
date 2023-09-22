@@ -22,7 +22,7 @@
 7. 保存成功后会出现，底下会出现 Custom domain 的填写栏，你把你的域名放进去，点击保存。
 8. 这时候，前往你购买域名的网站去进行填写你的域名 config（参数），参考链接如下 ： [Github domain 调试参考说明](https://docs.github.com/zh/pages/configuring-a-custom-domain-for-your-github-pages-site/about-custom-domains-and-github-pages)
 9. 完成后，**等待！等待！等待！** 多等几分钟，然后回到 Pages，点击 **verify** 进行验证，如果出现红色的提示，那么要注意你的 domain 调试有问题，如果为绿色，那么恭喜你成功一大半了。
-10. 回到 <code> 目录，选择绿色按钮的 <code>，然后复制你的 https，在你的桌面上打开 cmd 命令行（Windows），Mac/Linux用户可以打开 Terminal，输入git clone + 你复制的 https 地址。
+10. 回到 **code** 目录，选择绿色按钮的 **code**，然后复制你的 https，在你的桌面上打开 cmd 命令行（Windows），Mac/Linux用户可以打开 Terminal，输入git clone + 你复制的 https 地址。
     
 ![2023-09-23 02-24-23屏幕截图](https://github.com/blueokanna/blueokanna.github.io/assets/56761243/41d7a037-da98-4699-b196-428eadee246a)
 
