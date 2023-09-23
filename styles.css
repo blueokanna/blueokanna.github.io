@@ -1,104 +1,73 @@
-h2,
-h3,
+body {
+    margin: 0;
+    background-attachment: fixed;
+    line-height: 1.8;
+    flex-direction: column;
+    display: flex;
+    border-radius: 28px;
+    text-align: center;
+}
+
+#background-video {
+    object-fit: cover;
+    position: fixed;
+    top: 0;
+    left: 0;
+    min-width: 100%;
+    min-height: 100%;
+    z-index: -1;
+}
+
+h1 {
+    font-size: 48px;
+    color: whitesmoke;
+}
+
+h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+h1 {
+    margin: 0;
+    padding: 0;
+    font-family: 'Ma Shan Zheng', cursive;
+}
+
+
+h2 {
+    margin: 0;
+    padding: 0;
+    color: rgb(30, 30, 30, 0.8);
+    font-family: 'Zhi Mang Xing', cursive;
+}
+
+h3 {
+    margin: 0;
+    padding: 0;
+    font-family: 'Noto Serif SC', serif;
+
+    color: rgb(30, 30, 30);
+}
+
 h4,
 h5 {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
-    color: rgb(30, 30, 30);
+    color: rgb(20, 20, 20, 0.8);
+    font-family: 'Long Cang', cursive;
 }
 
-body,
-h1 {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    color: whitesmoke;
-}
 
 
 p {
     margin: 0;
     padding: 0;
-    stroke-width: 2px;
-    font-family: Arial, sans-serif;
-    color: rgb(185, 185, 185);
+    stroke-width: 3px;
+    font-family: 'Liu Jian Mao Cao', cursive;
+    color: rgba(255, 255, 255, 0.882);
 }
 
-body {
-    margin: 0;
-    padding: 0;
-    background-image: url('https://images.pexels.com/photos/209831/pexels-photo-209831.jpeg');
-    background-size: cover;
-    background-attachment: fixed;
-    line-height: 1.6;
-    flex-direction: column;
-    display: flex;
-    border-radius: 24px;
-    min-height: 100vh;
-}
-
-figure {
-    margin: 0;
-}
-
-header {
-    text-align: center;
-    padding: 100px 0;
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-.plan-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-}
-
-
-.plan-message {
-    flex: 1;
-    padding: 20px;
-    background-color: transparent;
-    animation: slide-in-out 30s ease infinite;
-}
-
-@keyframes slide-in-out {
-
-    0%,
-    100% {
-        transform: translateY(100%);
-    }
-
-    50% {
-        transform: translateY(0);
-    }
-}
-
-
-h1 {
-    font-size: 42px;
-}
-
-nav ul {
-    list-style: none;
-    text-align: center;
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 10px 0;
-}
-
-nav li {
-    display: inline;
-    margin: 0 20px;
-}
-
-nav a {
-    text-decoration: none;
-    color: #ffffff;
-    font-weight: bold;
-    font-size: 18px;
-}
 
 .card-container {
     min-height: 100%;
@@ -111,11 +80,11 @@ nav a {
 
 .card {
     border-radius: 18px;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
     padding: 60px;
     overflow: hidden;
     transition: transform 0.5s ease;
-    align-items: center, inline;
+    align-items: center;
     text-align: center;
     margin: 30px;
     max-width: 450px;
@@ -123,6 +92,7 @@ nav a {
 
 .card:hover {
     transform: translateY(-12px);
+    font-weight: bold;
 }
 
 .card-content {
@@ -132,13 +102,38 @@ nav a {
     justify-content: center;
 }
 
+.card-inner {
+    width: auto;
+    min-height: 10vh;
+    transform-style: preserve-3d;
+    transition: transform 1.2s ease;
+}
 
-.bg-about {
-    background-image: url('https://images.pexels.com/photos/2232917/pexels-photo-2232917.jpeg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center center;
+
+.card-front,
+.card-back {
     width: 100%;
+    height: 100%;
+    position: absolute;
+    backface-visibility: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.card-front {
+    background-color: transparent;
+}
+
+.card-back {
+    background-color: transparent;
+    transform: rotateY(180deg);
+}
+
+.card:hover .card-inner {
+    transform: rotateY(180deg);
+    font-weight: bolder;
 }
 
 .bg-blog {
@@ -147,8 +142,10 @@ nav a {
     background-repeat: no-repeat;
     background-position: center center;
     width: 100%;
+    height: auto;
 
 }
+
 
 .bg-portfolio {
     background-image: url('https://images.pexels.com/photos/2908983/pexels-photo-2908983.jpeg');
@@ -156,7 +153,18 @@ nav a {
     background-repeat: no-repeat;
     background-position: center center;
     width: 100%;
+    height: auto;
 
+}
+
+.bg-about {
+    background-image: url('https://images.pexels.com/photos/2232917/pexels-photo-2232917.jpeg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    width: 100%;
+    height: auto;
+    perspective: 1000px;
 }
 
 .bg-contact {
@@ -165,19 +173,14 @@ nav a {
     background-repeat: no-repeat;
     background-position: center center;
     width: 100%;
-
-}
-
-h2 {
-    font-size: 28px;
-    margin-bottom: 10px;
+    height: auto;
 }
 
 footer {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.5);
     color: wheat;
     padding: 10px;
     font-size: 14px;
@@ -187,7 +190,7 @@ footer {
 .clock,
 .copyright,
 .weather {
-    padding: 10px;
+    padding: 12px;
 }
 
 .copyright {
