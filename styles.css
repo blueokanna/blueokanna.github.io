@@ -137,7 +137,7 @@ p {
 }
 
 .bg-blog {
-    background-image: url('https://images.pexels.com/photos/2909077/pexels-photo-2909077.jpeg');
+    background-image: url('media/blog_back.jpeg');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
@@ -148,7 +148,7 @@ p {
 
 
 .bg-portfolio {
-    background-image: url('https://images.pexels.com/photos/2908983/pexels-photo-2908983.jpeg');
+    background-image: url('media/portfolio_back.jpeg');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
@@ -158,7 +158,7 @@ p {
 }
 
 .bg-about {
-    background-image: url('https://images.pexels.com/photos/2232917/pexels-photo-2232917.jpeg');
+    background-image: url('media/about_back.jpeg');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
@@ -168,7 +168,7 @@ p {
 }
 
 .bg-contact {
-    background-image: url('https://images.pexels.com/photos/417045/pexels-photo-417045.jpeg');
+    background-image: url('media/contact_back.jpeg');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
@@ -180,7 +180,7 @@ footer {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.4);
     color: wheat;
     padding: 10px;
     font-size: 14px;
