@@ -1,8 +1,6 @@
-<!DOCTYPE html>
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <meta name="description" content="Blueokanna's Blog">
     <meta name="author" content="Blueokanna">
@@ -10,140 +8,194 @@
     <title>Blue's Blog</title>
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/2593/2593542.png" type="image/x-icon">
     <link rel="stylesheet" href="styles.css">
-    <video id="background-video" autoplay loop muted>
-        <source src="media/background.mp4" type="video/mp4">
-    </video>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@300&display=swap" rel="stylesheet">
 </head>
 
 <body>
     <header>
-        <div class="header-content">
-            <br /><br />
-            <h1>Blueokanna</h1>
-            <h1>博客妙妙屋</h1>
-            <div style="border:1px solid #cccccc75"></div>
-            <br />
-            <p>一个简单的个人成长在线学习的实时博客</p>
-        
+        <div class="header-shows">
+            <div class="header-img" id="BlueLogo" onclick="navigateToLink('https://blueokanna.gay')">
+            </div>
+            <div class="nav-menu nav-menu-center">Blue's PulseLink Blog</div>
+        </div>
+        <div class="nav-button">
+            <nav>
+                <ul class="nav-menu nav-menu-left-home">
+                    <li><a href="https://blueokanna.gay" onclick="navigateToLink('https://blueokanna.gay')"><i
+                                class="fas fa-home"></i> Home</a></li>
+                </ul>
+
+                <ul class="nav-menu nav-menu-right-github">
+                    <li>
+                        <a href="https://github.com/blueokanna">
+                            <i class="fab fa-github"></i> GitHub
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </header>
 
-    <div class="card-container">
-        <article id="blog" class="card bg-blog" onclick="navigateToLink('https://github.com/blueokanna')">
-            <div class="card-inner">
-                <div class=card-front>
-                    <h2>已上传至仓库的项目</h2>
-                </div>
-                <div class=card-back>
-                    <div class="card-content">
-                        <h3>目前上传项目都在 Github 上</h3>
-                        <h3>您可以直接点击跳转到他的 Github</h3>
+    <div id="portfolio" class="card-container">
+        <div class="flex-container">
+            <div class="left-column">
+                <div class="flex-holder">
+                    <div class="col text-col aos-init aos-animate" data-aos="fade-up">
+                        <div class="content-holder">
+                            <div class="title-holder">
+                                <div class="top-image-holder">
+                                    <img class="profile_pic" src="https://avatars.githubusercontent.com/u/56761243?v=4">
+                                    <h1> Blueokanna </h1>
+                                </div>
+                                <h1 class="profile_name" style="color: rgba(255, 255, 255, 0.75); ">Bio about me:</h1>
+                            </div>
+                            <div class="left-box-text-holder">
+                                <p> As a passionate Java backend engineer, I have been focusing on the tech field for
+                                    many years, conducting in-depth research and practice in Java development.
+                                    My blog will share my technical insights, including Java fundamentals, framework
+                                    applications, and performance optimization.
+                                </p>
+                                <p>
+                                    I engage in learning and exchange with you, working together to
+                                    progress.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </article>
-
-        <article id="portfolio" class="card bg-portfolio">
-            <div class="card-inner">
-                <div class=card-front>
-                    <h2>自我计划</h2>
-                    <div class="card-content">
-                        <h4>这里是我的未来学习计划，以及指定的目标，希望未来的自己更好</h4>
-                    </div>
-                </div>
-                <div class=card-back>
-                    <h2>个人计划</h2>
-                    <div class="card-content">
-                        <h4>加入一家创新科技公司，参与开发具有社会影响力的应用程序，同时不断学习和提升我的编程技能。</h4>
-                    </div>
-                </div>
-        </article>
-
-        <article id="about" class="card bg-about">
-            <div class="card-inner">
-                <div class=card-front>
-                    <h2>关于我</h2>
-                    <div class="card-content">
-                        <h4>嘘，关于我的秘密可不要乱看哇！</h4>
-                    </div>
-                </div>
-                <div class=card-back>
-                    <div class="card-content">
-                        <h4>姓名：Blueokanna</h4>
-                        <h4>性别：真男人♂</h4>
-                        <h4>爱好：编程，女(不要被域名误导了)</h4>
+            <div style="padding: 8px;"></div>
+            <div class="right-column">
+                <div class="col gallery-col">
+                    <div class="col-inner-holder aos-init aos-animate" data-aos="fade-up" data-aos-delay="250">
+                        <div class="text-holder">
+                            <h1 style="color: rgba(255, 255, 255, 0.6);">GitHub Project:</h1>
+                            <ul id="project-list">
+                            </ul>
+                            <ul id="project-list-org">
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
-        </article>
-
-        <article id="contact" class="card bg-contact" onclick="myClickCopy('bitpayload@gmail.com')">
-            <div class="card-inner">
-                <div class=card-front>
-                    <h2>联系我</h2>
-                    <div class="card-content">
-                        <h4>点击这里就可以复制邮箱地址</h4>
-                    </div>
-                </div>
-                <div class=card-back>
-                    <div class="card-content">
-                        <h3>点击卡片，自动复制作者的邮箱地址:</h3>
-                        <h4>bitpayload@gmail.com</h4>
-                    </div>
-                </div>
-            </div>
-        </article>
+        </div>
     </div>
 
-    <footer>
-        <div class="footer-content">
+    <footer class="footer">
+        <div class="inner-footer-contain">
             <p>&copy; 2023 Blueokanna Copyright</p>
-            <div class="weather" id="weather">Loading weather...</div>
         </div>
     </footer>
 
-</body>
+    <script>
+        const images = document.querySelectorAll(".image-container img");
+        let counter = 1;
 
-<script>
-    const tempInput = document.createElement("textarea");
+        window.addEventListener("scroll", () => {
+            const scrollPosition = window.scrollY;
+            const blurValue = (scrollPosition / 100).toFixed(1);
+            document.body.style.backdropFilter = `blur(${blurValue}px)`;
 
-    function navigateToLink(url) {
-        window.location.href = url;
-    }
-
-    function myClickCopy(textToCopy) {
-        tempInput.style.cssText = "position: absolute; left: -9999px;";
-        tempInput.value = textToCopy;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempInput);
-        alert("可以前往邮箱，并且直接粘贴邮箱地址即可！");
-    }
-
-    function getWeather() {
-        const city = 'Guangzhou';
-        const weatherElement = document.getElementById('weather');
-
-        fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=59a880120255f8973aec8f8a22cf038f`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+            images.forEach((img, index) => {
+                const imageTop = img.getBoundingClientRect().top;
+                if (imageTop < window.innerHeight) {
+                    img.style.display = "block";
                 }
-                return response.json();
-            })
-            .then(data => {
-                const weatherDescription = data.weather[0].description;
-                weatherElement.textContent = `Weather: ${weatherDescription}`;
-            })
-            .catch(error => {
-                console.error('Error fetching weather data:', error);
-                weatherElement.textContent = 'Failed to fetch weather data';
             });
-    }
-    getWeather();
-    setInterval(getWeather, 50000);
+        });
 
-</script>
+        function navigateToLink(url) {
+            window.location.href = url;
+        }
+
+// 获取用户仓库数据
+fetch('https://api.github.com/users/blueokanna/repos')
+    .then(response => response.json())
+    .then(data => {
+        const projectList = document.getElementById('project-list');
+
+        data.forEach(project => {
+            const listItem = document.createElement('li');
+            const link = document.createElement('a');
+
+            link.href = project.html_url;
+            link.textContent = project.name;
+
+            const languageSpan = document.createElement('span');
+
+            fetch(project.languages_url)
+                .then(response => response.json())
+                .then(languagesData => {
+                    const languages = Object.keys(languagesData);
+                    if (languages.length > 0) {
+                        languageSpan.textContent = ` (${languages.join(', ')})`;
+                    }
+
+                    const counterSpan = document.createElement('span');
+                    counterSpan.textContent = `${counter}. `;
+                    counterSpan.style.marginRight = '12px';
+                    counterSpan.style.color = 'wheat';
+                    counterSpan.style.fontWeight = 'bold';
+                    languageSpan.style.color = 'white';
+                    languageSpan.style.fontWeight = 'bold';
+
+                    listItem.appendChild(counterSpan);
+                    listItem.appendChild(link);
+                    listItem.appendChild(languageSpan);
+                    projectList.appendChild(listItem);
+                    counter++;
+                })
+                .catch(error => console.error('Error fetching languages data: ' + error));
+        });
+    })
+    .catch(error => console.error('Error fetching GitHub data for user: ' + error));
+
+fetch('https://api.github.com/orgs/AstralQuanta/repos')
+    .then(response => response.json())
+    .then(data => {
+        const projectListOrg = document.getElementById('project-list-org');
+
+        data.forEach(project => {
+            const listItem = document.createElement('li');
+            const link = document.createElement('a');
+
+            link.href = project.html_url;
+            link.textContent = project.name;
+
+            const languageSpan = document.createElement('span');
+
+            fetch(project.languages_url)
+                .then(response => response.json())
+                .then(languagesData => {
+                    const languages = Object.keys(languagesData);
+                    if (languages.length > 0) {
+                        languageSpan.textContent = ` (${languages.join(', ')})`;
+                    }
+
+                    const counterSpan = document.createElement('span');
+                    counterSpan.textContent = `${counter}. `;
+                    counterSpan.style.marginRight = '12px';
+                    counterSpan.style.color = 'wheat';
+                    counterSpan.style.fontWeight = 'bold';
+                    languageSpan.style.color = 'white';
+                    languageSpan.style.fontWeight = 'bold';
+
+                    listItem.appendChild(counterSpan);
+                    listItem.appendChild(link);
+                    listItem.appendChild(languageSpan);
+                    projectListOrg.appendChild(listItem);
+                    counter++;
+                })
+                .catch(error => console.error('Error fetching languages data: ' + error));
+        });
+    })
+    .catch(error => console.error('Error fetching GitHub data for organization: ' + error));
+
+
+    </script>
+</body>
 
 </html>
