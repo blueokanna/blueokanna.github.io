@@ -1,201 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <meta name="description" content="Blueokanna's Blog">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description"
+        content="Blue's PulseLink Blog — A passionate developer's journey through code and technology">
     <meta name="author" content="Blueokanna">
-    <meta name="keywords" content="blog, Blueokanna, web development">
-    <title>Blue's Blog</title>
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/2593/2593542.png" type="image/x-icon">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <meta name="keywords" content="blog, Blueokanna, Java, Rust, developer, technology, backend engineer">
+    <meta name="theme-color" content="#1565C0">
+    <title>Blue's PulseLink Blog</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/2593/2593542.png" type="image/png">
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@300&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+        rel="stylesheet">
+
+    <!-- Material Design 3 Web Components -->
+    <script type="importmap">
+    {
+        "imports": {
+            "@material/web/": "https://esm.run/@material/web/"
+        }
+    }
+    </script>
+    <script type="module">
+        import '@material/web/all.js';
+    </script>
+
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <header>
-        <div class="header-shows">
-            <div class="header-img" id="BlueLogo" onclick="navigateToLink('https://blueokanna.gay')">
+    <!-- ===== Loading Screen ===== -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-icon-3d">
+                <span class="material-symbols-outlined">rocket_launch</span>
             </div>
-            <div class="nav-menu nav-menu-center">Blue's PulseLink Blog</div>
-        </div>
-        <div class="nav-button">
-            <nav>
-                <ul class="nav-menu nav-menu-left-home">
-                    <li><a href="https://blueokanna.gay" onclick="navigateToLink('https://blueokanna.gay')"><i
-                                class="fas fa-home"></i> Home</a></li>
-                </ul>
-
-                <ul class="nav-menu nav-menu-right-github">
-                    <li>
-                        <a href="https://github.com/blueokanna">
-                            <i class="fab fa-github"></i> GitHub
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <div id="portfolio" class="card-container">
-        <div class="flex-container">
-            <div class="left-column">
-                <div class="flex-holder">
-                    <div class="col text-col aos-init aos-animate" data-aos="fade-up">
-                        <div class="content-holder">
-                            <div class="title-holder">
-                                <div class="top-image-holder">
-                                    <img class="profile_pic" src="https://avatars.githubusercontent.com/u/56761243?v=4">
-                                    <h1> Blueokanna </h1>
-                                </div>
-                                <h1 class="profile_name" style="color: rgba(255, 255, 255, 0.75); ">Bio about me:</h1>
-                            </div>
-                            <div class="left-box-text-holder">
-                                <p> As a passionate Java backend engineer, I have been focusing on the tech field for
-                                    many years, conducting in-depth research and practice in Java development.
-                                    My blog will share my technical insights, including Java fundamentals, framework
-                                    applications, and performance optimization.
-                                </p>
-                                <p>
-                                    I engage in learning and exchange with you, working together to
-                                    progress.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div style="padding: 8px;"></div>
-            <div class="right-column">
-                <div class="col gallery-col">
-                    <div class="col-inner-holder aos-init aos-animate" data-aos="fade-up" data-aos-delay="250">
-                        <div class="text-holder">
-                            <h1 style="color: rgba(255, 255, 255, 0.6);">GitHub Project:</h1>
-                            <ul id="project-list">
-                            </ul>
-                            <ul id="project-list-org">
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <md-circular-progress indeterminate></md-circular-progress>
+            <p class="loading-text">Loading PulseLink…</p>
         </div>
     </div>
 
-    <footer class="footer">
-        <div class="inner-footer-contain">
-            <p>&copy; 2023 Blueokanna Copyright</p>
+    <!-- ===== Holiday Canvas (snow / petals / confetti) ===== -->
+    <canvas id="holiday-canvas" class="holiday-canvas" aria-hidden="true"></canvas>
+
+    <!-- ===== Top App Bar ===== -->
+    <header id="top-bar" class="top-app-bar">
+        <div class="top-bar-inner">
+            <div class="top-bar-left">
+                <div id="weather-widget" class="weather-widget" title="Current Weather">
+                    <span id="weather-icon" class="weather-icon">🌤️</span>
+                    <span id="weather-temp" class="weather-temp">--°C</span>
+                </div>
+                <div id="holiday-badge" class="holiday-badge" style="display:none">
+                    <span id="holiday-icon" class="holiday-icon"></span>
+                    <span id="holiday-name" class="holiday-name"></span>
+                </div>
+            </div>
+
+            <div class="top-bar-center">
+                <a href="#hero" class="logo-link">
+                    <div class="logo-icon-3d"><img src="media/blue_logo.png" alt="Blue Logo" class="logo-img"></div>
+                    <span class="logo-text">PulseLink</span>
+                </a>
+            </div>
+
+            <div class="top-bar-right">
+                <nav class="desktop-nav">
+                    <a href="#about" class="nav-link">About</a>
+                    <a href="#skills" class="nav-link">Skills</a>
+                    <a href="#projects" class="nav-link">Projects</a>
+                    <a href="#contact" class="nav-link">Contact</a>
+                </nav>
+                <md-filled-tonal-icon-button id="theme-toggle" aria-label="Toggle theme">
+                    <md-icon>dark_mode</md-icon>
+                </md-filled-tonal-icon-button>
+                <md-icon-button id="menu-toggle" class="menu-toggle" aria-label="Open menu">
+                    <md-icon>menu</md-icon>
+                </md-icon-button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== Mobile Nav Drawer ===== -->
+    <div id="mobile-nav-overlay" class="mobile-nav-overlay"></div>
+    <aside id="mobile-nav" class="mobile-nav">
+        <div class="mobile-nav-header">
+            <span class="mobile-nav-title">Navigation</span>
+            <md-icon-button id="mobile-nav-close" aria-label="Close menu">
+                <md-icon>close</md-icon>
+            </md-icon-button>
+        </div>
+        <md-list>
+            <md-list-item type="button" class="mobile-nav-item" data-href="#hero">
+                <md-icon slot="start">home</md-icon> Home
+            </md-list-item>
+            <md-list-item type="button" class="mobile-nav-item" data-href="#about">
+                <md-icon slot="start">person</md-icon> About
+            </md-list-item>
+            <md-list-item type="button" class="mobile-nav-item" data-href="#skills">
+                <md-icon slot="start">code</md-icon> Skills
+            </md-list-item>
+            <md-list-item type="button" class="mobile-nav-item" data-href="#projects">
+                <md-icon slot="start">folder_open</md-icon> Projects
+            </md-list-item>
+            <md-list-item type="button" class="mobile-nav-item" data-href="#contact">
+                <md-icon slot="start">mail</md-icon> Contact
+            </md-list-item>
+        </md-list>
+        <md-divider></md-divider>
+        <div class="mobile-nav-footer">
+            <md-icon>dark_mode</md-icon>
+            <span>Dark Mode</span>
+            <md-switch id="mobile-theme-switch"></md-switch>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main>
+        <!-- HERO -->
+        <section id="hero" class="hero-section">
+            <div class="hero-bg-shapes" aria-hidden="true">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+                <div class="shape shape-4"></div>
+                <div class="shape shape-5"></div>
+            </div>
+
+            <div class="hero-content">
+                <div class="hero-text">
+                    <p class="hero-greeting" id="hero-greeting"><span class="greeting-wave">👋</span> Hello, World!</p>
+                    <h1 class="hero-title">I'm <span class="highlight">Blue</span></h1>
+                    <p class="hero-subtitle">Backend Engineer &amp; Open Source Enthusiast</p>
+                    <p class="hero-desc">Passionate about building robust systems with Java, Rust, and modern web
+                        technologies. Exploring the intersection of performance and elegance.</p>
+                    <div class="hero-actions">
+                        <md-filled-button class="hero-cta"
+                            onclick="document.getElementById('projects').scrollIntoView({behavior:'smooth'})">
+                            <md-icon slot="icon">explore</md-icon>
+                            Explore Projects
+                        </md-filled-button>
+                        <md-outlined-button class="hero-cta-sec"
+                            onclick="window.open('https://github.com/blueokanna','_blank')">
+                            <md-icon slot="icon">code</md-icon>
+                            GitHub Profile
+                        </md-outlined-button>
+                    </div>
+                </div>
+
+                <div class="hero-visual">
+                    <div class="hero-3d-scene">
+                        <div class="floating-card fc1">
+                            <div class="icon-3d i3d-blue"><span>☕</span></div><span>Java</span>
+                        </div>
+                        <div class="floating-card fc2">
+                            <div class="icon-3d i3d-orange"><span>🦀</span></div><span>Rust</span>
+                        </div>
+                        <div class="floating-card fc3">
+                            <div class="icon-3d i3d-cyan"><span>🌐</span></div><span>Web</span>
+                        </div>
+                        <div class="floating-card fc4">
+                            <div class="icon-3d i3d-green"><span>🗄️</span></div><span>Database</span>
+                        </div>
+                        <div class="floating-card fc5">
+                            <div class="icon-3d i3d-purple"><span>☁️</span></div><span>Cloud</span>
+                        </div>
+                        <div class="hero-avatar-wrap">
+                            <div class="hero-avatar-ring"></div>
+                            <img class="hero-avatar" src="https://avatars.githubusercontent.com/u/56761243?v=4"
+                                alt="Blueokanna">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scroll-indicator" aria-hidden="true">
+                <md-icon class="scroll-arrow">expand_more</md-icon>
+                <span>Scroll to explore</span>
+            </div>
+        </section>
+
+        <!-- ABOUT -->
+        <section id="about" class="section about-section">
+            <div class="section-container">
+                <div class="section-header reveal-up">
+                    <div class="section-icon-3d si3d-about"><span class="material-symbols-outlined">person</span></div>
+                    <h2 class="section-title">About Me</h2>
+                    <p class="section-subtitle">Get to know the developer behind the code</p>
+                </div>
+
+                <div class="about-grid">
+                    <div class="about-card profile-card reveal-up tilt-card">
+                        <div class="profile-card-header">
+                            <img class="about-avatar" src="https://avatars.githubusercontent.com/u/56761243?v=4"
+                                alt="Blueokanna">
+                            <div class="profile-info">
+                                <h3>Blueokanna</h3>
+                                <md-chip-set>
+                                    <md-assist-chip label="Backend Engineer"><md-icon
+                                            slot="icon">engineering</md-icon></md-assist-chip>
+                                    <md-assist-chip label="Open Source"><md-icon
+                                            slot="icon">favorite</md-icon></md-assist-chip>
+                                </md-chip-set>
+                            </div>
+                        </div>
+                        <md-divider></md-divider>
+                        <div class="profile-body">
+                            <p>As a passionate backend engineer, I've spent years diving deep into software development.
+                                My journey started with Java and has expanded to include Rust, Kotlin, and modern web
+                                technologies.</p>
+                            <p>I believe in writing clean, efficient, and maintainable code. My projects reflect my
+                                passion for learning and sharing knowledge with the developer community.</p>
+                        </div>
+                    </div>
+
+                    <div class="about-stats reveal-up" style="--reveal-delay:.1s">
+                        <div class="stat-card tilt-card">
+                            <div class="stat-icon-3d si-repos"><span
+                                    class="material-symbols-outlined">folder_special</span></div>
+                            <div class="stat-info"><span class="stat-number" id="stat-repos">--</span><span
+                                    class="stat-label">Repositories</span></div>
+                        </div>
+                        <div class="stat-card tilt-card">
+                            <div class="stat-icon-3d si-stars"><span class="material-symbols-outlined">star</span></div>
+                            <div class="stat-info"><span class="stat-number" id="stat-stars">--</span><span
+                                    class="stat-label">Total Stars</span></div>
+                        </div>
+                        <div class="stat-card tilt-card">
+                            <div class="stat-icon-3d si-commits"><span class="material-symbols-outlined">commit</span>
+                            </div>
+                            <div class="stat-info"><span class="stat-number" id="stat-followers">--</span><span
+                                    class="stat-label">Followers</span></div>
+                        </div>
+                        <div class="stat-card tilt-card">
+                            <div class="stat-icon-3d si-years"><span
+                                    class="material-symbols-outlined">calendar_month</span></div>
+                            <div class="stat-info"><span class="stat-number" id="stat-years">3+</span><span
+                                    class="stat-label">Years Coding</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SKILLS -->
+        <section id="skills" class="section skills-section">
+            <div class="section-container">
+                <div class="section-header reveal-up">
+                    <div class="section-icon-3d si3d-skills"><span class="material-symbols-outlined">code</span></div>
+                    <h2 class="section-title">Tech Stack</h2>
+                    <p class="section-subtitle">Technologies I work with</p>
+                </div>
+
+                <div class="skills-tabs reveal-up">
+                    <md-tabs id="skills-tabs">
+                        <md-primary-tab id="tab-lang" aria-controls="panel-lang">
+                            <md-icon slot="icon">terminal</md-icon> Languages
+                        </md-primary-tab>
+                        <md-primary-tab id="tab-fw" aria-controls="panel-fw">
+                            <md-icon slot="icon">widgets</md-icon> Frameworks
+                        </md-primary-tab>
+                        <md-primary-tab id="tab-tools" aria-controls="panel-tools">
+                            <md-icon slot="icon">build</md-icon> Tools
+                        </md-primary-tab>
+                    </md-tabs>
+                </div>
+
+                <div class="skills-panels">
+                    <div id="panel-lang" class="skills-panel active" role="tabpanel">
+                        <div class="skills-grid">
+                            <div class="skill-card reveal-up tilt-card">
+                                <div class="skill-icon-3d sk-java"><span>☕</span></div>
+                                <h4>Java</h4><md-linear-progress value="0.95" buffer="1"></md-linear-progress><span
+                                    class="skill-level">Expert</span>
+                            </div>
+                            <div class="skill-card reveal-up tilt-card" style="--reveal-delay:.05s">
+                                <div class="skill-icon-3d sk-rust"><span>🦀</span></div>
+                                <h4>Rust</h4><md-linear-progress value="0.75" buffer="1"></md-linear-progress><span
+                                    class="skill-level">Advanced</span>
+                            </div>
+                            <div class="skill-card reveal-up tilt-card" style="--reveal-delay:.1s">
+                                <div class="skill-icon-3d sk-kotlin"><span>🟣</span></div>
+                                <h4>Kotlin</h4><md-linear-progress value="0.80" buffer="1"></md-linear-progress><span
+                                    class="skill-level">Advanced</span>
+                            </div>
+                            <div class="skill-card reveal-up tilt-card" style="--reveal-delay:.15s">
+                                <div class="skill-icon-3d sk-python"><span>🐍</span></div>
+                                <h4>Python</h4><md-linear-progress value="0.70" buffer="1"></md-linear-progress><span
+                                    class="skill-level">Proficient</span>
+                            </div>
+                            <div class="skill-card reveal-up tilt-card" style="--reveal-delay:.2s">
+                                <div class="skill-icon-3d sk-js"><span>⚡</span></div>
+                                <h4>JavaScript</h4><md-linear-progress value="0.65"
+                                    buffer="1"></md-linear-progress><span class="skill-level">Proficient</span>
+                            </div>
+                            <div class="skill-card reveal-up tilt-card" style="--reveal-delay:.25s">
+                                <div class="skill-icon-3d sk-go"><span>🐹</span></div>
+                                <h4>Go</h4><md-linear-progress value="0.55" buffer="1"></md-linear-progress><span
+                                    class="skill-level">Intermediate</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="panel-fw" class="skills-panel" role="tabpanel">
+                        <div class="skills-grid">
+                            <div class="skill-card reveal-up tilt-card">
+                                <div class="skill-icon-3d sk-spring"><span>🍃</span></div>
+                                <h4>Spring Boot</h4><md-linear-progress value="0.90"
+                                    buffer="1"></md-linear-progress><span class="skill-level">Expert</span>
+                            </div>
+                            <div class="skill-card reveal-up tilt-card" style="--reveal-delay:.05s">
+                                <div class="skill-icon-3d sk-tokio"><span>⚙️</span></div>
+                                <h4>Tokio</h4><md-linear-progress value="0.70" buffer="1"></md-linear-progress><span
+                                    class="skill-level">Advanced</span>
+                            </div>
+                            <div class="skill-card reveal-up tilt-card" style="--reveal-delay:.1s">
+                                <div class="skill-icon-3d sk-react"><span>⚛️</span></div>
+                                <h4>React</h4><md-linear-progress value="0.60" buffer="1"></md-linear-progress><span
+                                    class="skill-level">Intermediate</span>
+                            </div>
+                            <div class="skill-card reveal-up tilt-card" style="--reveal-delay:.15s">
+                                <div class="skill-icon-3d sk-mybatis"><span>🗃️</span></div>
+                                <h4>MyBatis</h4><md-linear-progress value="0.85" buffer="1"></md-linear-progress><span
+                                    class="skill-level">Expert</span>
+                            </div>
+                            <div class="skill-card reveal-up tilt-card" style="--reveal-delay:.2s">
+                                <div class="skill-icon-3d sk-vertx"><span>💠</span></div>
+                                <h4>Vert.x</h4><md-linear-progress value="0.70" buffer="1"></md-linear-progress><span
+                                    class="skill-level">Advanced</span>
+                            </div>
+                            <div class="skill-card reveal-up tilt-card" style="--reveal-delay:.25s">
+                                <div class="skill-icon-3d sk-android"><span>🤖</span></div>
+                                <h4>Android</h4><md-linear-progress value="0.65" buffer="1"></md-linear-progress><span
+                                    class="skill-level">Proficient</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="panel-tools" class="skills-panel" role="tabpanel">
+                        <div class="skills-grid">
+                            <div class="skill-card reveal-up tilt-card">
+                                <div class="skill-icon-3d sk-docker"><span>🐳</span></div>
+                                <h4>Docker</h4><md-linear-progress value="0.80" buffer="1"></md-linear-progress><span
+                                    class="skill-level">Advanced</span>
+                            </div>
+                            <div class="skill-card reveal-up tilt-card" style="--reveal-delay:.05s">
+                                <div class="skill-icon-3d sk-git"><span>🔀</span></div>
+                                <h4>Git</h4><md-linear-progress value="0.85" buffer="1"></md-linear-progress><span
+                                    class="skill-level">Expert</span>
+                            </div>
+                            <div class="skill-card reveal-up tilt-card" style="--reveal-delay:.1s">
+                                <div class="skill-icon-3d sk-linux"><span>🐧</span></div>
+                                <h4>Linux</h4><md-linear-progress value="0.80" buffer="1"></md-linear-progress><span
+                                    class="skill-level">Advanced</span>
+                            </div>
+                            <div class="skill-card reveal-up tilt-card" style="--reveal-delay:.15s">
+                                <div class="skill-icon-3d sk-mysql"><span>🐬</span></div>
+                                <h4>MySQL</h4><md-linear-progress value="0.85" buffer="1"></md-linear-progress><span
+                                    class="skill-level">Expert</span>
+                            </div>
+                            <div class="skill-card reveal-up tilt-card" style="--reveal-delay:.2s">
+                                <div class="skill-icon-3d sk-redis"><span>🔴</span></div>
+                                <h4>Redis</h4><md-linear-progress value="0.75" buffer="1"></md-linear-progress><span
+                                    class="skill-level">Advanced</span>
+                            </div>
+                            <div class="skill-card reveal-up tilt-card" style="--reveal-delay:.25s">
+                                <div class="skill-icon-3d sk-k8s"><span>☸️</span></div>
+                                <h4>Kubernetes</h4><md-linear-progress value="0.60"
+                                    buffer="1"></md-linear-progress><span class="skill-level">Intermediate</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROJECTS -->
+        <section id="projects" class="section projects-section">
+            <div class="section-container">
+                <div class="section-header reveal-up">
+                    <div class="section-icon-3d si3d-projects"><span
+                            class="material-symbols-outlined">folder_open</span></div>
+                    <h2 class="section-title">Projects</h2>
+                    <p class="section-subtitle">Open source work and personal projects</p>
+                </div>
+
+                <div id="projects-grid" class="projects-grid">
+                    <div class="projects-loading reveal-up">
+                        <md-circular-progress indeterminate></md-circular-progress>
+                        <p>Loading projects from GitHub…</p>
+                    </div>
+                </div>
+
+                <div class="projects-cta reveal-up">
+                    <md-outlined-button onclick="window.open('https://github.com/blueokanna','_blank')">
+                        <md-icon slot="icon">open_in_new</md-icon>
+                        View All on GitHub
+                    </md-outlined-button>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT -->
+        <section id="contact" class="section contact-section">
+            <div class="section-container">
+                <div class="section-header reveal-up">
+                    <div class="section-icon-3d si3d-contact"><span
+                            class="material-symbols-outlined">connect_without_contact</span></div>
+                    <h2 class="section-title">Let's Connect</h2>
+                    <p class="section-subtitle">Feel free to reach out for collaborations or just a friendly chat</p>
+                </div>
+
+                <div class="contact-grid">
+                    <a href="https://github.com/blueokanna" target="_blank" rel="noopener"
+                        class="contact-card reveal-up tilt-card">
+                        <div class="contact-icon-3d ci-github"><span>🐙</span></div>
+                        <h4>GitHub</h4>
+                        <p>@blueokanna</p>
+                    </a>
+                    <a href="https://blueokanna.gay" target="_blank" rel="noopener"
+                        class="contact-card reveal-up tilt-card" style="--reveal-delay:.1s">
+                        <div class="contact-icon-3d ci-blog"><span>🌐</span></div>
+                        <h4>Website</h4>
+                        <p>blueokanna.gay</p>
+                    </a>
+                    <a href="https://www.pulselink.top" class="contact-card reveal-up tilt-card"
+                        style="--reveal-delay:.2s">
+                        <div class="contact-icon-3d ci-pulse"><span>💜</span></div>
+                        <h4>PulseLink</h4>
+                        <p>pulselink.top</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="footer-logo-3d"><img src="media/blue_logo.png" alt="Blue Logo"></div>
+                <span class="footer-name">Blue's PulseLink Blog</span>
+            </div>
+            <md-divider></md-divider>
+            <div class="footer-bottom">
+                <p>&copy; 2023 – 2026 Blueokanna. All rights reserved.</p>
+                <p class="footer-made">Made with <span class="heart-beat">❤️</span> and Material Design 3</p>
+            </div>
         </div>
     </footer>
 
-    <script>
-        const images = document.querySelectorAll(".image-container img");
-        let counter = 1;
+    <!-- Back-to-top FAB -->
+    <md-fab id="back-to-top" class="back-to-top" aria-label="Back to top" size="small">
+        <md-icon slot="icon">arrow_upward</md-icon>
+    </md-fab>
 
-        window.addEventListener("scroll", () => {
-            const scrollPosition = window.scrollY;
-            const blurValue = (scrollPosition / 100).toFixed(1);
-            document.body.style.backdropFilter = `blur(${blurValue}px)`;
+    <!-- Mobile Bottom Nav -->
+    <div class="mobile-bottom-nav" id="mobile-bottom-nav">
+        <nav class="bottom-nav-inner">
+            <button class="bottom-nav-btn active" data-href="#hero"><md-icon>home</md-icon><span>Home</span></button>
+            <button class="bottom-nav-btn" data-href="#about"><md-icon>person</md-icon><span>About</span></button>
+            <button class="bottom-nav-btn" data-href="#skills"><md-icon>code</md-icon><span>Skills</span></button>
+            <button class="bottom-nav-btn" data-href="#projects"><md-icon>folder</md-icon><span>Projects</span></button>
+            <button class="bottom-nav-btn" data-href="#contact"><md-icon>mail</md-icon><span>Contact</span></button>
+        </nav>
+    </div>
 
-            images.forEach((img, index) => {
-                const imageTop = img.getBoundingClientRect().top;
-                if (imageTop < window.innerHeight) {
-                    img.style.display = "block";
-                }
-            });
-        });
-
-        function navigateToLink(url) {
-            window.location.href = url;
-        }
-
-// 获取用户仓库数据
-fetch('https://api.github.com/users/blueokanna/repos')
-    .then(response => response.json())
-    .then(data => {
-        const projectList = document.getElementById('project-list');
-
-        data.forEach(project => {
-            const listItem = document.createElement('li');
-            const link = document.createElement('a');
-
-            link.href = project.html_url;
-            link.textContent = project.name;
-
-            const languageSpan = document.createElement('span');
-
-            fetch(project.languages_url)
-                .then(response => response.json())
-                .then(languagesData => {
-                    const languages = Object.keys(languagesData);
-                    if (languages.length > 0) {
-                        languageSpan.textContent = ` (${languages.join(', ')})`;
-                    }
-
-                    const counterSpan = document.createElement('span');
-                    counterSpan.textContent = `${counter}. `;
-                    counterSpan.style.marginRight = '12px';
-                    counterSpan.style.color = 'wheat';
-                    counterSpan.style.fontWeight = 'bold';
-                    languageSpan.style.color = 'white';
-                    languageSpan.style.fontWeight = 'bold';
-
-                    listItem.appendChild(counterSpan);
-                    listItem.appendChild(link);
-                    listItem.appendChild(languageSpan);
-                    projectList.appendChild(listItem);
-                    counter++;
-                })
-                .catch(error => console.error('Error fetching languages data: ' + error));
-        });
-    })
-    .catch(error => console.error('Error fetching GitHub data for user: ' + error));
-
-fetch('https://api.github.com/orgs/AstralQuanta/repos')
-    .then(response => response.json())
-    .then(data => {
-        const projectListOrg = document.getElementById('project-list-org');
-
-        data.forEach(project => {
-            const listItem = document.createElement('li');
-            const link = document.createElement('a');
-
-            link.href = project.html_url;
-            link.textContent = project.name;
-
-            const languageSpan = document.createElement('span');
-
-            fetch(project.languages_url)
-                .then(response => response.json())
-                .then(languagesData => {
-                    const languages = Object.keys(languagesData);
-                    if (languages.length > 0) {
-                        languageSpan.textContent = ` (${languages.join(', ')})`;
-                    }
-
-                    const counterSpan = document.createElement('span');
-                    counterSpan.textContent = `${counter}. `;
-                    counterSpan.style.marginRight = '12px';
-                    counterSpan.style.color = 'wheat';
-                    counterSpan.style.fontWeight = 'bold';
-                    languageSpan.style.color = 'white';
-                    languageSpan.style.fontWeight = 'bold';
-
-                    listItem.appendChild(counterSpan);
-                    listItem.appendChild(link);
-                    listItem.appendChild(languageSpan);
-                    projectListOrg.appendChild(listItem);
-                    counter++;
-                })
-                .catch(error => console.error('Error fetching languages data: ' + error));
-        });
-    })
-    .catch(error => console.error('Error fetching GitHub data for organization: ' + error));
-
-
-    </script>
+    <script src="app.js" defer></script>
 </body>
+
+</html>
 
 </html>
