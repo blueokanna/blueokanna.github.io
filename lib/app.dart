@@ -446,27 +446,30 @@ class _PulseLinkHomePageState extends State<PulseLinkHomePage>
                 ),
               ),
               // ── Back to top ──
-              Positioned(
-                right: dc == DeviceClass.mobile ? 16 : 24,
-                bottom: dc == DeviceClass.mobile ? 170 : 88,
-                child: AnimatedScale(
-                  scale: _showTop ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOutBack,
-                  alignment: Alignment.bottomRight,
-                  child: FloatingActionButton.small(
-                    heroTag: 'top',
-                    onPressed: _showTop
-                        ? () => _scrollCtrl.animateTo(
-                              0,
-                              duration: const Duration(milliseconds: 700),
-                              curve: Curves.easeInOutCubicEmphasized,
-                            )
-                        : null,
-                    child: const Icon(Icons.keyboard_arrow_up_rounded),
+              if (_showTop)
+                Positioned(
+                  right: dc == DeviceClass.mobile ? 16 : 24,
+                  bottom: dc == DeviceClass.mobile ? 170 : 88,
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: 1),
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutBack,
+                    builder: (context, value, child) => Transform.scale(
+                      scale: value,
+                      alignment: Alignment.bottomRight,
+                      child: child,
+                    ),
+                    child: FloatingActionButton.small(
+                      heroTag: 'top',
+                      onPressed: () => _scrollCtrl.animateTo(
+                        0,
+                        duration: const Duration(milliseconds: 700),
+                        curve: Curves.easeInOutCubicEmphasized,
+                      ),
+                      child: const Icon(Icons.keyboard_arrow_up_rounded),
+                    ),
                   ),
                 ),
-              ),
               // ── AI Chat FAB ──
               if (ZhipuAiService.isConfigured)
                 Positioned(
@@ -1425,38 +1428,52 @@ class _MetricGrid extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 14,
         crossAxisSpacing: 14,
-        childAspectRatio: 1.1,
+        childAspectRatio: 1.6,
       ),
       itemBuilder: (context, i) {
         final it = items[i];
         return _SpringHover(
           child: _Glass(
             child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+              child: Row(
                 children: [
                   ThreeDCube(
                     icon: it.icon,
                     colorA: it.colorA,
                     colorB: it.colorB,
-                    size: 52,
+                    size: 44,
                     rotation: .3 + i * .12,
                   ),
-                  const Spacer(),
-                  _AnimNum(
-                    value: it.value,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -.5,
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _AnimNum(
+                          value: it.value,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -.5,
+                              ),
                         ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    it.label,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
+                        const SizedBox(height: 2),
+                        Text(
+                          it.label,
+                          style:
+                              Theme.of(context).textTheme.labelMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                         ),
+                      ],
+                    ),
                   ),
                 ],
               ),
