@@ -129,7 +129,3 @@ Copy-Item -Path "build\web\*" -Destination "." -Recurse -Force
 - **M3 Expressive** — 有机形状（squircle）、弹性运动、表达性色彩
 - **心理学优先** — 节奏感、信任信号、渐进式信息呈现
 - **零黑点** — 移除背景画布中的点阵网格，保持纯净的渐变氛围
-
-## 许可证
-
-[MIT](LICENSE)

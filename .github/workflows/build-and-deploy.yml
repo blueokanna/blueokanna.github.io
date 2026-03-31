@@ -1,0 +1,36 @@
+name: Build and deploy Flutter Web
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Build release web (inject ZHIPU key)
+        env:
+          ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+        run: |
+          flutter build web --release --base-href / --dart-define=ZHIPU_API_KEY=${ZHIPU_API_KEY}
+
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          publish_dir: build/web
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
