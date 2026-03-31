@@ -1,130 +1,204 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
+    <base href="$FLUTTER_BASE_HREF">
+    <meta charset="UTF-8">
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="Blue的PulseLink博客 — 基于Flutter Web与Material Design 3构建的个人博客，集成智谱AI。">
+    <meta name="theme-color" content="#0f7a65">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="PulseLink">
+    <link rel="apple-touch-icon" href="icons/Icon-192.png">
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <title>Blue的PulseLink博客</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
 
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: Inter, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif
+        }
 
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+        body {
+            background: #091411
+        }
 
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
+        .boot-shell {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            place-items: center;
+            background: radial-gradient(ellipse at 30% 20%, rgba(15, 122, 101, .12) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(70, 199, 166, .08) 0%, transparent 50%), #091411
+        }
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Blue's PulseLink Blog rebuilt with Flutter Web and Material Design 3.">
-  <meta name="theme-color" content="#0f7a65">
+        /* M3 Expressive squircle card */
+        .boot-card {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 22px 28px;
+            border-radius: 28px;
+            background: rgba(16, 33, 26, .86);
+            border: 1px solid rgba(255, 255, 255, .08);
+            box-shadow: 0 24px 64px rgba(0, 0, 0, .3);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            animation: cardIn .9s cubic-bezier(.34, 1.56, .64, 1) both
+        }
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="PulseLink">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(.96)
+            }
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1)
+            }
+        }
 
-  <title>Blue's PulseLink Blog</title>
-  <link rel="manifest" href="manifest.json">
-  <style>
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at top, #d7f6ee 0%, #f8f4ec 45%, #f7efe2 100%);
-      font-family: Inter, "Segoe UI", sans-serif;
-    }
+        .boot-mark {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #0f7a65, #46c7a6);
+            box-shadow: 0 12px 28px rgba(15, 122, 101, .3);
+            position: relative;
+            flex-shrink: 0;
+            animation: pulse 2.4s ease-in-out infinite
+        }
 
-    .boot-shell {
-      width: 100%;
-      height: 100%;
-      display: grid;
-      place-items: center;
-      color: #123128;
-    }
+        @keyframes pulse {
 
-    .boot-card {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      padding: 20px 24px;
-      border-radius: 24px;
-      background: rgba(255, 255, 255, 0.72);
-      box-shadow: 0 20px 60px rgba(15, 77, 66, 0.12);
-      backdrop-filter: blur(18px);
-    }
+            0%,
+            100% {
+                transform: scale(1)
+            }
 
-    .boot-mark {
-      width: 54px;
-      height: 54px;
-      border-radius: 18px;
-      background: linear-gradient(135deg, #0f7a65, #37c4a2);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 16px 30px rgba(15, 122, 101, .25);
-      position: relative;
-      overflow: hidden;
-    }
+            50% {
+                transform: scale(1.06)
+            }
+        }
 
-    .boot-mark::before,
-    .boot-mark::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-    }
+        .boot-mark::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255, 255, 255, .30), rgba(255, 255, 255, 0))
+        }
 
-    .boot-mark::before {
-      transform: translate(8px, 8px);
-      background: linear-gradient(135deg, rgba(1, 52, 42, .3), rgba(1, 52, 42, 0));
-    }
+        .boot-icon {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            z-index: 1
+        }
 
-    .boot-mark::after {
-      background: linear-gradient(135deg, rgba(255,255,255,.35), rgba(255,255,255,0));
-    }
+        .boot-icon svg {
+            width: 26px;
+            height: 26px;
+            fill: white
+        }
 
-    .boot-title {
-      font-size: 17px;
-      font-weight: 700;
-      letter-spacing: -.02em;
-    }
+        .boot-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px
+        }
 
-    .boot-subtitle {
-      margin-top: 4px;
-      font-size: 13px;
-      color: rgba(18, 49, 40, .68);
-    }
+        .boot-title {
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: -.02em;
+            color: rgba(255, 255, 255, .92)
+        }
 
-    .boot-spinner {
-      width: 18px;
-      height: 18px;
-      border-radius: 999px;
-      border: 2px solid rgba(15, 122, 101, .2);
-      border-top-color: #0f7a65;
-      animation: spin .9s linear infinite;
-    }
+        .boot-subtitle {
+            font-size: 13px;
+            color: rgba(255, 255, 255, .5);
+            font-weight: 500
+        }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  </style>
+        /* M3 Expressive shape morphing loader */
+        .boot-loader {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+            position: relative
+        }
+
+        .boot-loader::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            background: linear-gradient(135deg, #0f7a65, #46c7a6);
+            animation: morph 2s ease-in-out infinite, spin 3s linear infinite
+        }
+
+        @keyframes morph {
+
+            0%,
+            100% {
+                border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%
+            }
+
+            25% {
+                border-radius: 58% 42% 36% 64% / 53% 67% 33% 47%
+            }
+
+            50% {
+                border-radius: 50% 50% 33% 67% / 60% 40% 60% 40%
+            }
+
+            75% {
+                border-radius: 33% 67% 58% 42% / 63% 37% 63% 37%
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+    </style>
 </head>
+
 <body>
-  <div class="boot-shell">
-    <div class="boot-card">
-      <div class="boot-mark"></div>
-      <div>
-        <div class="boot-title">Blue's PulseLink Blog</div>
-        <div class="boot-subtitle">Loading Flutter Web experience</div>
-      </div>
-      <div class="boot-spinner" aria-hidden="true"></div>
+    <div class="boot-shell">
+        <div class="boot-card">
+            <div class="boot-mark">
+                <div class="boot-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+                    </svg>
+                </div>
+            </div>
+            <div class="boot-info">
+                <div class="boot-title">Blue的PulseLink博客</div>
+                <div class="boot-subtitle">Flutter Web · Material 3 Expressive</div>
+            </div>
+            <div class="boot-loader" aria-hidden="true"></div>
+        </div>
     </div>
-  </div>
-  <script src="flutter_bootstrap.js" async></script>
+    <script src="flutter_bootstrap.js" async></script>
 </body>
+
 </html>
