@@ -21,14 +21,13 @@ class _PulseLinkAppState extends State<PulseLinkApp> {
   AppLanguage _lang = AppLanguage.zh;
 
   void _toggleTheme() => setState(() {
-    _themeMode = _themeMode == ThemeMode.dark
-        ? ThemeMode.light
-        : ThemeMode.dark;
-  });
+        _themeMode =
+            _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+      });
 
   void _toggleLang() => setState(() {
-    _lang = _lang == AppLanguage.zh ? AppLanguage.en : AppLanguage.zh;
-  });
+        _lang = _lang == AppLanguage.zh ? AppLanguage.en : AppLanguage.zh;
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -64,9 +63,8 @@ ThemeData _buildTheme(Brightness brightness) {
     colorScheme: scheme,
     useMaterial3: true,
     brightness: brightness,
-    scaffoldBackgroundColor: isDark
-        ? const Color(0xFF091411)
-        : const Color(0xFFF8F4EC),
+    scaffoldBackgroundColor:
+        isDark ? const Color(0xFF091411) : const Color(0xFFF8F4EC),
   );
   return base.copyWith(
     textTheme: base.textTheme.apply(
@@ -154,21 +152,22 @@ class _PulseLinkHomePageState extends State<PulseLinkHomePage>
   S get s => S.of(widget.lang);
 
   List<NavSection> get _sections => [
-    NavSection(id: 'hero', label: s.navHome, icon: Icons.home_rounded),
-    NavSection(id: 'about', label: s.navAbout, icon: Icons.person_rounded),
-    NavSection(
-      id: 'skills',
-      label: s.navSkills,
-      icon: Icons.auto_awesome_rounded,
-    ),
-    NavSection(id: 'blog', label: s.navBlog, icon: Icons.article_rounded),
-    NavSection(
-      id: 'projects',
-      label: s.navProjects,
-      icon: Icons.folder_copy_rounded,
-    ),
-    NavSection(id: 'contact', label: s.navContact, icon: Icons.forum_rounded),
-  ];
+        NavSection(id: 'hero', label: s.navHome, icon: Icons.home_rounded),
+        NavSection(id: 'about', label: s.navAbout, icon: Icons.person_rounded),
+        NavSection(
+          id: 'skills',
+          label: s.navSkills,
+          icon: Icons.auto_awesome_rounded,
+        ),
+        NavSection(id: 'blog', label: s.navBlog, icon: Icons.article_rounded),
+        NavSection(
+          id: 'projects',
+          label: s.navProjects,
+          icon: Icons.folder_copy_rounded,
+        ),
+        NavSection(
+            id: 'contact', label: s.navContact, icon: Icons.forum_rounded),
+      ];
 
   late final Map<String, GlobalKey> _sectionKeys = {
     for (final sec in _sections) sec.id: GlobalKey(),
@@ -207,8 +206,8 @@ class _PulseLinkHomePageState extends State<PulseLinkHomePage>
     if (show != _showTop && mounted) setState(() => _showTop = show);
     int active = _selectedIdx;
     for (var i = 0; i < _sections.length; i++) {
-      final box = _sectionKeys[_sections[i].id]?.currentContext
-          ?.findRenderObject();
+      final box =
+          _sectionKeys[_sections[i].id]?.currentContext?.findRenderObject();
       if (box is RenderBox) {
         final top = box.localToGlobal(Offset.zero).dy;
         final bottom = top + box.size.height;
@@ -292,8 +291,7 @@ class _PulseLinkHomePageState extends State<PulseLinkHomePage>
         _chatMessages.add(
           ChatMessage(
             role: 'assistant',
-            content:
-                response ??
+            content: response ??
                 (s.isZh ? '抱歉，暂时无法回复。' : 'Sorry, unable to respond right now.'),
           ),
         );
@@ -451,25 +449,21 @@ class _PulseLinkHomePageState extends State<PulseLinkHomePage>
               Positioned(
                 right: dc == DeviceClass.mobile ? 16 : 24,
                 bottom: dc == DeviceClass.mobile ? 170 : 88,
-                child: IgnorePointer(
-                  ignoring: !_showTop,
-                  child: AnimatedSlide(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOutBack,
-                    offset: _showTop ? Offset.zero : const Offset(0, .5),
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 250),
-                      opacity: _showTop ? 1 : 0,
-                      child: FloatingActionButton.small(
-                        heroTag: 'top',
-                        onPressed: () => _scrollCtrl.animateTo(
-                          0,
-                          duration: const Duration(milliseconds: 700),
-                          curve: Curves.easeInOutCubicEmphasized,
-                        ),
-                        child: const Icon(Icons.keyboard_arrow_up_rounded),
-                      ),
-                    ),
+                child: AnimatedScale(
+                  scale: _showTop ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutBack,
+                  alignment: Alignment.bottomRight,
+                  child: FloatingActionButton.small(
+                    heroTag: 'top',
+                    onPressed: _showTop
+                        ? () => _scrollCtrl.animateTo(
+                              0,
+                              duration: const Duration(milliseconds: 700),
+                              curve: Curves.easeInOutCubicEmphasized,
+                            )
+                        : null,
+                    child: const Icon(Icons.keyboard_arrow_up_rounded),
                   ),
                 ),
               ),
@@ -723,11 +717,11 @@ class _NavChipState extends State<_NavChip> {
             child: Text(
               widget.label,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: widget.selected
-                    ? cs.onPrimaryContainer
-                    : cs.onSurfaceVariant,
-              ),
+                    fontWeight: FontWeight.w700,
+                    color: widget.selected
+                        ? cs.onPrimaryContainer
+                        : cs.onSurfaceVariant,
+                  ),
             ),
           ),
         ),
@@ -900,9 +894,8 @@ class _HeroSection extends StatelessWidget {
     final greet = greetingForNow(s);
 
     final textCol = Column(
-      crossAxisAlignment: isDesk
-          ? CrossAxisAlignment.start
-          : CrossAxisAlignment.center,
+      crossAxisAlignment:
+          isDesk ? CrossAxisAlignment.start : CrossAxisAlignment.center,
       children: [
         _Reveal(
           delay: 0,
@@ -1110,7 +1103,7 @@ class _HeroVisual extends StatelessWidget {
         label: holiday.shortLabel(s),
         colorA: holiday.accent,
         colorB: holiday.highlight,
-        alignment: const Alignment(.08, -.18),
+        alignment: const Alignment(0.0, -0.65),
         phase: 2.6,
       ),
     ];
@@ -1158,8 +1151,8 @@ class _HeroVisual extends StatelessWidget {
                     Text(
                       c.label,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+                            fontWeight: FontWeight.w800,
+                          ),
                     ),
                   ],
                 ),
@@ -1382,9 +1375,9 @@ class _StoryRow extends StatelessWidget {
           child: Text(
             s.storyHeading,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w900,
-              letterSpacing: -.5,
-            ),
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -.5,
+                ),
           ),
         ),
       ],
@@ -1459,16 +1452,16 @@ class _MetricGrid extends StatelessWidget {
                   _AnimNum(
                     value: it.value,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -.5,
-                    ),
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -.5,
+                        ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     it.label,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                          fontWeight: FontWeight.w700,
+                        ),
                   ),
                 ],
               ),
@@ -1563,9 +1556,8 @@ class _SkillsSection extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: cards.length,
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: MediaQuery.sizeOf(context).width < 700
-                    ? 520
-                    : 360,
+                maxCrossAxisExtent:
+                    MediaQuery.sizeOf(context).width < 700 ? 520 : 360,
                 crossAxisSpacing: 14,
                 mainAxisSpacing: 14,
                 mainAxisExtent: 240,
@@ -2203,9 +2195,8 @@ class _ProjectsSection extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: repos.length,
             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: MediaQuery.sizeOf(context).width < 760
-                  ? 720
-                  : 400,
+              maxCrossAxisExtent:
+                  MediaQuery.sizeOf(context).width < 760 ? 720 : 400,
               crossAxisSpacing: 14,
               mainAxisSpacing: 14,
               mainAxisExtent: 260,
@@ -2462,18 +2453,20 @@ class _ContactCard extends StatelessWidget {
                         children: [
                           Text(
                             card.title,
-                            style: Theme.of(context).textTheme.titleSmall
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
                                 ?.copyWith(fontWeight: FontWeight.w900),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             card.subtitle,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
                           ),
                         ],
                       ),
@@ -2537,15 +2530,15 @@ class _SpringHoverState extends State<_SpringHover> {
   bool _hovered = false;
   @override
   Widget build(BuildContext context) => MouseRegion(
-    onEnter: (_) => setState(() => _hovered = true),
-    onExit: (_) => setState(() => _hovered = false),
-    child: AnimatedScale(
-      scale: _hovered ? 1.02 : 1.0,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOutBack,
-      child: widget.child,
-    ),
-  );
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: AnimatedScale(
+          scale: _hovered ? 1.02 : 1.0,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutBack,
+          child: widget.child,
+        ),
+      );
 }
 
 /// Delayed reveal with spring overshoot (M3 Expressive motion)
@@ -2555,15 +2548,15 @@ class _Reveal extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) => TweenAnimationBuilder<double>(
-    tween: Tween(begin: 0, end: 1),
-    duration: Duration(milliseconds: 700 + delay),
-    curve: Curves.easeOutBack,
-    builder: (_, v, c) => Opacity(
-      opacity: v.clamp(0.0, 1.0),
-      child: Transform.translate(offset: Offset(0, (1 - v) * 24), child: c),
-    ),
-    child: child,
-  );
+        tween: Tween(begin: 0, end: 1),
+        duration: Duration(milliseconds: 700 + delay),
+        curve: Curves.easeOutBack,
+        builder: (_, v, c) => Opacity(
+          opacity: v.clamp(0.0, 1.0),
+          child: Transform.translate(offset: Offset(0, (1 - v) * 24), child: c),
+        ),
+        child: child,
+      );
 }
 
 /// Section header
@@ -2750,26 +2743,26 @@ class _Badge extends StatelessWidget {
   final Color accent;
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-    decoration: BoxDecoration(
-      color: accent.withValues(alpha: .10),
-      borderRadius: BorderRadius.circular(999),
-      border: Border.all(color: accent.withValues(alpha: .16)),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 15),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: Theme.of(
-            context,
-          ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: .10),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: accent.withValues(alpha: .16)),
         ),
-      ],
-    ),
-  );
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 15),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+      );
 }
 
 /// Icon + label row
@@ -2779,18 +2772,18 @@ class _IconLabel extends StatelessWidget {
   final String text;
   @override
   Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(icon, size: 15),
-      const SizedBox(width: 4),
-      Text(
-        text,
-        style: Theme.of(
-          context,
-        ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
-      ),
-    ],
-  );
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+        ],
+      );
 }
 
 /// Animated number counter
@@ -2800,11 +2793,11 @@ class _AnimNum extends StatelessWidget {
   final TextStyle? style;
   @override
   Widget build(BuildContext context) => TweenAnimationBuilder<double>(
-    tween: Tween(begin: 0, end: value.toDouble()),
-    duration: const Duration(milliseconds: 1200),
-    curve: Curves.easeOutCubic,
-    builder: (_, v, __) => Text(v.round().toString(), style: style),
-  );
+        tween: Tween(begin: 0, end: value.toDouble()),
+        duration: const Duration(milliseconds: 1200),
+        curve: Curves.easeOutCubic,
+        builder: (_, v, __) => Text(v.round().toString(), style: style),
+      );
 }
 
 /// Mobile bottom navigation bar
@@ -2819,20 +2812,21 @@ class _MobileNav extends StatelessWidget {
   final ValueChanged<int> onSelect;
   @override
   Widget build(BuildContext context) => ClipRRect(
-    borderRadius: BorderRadius.circular(24),
-    child: BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-      child: NavigationBar(
-        selectedIndex: selectedIdx,
-        onDestinationSelected: onSelect,
-        destinations: sections
-            .map(
-              (s) => NavigationDestination(icon: Icon(s.icon), label: s.label),
-            )
-            .toList(),
-      ),
-    ),
-  );
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: NavigationBar(
+            selectedIndex: selectedIdx,
+            onDestinationSelected: onSelect,
+            destinations: sections
+                .map(
+                  (s) =>
+                      NavigationDestination(icon: Icon(s.icon), label: s.label),
+                )
+                .toList(),
+          ),
+        ),
+      );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -2852,16 +2846,14 @@ class _AmbientPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..style = PaintingStyle.fill;
     for (var i = 0; i < colors.length; i++) {
-      final x =
-          size.width * (.15 + i * .32) +
+      final x = size.width * (.15 + i * .32) +
           math.sin((progress * math.pi * 2) + i) * 38;
-      final y =
-          size.height * (.12 + i * .24) +
+      final y = size.height * (.12 + i * .24) +
           math.cos((progress * math.pi * 2) + i * .8) * 30;
-      paint.shader = RadialGradient(colors: [colors[i], Colors.transparent])
-          .createShader(
-            Rect.fromCircle(center: Offset(x, y), radius: size.width * .28),
-          );
+      paint.shader =
+          RadialGradient(colors: [colors[i], Colors.transparent]).createShader(
+        Rect.fromCircle(center: Offset(x, y), radius: size.width * .28),
+      );
       canvas.drawCircle(Offset(x, y), size.width * .28, paint);
     }
     // Removed dot grid to fix black dot artifacts
