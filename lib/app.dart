@@ -1098,14 +1098,6 @@ class _HeroVisual extends StatelessWidget {
         alignment: const Alignment(.9, .56),
         phase: 1.9,
       ),
-      FloatingCubeData(
-        icon: holiday.icon,
-        label: holiday.shortLabel(s),
-        colorA: holiday.accent,
-        colorB: holiday.highlight,
-        alignment: const Alignment(0.0, -0.65),
-        phase: 2.6,
-      ),
     ];
     return SizedBox(
       width: size,
@@ -1113,6 +1105,7 @@ class _HeroVisual extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
+          // Background glow
           Center(
             child: Container(
               width: size * .72,
@@ -1129,6 +1122,14 @@ class _HeroVisual extends StatelessWidget {
               ),
             ),
           ),
+          // Avatar (rendered before cubes so cubes always stay on top)
+          Center(
+            child: Transform.translate(
+              offset: Offset(0, math.sin(progress * math.pi * 2) * 6),
+              child: _AvatarHalo(progress: progress, holiday: holiday),
+            ),
+          ),
+          // Floating cubes (on top of avatar, never hidden behind it)
           for (final c in cubes)
             Align(
               alignment: c.alignment,
@@ -1144,7 +1145,7 @@ class _HeroVisual extends StatelessWidget {
                       icon: c.icon,
                       colorA: c.colorA,
                       colorB: c.colorB,
-                      size: c == cubes.last ? size * .20 : size * .16,
+                      size: size * .16,
                       rotation: progress + c.phase,
                     ),
                     const SizedBox(height: 8),
@@ -1158,12 +1159,6 @@ class _HeroVisual extends StatelessWidget {
                 ),
               ),
             ),
-          Center(
-            child: Transform.translate(
-              offset: Offset(0, math.sin(progress * math.pi * 2) * 6),
-              child: _AvatarHalo(progress: progress, holiday: holiday),
-            ),
-          ),
         ],
       ),
     );

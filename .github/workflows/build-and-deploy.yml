@@ -31,13 +31,21 @@ jobs:
       - name: Run tests
         run: flutter test
 
-      - name: Build release web (inject ZHIPU key)
+      - name: Verify ZHIPU key presence
         env:
           ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
         run: |
+          if [ -z "$ZHIPU_API_KEY" ]; then
+            echo "::warning::ZHIPU_API_KEY secret is empty — AI blog features will be disabled."
+          else
+            echo "ZHIPU_API_KEY is set (length=${#ZHIPU_API_KEY})"
+          fi
+
+      - name: Build release web (inject ZHIPU key)
+        run: |
           flutter build web --release \
             --base-href / \
-            --dart-define="ZHIPU_API_KEY=${ZHIPU_API_KEY}"
+            --dart-define=ZHIPU_API_KEY=${{ secrets.ZHIPU_API_KEY }}
 
       - name: Copy CNAME into build output
         run: cp CNAME build/web/CNAME
