@@ -1,501 +1,130 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Blue's PulseLink Blog — Backend engineer, open-source builder, Rust & Java enthusiast.">
-<meta name="author" content="Blueokanna">
-<meta name="keywords" content="blog,Blueokanna,Java,Rust,developer,backend,open source">
-<meta name="theme-color" content="#0b57d0" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#a8c7fa" media="(prefers-color-scheme: dark)">
-<title>Blue's PulseLink Blog</title>
-<link rel="icon" href="https://cdn-icons-png.flaticon.com/128/2593/2593542.png" type="image/png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="/">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Blue's PulseLink Blog rebuilt with Flutter Web and Material Design 3.">
+  <meta name="theme-color" content="#0f7a65">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="PulseLink">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>Blue's PulseLink Blog</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at top, #d7f6ee 0%, #f8f4ec 45%, #f7efe2 100%);
+      font-family: Inter, "Segoe UI", sans-serif;
+    }
+
+    .boot-shell {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      color: #123128;
+    }
+
+    .boot-card {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 20px 24px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 20px 60px rgba(15, 77, 66, 0.12);
+      backdrop-filter: blur(18px);
+    }
+
+    .boot-mark {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #0f7a65, #37c4a2);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 16px 30px rgba(15, 122, 101, .25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .boot-mark::before,
+    .boot-mark::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+    }
+
+    .boot-mark::before {
+      transform: translate(8px, 8px);
+      background: linear-gradient(135deg, rgba(1, 52, 42, .3), rgba(1, 52, 42, 0));
+    }
+
+    .boot-mark::after {
+      background: linear-gradient(135deg, rgba(255,255,255,.35), rgba(255,255,255,0));
+    }
+
+    .boot-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -.02em;
+    }
+
+    .boot-subtitle {
+      margin-top: 4px;
+      font-size: 13px;
+      color: rgba(18, 49, 40, .68);
+    }
+
+    .boot-spinner {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid rgba(15, 122, 101, .2);
+      border-top-color: #0f7a65;
+      animation: spin .9s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-
-<!-- ====== LOADER ====== -->
-<div id="loader" class="loader" aria-live="polite">
-  <div class="loader__inner">
-    <div class="loader__cube">
-      <div class="cube__face cube__face--front"><span class="mat-icon">rocket_launch</span></div>
-      <div class="cube__face cube__face--back"><span class="mat-icon">code</span></div>
-      <div class="cube__face cube__face--right"><span class="mat-icon">terminal</span></div>
-      <div class="cube__face cube__face--left"><span class="mat-icon">star</span></div>
-      <div class="cube__face cube__face--top"><span class="mat-icon">lightbulb</span></div>
-      <div class="cube__face cube__face--bottom"><span class="mat-icon">favorite</span></div>
-    </div>
-    <p class="loader__text">Loading PulseLink&hellip;</p>
-  </div>
-</div>
-
-<!-- ====== PARTICLE CANVAS ====== -->
-<canvas id="particles" class="particles-canvas" aria-hidden="true"></canvas>
-
-<!-- ====== TOP APP BAR ====== -->
-<header id="topbar" class="topbar">
-  <div class="topbar__inner">
-    <!-- Left: weather + holiday -->
-    <div class="topbar__left">
-      <div class="topbar__weather" id="weather-widget" title="Weather">
-        <span id="weather-icon" class="topbar__weather-icon">⛅</span>
-        <span id="weather-temp" class="topbar__weather-temp">--°C</span>
+  <div class="boot-shell">
+    <div class="boot-card">
+      <div class="boot-mark"></div>
+      <div>
+        <div class="boot-title">Blue's PulseLink Blog</div>
+        <div class="boot-subtitle">Loading Flutter Web experience</div>
       </div>
-      <div class="topbar__holiday" id="holiday-badge">
-        <span id="holiday-icon"></span>
-        <span id="holiday-text"></span>
-      </div>
-    </div>
-
-    <!-- Center: logo -->
-    <a href="#hero" class="topbar__logo" aria-label="Home">
-      <div class="topbar__logo-icon"><img src="media/blue_logo.png" alt="" width="36" height="36"></div>
-      <span class="topbar__logo-text">PulseLink</span>
-    </a>
-
-    <!-- Right: nav + toggle -->
-    <div class="topbar__right">
-      <nav class="topbar__nav" aria-label="Main navigation">
-        <a href="#about" class="topbar__nav-link" data-section="about">About</a>
-        <a href="#skills" class="topbar__nav-link" data-section="skills">Skills</a>
-        <a href="#projects" class="topbar__nav-link" data-section="projects">Projects</a>
-        <a href="#contact" class="topbar__nav-link" data-section="contact">Contact</a>
-      </nav>
-      <button class="topbar__theme-btn" id="theme-btn" type="button" aria-label="Toggle dark mode">
-        <span class="mat-icon" id="theme-icon">dark_mode</span>
-      </button>
-      <button class="topbar__menu-btn" id="menu-btn" type="button" aria-label="Open menu">
-        <span class="mat-icon">menu</span>
-      </button>
+      <div class="boot-spinner" aria-hidden="true"></div>
     </div>
   </div>
-</header>
-
-<!-- ====== MOBILE DRAWER ====== -->
-<div class="drawer-scrim" id="drawer-scrim"></div>
-<aside class="drawer" id="drawer" role="dialog" aria-label="Navigation drawer">
-  <div class="drawer__header">
-    <span class="drawer__title">Navigation</span>
-    <button class="drawer__close" id="drawer-close" type="button" aria-label="Close"><span class="mat-icon">close</span></button>
-  </div>
-  <nav class="drawer__nav">
-    <a href="#hero" class="drawer__item"><span class="mat-icon">home</span>Home</a>
-    <a href="#about" class="drawer__item"><span class="mat-icon">person</span>About</a>
-    <a href="#skills" class="drawer__item"><span class="mat-icon">code</span>Skills</a>
-    <a href="#projects" class="drawer__item"><span class="mat-icon">folder_open</span>Projects</a>
-    <a href="#contact" class="drawer__item"><span class="mat-icon">mail</span>Contact</a>
-  </nav>
-  <div class="drawer__footer">
-    <span class="mat-icon">dark_mode</span>
-    <span>Dark Mode</span>
-    <label class="toggle">
-      <input type="checkbox" id="drawer-theme-toggle">
-      <span class="toggle__slider"></span>
-    </label>
-  </div>
-</aside>
-
-<!-- ====== MAIN CONTENT ====== -->
-<main>
-
-<!-- ── HERO ── -->
-<section id="hero" class="hero">
-  <!-- Animated gradient mesh -->
-  <div class="hero__bg" aria-hidden="true">
-    <div class="hero__orb hero__orb--1"></div>
-    <div class="hero__orb hero__orb--2"></div>
-    <div class="hero__orb hero__orb--3"></div>
-    <div class="hero__orb hero__orb--4"></div>
-  </div>
-
-  <div class="hero__content">
-    <div class="hero__text">
-      <p class="hero__greeting anim-fade" id="hero-greeting">
-        <span class="hero__wave" id="greeting-emoji">👋</span>
-        <span id="greeting-text">Hello, World!</span>
-      </p>
-      <h1 class="hero__title anim-fade anim-delay-1">
-        I'm <span class="hero__highlight">Blue</span>
-      </h1>
-      <p class="hero__subtitle anim-fade anim-delay-2">Backend Engineer &amp; Open Source Enthusiast</p>
-      <p class="hero__desc anim-fade anim-delay-3">
-        Passionate about building robust systems with Java, Rust, and modern web technologies.
-        Exploring the intersection of performance and elegance.
-      </p>
-      <div class="hero__cta anim-fade anim-delay-4">
-        <a href="#projects" class="btn btn--filled">
-          <span class="mat-icon">explore</span>Explore Projects
-        </a>
-        <a href="https://github.com/blueokanna" target="_blank" rel="noopener" class="btn btn--outlined btn--on-dark">
-          <span class="mat-icon">code</span>GitHub Profile
-        </a>
-      </div>
-    </div>
-
-    <div class="hero__visual anim-fade anim-delay-2">
-      <div class="hero__scene">
-        <!-- 3D floating icons -->
-        <div class="float-icon fi--1" data-speed="1.2">
-          <div class="fi__cube" style="--cube-color:#E65100;--cube-light:#FF9800">
-            <div class="fi__face fi__face--front">☕</div>
-            <div class="fi__face fi__face--back">☕</div>
-            <div class="fi__face fi__face--left"></div>
-            <div class="fi__face fi__face--right"></div>
-            <div class="fi__face fi__face--top"></div>
-            <div class="fi__face fi__face--bottom"></div>
-          </div>
-          <span class="fi__label">Java</span>
-        </div>
-        <div class="float-icon fi--2" data-speed="1.5">
-          <div class="fi__cube" style="--cube-color:#BF360C;--cube-light:#FF7043">
-            <div class="fi__face fi__face--front">🦀</div>
-            <div class="fi__face fi__face--back">🦀</div>
-            <div class="fi__face fi__face--left"></div>
-            <div class="fi__face fi__face--right"></div>
-            <div class="fi__face fi__face--top"></div>
-            <div class="fi__face fi__face--bottom"></div>
-          </div>
-          <span class="fi__label">Rust</span>
-        </div>
-        <div class="float-icon fi--3" data-speed="0.9">
-          <div class="fi__cube" style="--cube-color:#00838F;--cube-light:#4DD0E1">
-            <div class="fi__face fi__face--front">🌐</div>
-            <div class="fi__face fi__face--back">🌐</div>
-            <div class="fi__face fi__face--left"></div>
-            <div class="fi__face fi__face--right"></div>
-            <div class="fi__face fi__face--top"></div>
-            <div class="fi__face fi__face--bottom"></div>
-          </div>
-          <span class="fi__label">Web</span>
-        </div>
-        <div class="float-icon fi--4" data-speed="1.3">
-          <div class="fi__cube" style="--cube-color:#2E7D32;--cube-light:#66BB6A">
-            <div class="fi__face fi__face--front">🗄️</div>
-            <div class="fi__face fi__face--back">🗄️</div>
-            <div class="fi__face fi__face--left"></div>
-            <div class="fi__face fi__face--right"></div>
-            <div class="fi__face fi__face--top"></div>
-            <div class="fi__face fi__face--bottom"></div>
-          </div>
-          <span class="fi__label">Database</span>
-        </div>
-        <div class="float-icon fi--5" data-speed="1.1">
-          <div class="fi__cube" style="--cube-color:#6A1B9A;--cube-light:#CE93D8">
-            <div class="fi__face fi__face--front">☁️</div>
-            <div class="fi__face fi__face--back">☁️</div>
-            <div class="fi__face fi__face--left"></div>
-            <div class="fi__face fi__face--right"></div>
-            <div class="fi__face fi__face--top"></div>
-            <div class="fi__face fi__face--bottom"></div>
-          </div>
-          <span class="fi__label">Cloud</span>
-        </div>
-
-        <!-- Avatar -->
-        <div class="hero__avatar">
-          <div class="hero__avatar-ring"></div>
-          <img src="https://avatars.githubusercontent.com/u/56761243?v=4" alt="Blueokanna" width="140" height="140" loading="eager">
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="hero__scroll" aria-hidden="true">
-    <span class="mat-icon hero__scroll-icon">expand_more</span>
-    <span>Scroll to explore</span>
-  </div>
-</section>
-
-<!-- ── ABOUT ── -->
-<section id="about" class="section section--about">
-  <div class="container">
-    <header class="section__header reveal">
-      <div class="section__icon section__icon--about">
-        <div class="section__icon-cube" style="--cube-color:#0b57d0;--cube-light:#a8c7fa">
-          <div class="si__face si__face--front"><span class="mat-icon">person</span></div>
-          <div class="si__face si__face--back"></div>
-          <div class="si__face si__face--left"></div>
-          <div class="si__face si__face--right"></div>
-          <div class="si__face si__face--top"></div>
-          <div class="si__face si__face--bottom"></div>
-        </div>
-      </div>
-      <h2 class="section__title">About Me</h2>
-      <p class="section__subtitle">Get to know the developer behind the code</p>
-    </header>
-
-    <div class="about__grid">
-      <!-- Profile card -->
-      <div class="card card--profile reveal tilt-card">
-        <div class="card__profile-top">
-          <img class="card__avatar" src="https://avatars.githubusercontent.com/u/56761243?v=4" alt="Blueokanna" width="80" height="80" loading="lazy">
-          <div class="card__profile-info">
-            <h3 class="card__name">Blueokanna</h3>
-            <div class="chip-row">
-              <span class="chip"><span class="mat-icon">engineering</span>Backend Engineer</span>
-              <span class="chip"><span class="mat-icon">favorite</span>Open Source</span>
-            </div>
-          </div>
-        </div>
-        <hr class="divider">
-        <div class="card__body">
-          <p>As a passionate backend engineer, I've spent years diving deep into software development. My journey started with Java and has expanded to include Rust, Kotlin, and modern web technologies.</p>
-          <p>I believe in writing clean, efficient, and maintainable code. My projects reflect my passion for learning and sharing knowledge with the developer community.</p>
-        </div>
-      </div>
-
-      <!-- Stats -->
-      <div class="about__stats reveal" style="--reveal-delay:100ms">
-        <div class="stat-card tilt-card">
-          <div class="stat-card__icon" style="--cube-color:#0b57d0;--cube-light:#a8c7fa">
-            <div class="stat-cube">
-              <div class="sc__face sc__face--front"><span class="mat-icon">folder_special</span></div>
-              <div class="sc__face sc__face--right"></div>
-              <div class="sc__face sc__face--top"></div>
-            </div>
-          </div>
-          <span class="stat-card__number" id="stat-repos">--</span>
-          <span class="stat-card__label">Repositories</span>
-        </div>
-        <div class="stat-card tilt-card">
-          <div class="stat-card__icon" style="--cube-color:#b5890a;--cube-light:#fdd663">
-            <div class="stat-cube">
-              <div class="sc__face sc__face--front"><span class="mat-icon">star</span></div>
-              <div class="sc__face sc__face--right"></div>
-              <div class="sc__face sc__face--top"></div>
-            </div>
-          </div>
-          <span class="stat-card__number" id="stat-stars">--</span>
-          <span class="stat-card__label">Total Stars</span>
-        </div>
-        <div class="stat-card tilt-card">
-          <div class="stat-card__icon" style="--cube-color:#0d652d;--cube-light:#6dd58c">
-            <div class="stat-cube">
-              <div class="sc__face sc__face--front"><span class="mat-icon">group</span></div>
-              <div class="sc__face sc__face--right"></div>
-              <div class="sc__face sc__face--top"></div>
-            </div>
-          </div>
-          <span class="stat-card__number" id="stat-followers">--</span>
-          <span class="stat-card__label">Followers</span>
-        </div>
-        <div class="stat-card tilt-card">
-          <div class="stat-card__icon" style="--cube-color:#7b1fa2;--cube-light:#ce93d8">
-            <div class="stat-cube">
-              <div class="sc__face sc__face--front"><span class="mat-icon">calendar_month</span></div>
-              <div class="sc__face sc__face--right"></div>
-              <div class="sc__face sc__face--top"></div>
-            </div>
-          </div>
-          <span class="stat-card__number" id="stat-years">3+</span>
-          <span class="stat-card__label">Years Coding</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── SKILLS ── -->
-<section id="skills" class="section section--skills">
-  <div class="container">
-    <header class="section__header reveal">
-      <div class="section__icon section__icon--skills">
-        <div class="section__icon-cube" style="--cube-color:#00838f;--cube-light:#4dd0e1">
-          <div class="si__face si__face--front"><span class="mat-icon">code</span></div>
-          <div class="si__face si__face--back"></div>
-          <div class="si__face si__face--left"></div>
-          <div class="si__face si__face--right"></div>
-          <div class="si__face si__face--top"></div>
-          <div class="si__face si__face--bottom"></div>
-        </div>
-      </div>
-      <h2 class="section__title">Tech Stack</h2>
-      <p class="section__subtitle">Technologies I work with</p>
-    </header>
-
-    <div class="tabs reveal" id="skill-tabs-wrap">
-      <div class="tabs__bar" role="tablist">
-        <button class="tabs__tab is-active" role="tab" aria-selected="true" data-panel="panel-lang"><span class="mat-icon">terminal</span>Languages</button>
-        <button class="tabs__tab" role="tab" aria-selected="false" data-panel="panel-fw"><span class="mat-icon">widgets</span>Frameworks</button>
-        <button class="tabs__tab" role="tab" aria-selected="false" data-panel="panel-tools"><span class="mat-icon">build</span>Tools</button>
-        <div class="tabs__indicator" id="tab-indicator"></div>
-      </div>
-
-      <div class="tabs__panels">
-        <!-- Languages -->
-        <div class="tabs__panel is-active" id="panel-lang" role="tabpanel">
-          <div class="skills-grid">
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:0ms">
-              <div class="skill-card__icon" style="--sc:#E65100;--sl:#FF9800">☕</div>
-              <h4 class="skill-card__name">Java</h4>
-              <div class="progress"><div class="progress__bar" style="--pct:95%"></div></div>
-              <span class="skill-card__level">Expert</span>
-            </div>
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:50ms">
-              <div class="skill-card__icon" style="--sc:#BF360C;--sl:#FF7043">🦀</div>
-              <h4 class="skill-card__name">Rust</h4>
-              <div class="progress"><div class="progress__bar" style="--pct:75%"></div></div>
-              <span class="skill-card__level">Advanced</span>
-            </div>
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:100ms">
-              <div class="skill-card__icon" style="--sc:#6A1B9A;--sl:#AB47BC">🟣</div>
-              <h4 class="skill-card__name">Kotlin</h4>
-              <div class="progress"><div class="progress__bar" style="--pct:80%"></div></div>
-              <span class="skill-card__level">Advanced</span>
-            </div>
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:150ms">
-              <div class="skill-card__icon" style="--sc:#1565C0;--sl:#42A5F5">🐍</div>
-              <h4 class="skill-card__name">Python</h4>
-              <div class="progress"><div class="progress__bar" style="--pct:70%"></div></div>
-              <span class="skill-card__level">Proficient</span>
-            </div>
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:200ms">
-              <div class="skill-card__icon" style="--sc:#F9A825;--sl:#FFF176">⚡</div>
-              <h4 class="skill-card__name">JavaScript</h4>
-              <div class="progress"><div class="progress__bar" style="--pct:65%"></div></div>
-              <span class="skill-card__level">Proficient</span>
-            </div>
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:250ms">
-              <div class="skill-card__icon" style="--sc:#00838F;--sl:#4DD0E1">🐹</div>
-              <h4 class="skill-card__name">Go</h4>
-              <div class="progress"><div class="progress__bar" style="--pct:55%"></div></div>
-              <span class="skill-card__level">Intermediate</span>
-            </div>
-          </div>
-        </div>
-        <!-- Frameworks -->
-        <div class="tabs__panel" id="panel-fw" role="tabpanel">
-          <div class="skills-grid">
-            <div class="skill-card tilt-card reveal"><div class="skill-card__icon" style="--sc:#2E7D32;--sl:#81C784">🍃</div><h4 class="skill-card__name">Spring Boot</h4><div class="progress"><div class="progress__bar" style="--pct:90%"></div></div><span class="skill-card__level">Expert</span></div>
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:50ms"><div class="skill-card__icon" style="--sc:#37474F;--sl:#90A4AE">⚙️</div><h4 class="skill-card__name">Tokio</h4><div class="progress"><div class="progress__bar" style="--pct:70%"></div></div><span class="skill-card__level">Advanced</span></div>
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:100ms"><div class="skill-card__icon" style="--sc:#0097A7;--sl:#4DD0E1">⚛️</div><h4 class="skill-card__name">React</h4><div class="progress"><div class="progress__bar" style="--pct:60%"></div></div><span class="skill-card__level">Intermediate</span></div>
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:150ms"><div class="skill-card__icon" style="--sc:#C62828;--sl:#EF5350">🗃️</div><h4 class="skill-card__name">MyBatis</h4><div class="progress"><div class="progress__bar" style="--pct:85%"></div></div><span class="skill-card__level">Expert</span></div>
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:200ms"><div class="skill-card__icon" style="--sc:#4A148C;--sl:#7E57C2">💠</div><h4 class="skill-card__name">Vert.x</h4><div class="progress"><div class="progress__bar" style="--pct:70%"></div></div><span class="skill-card__level">Advanced</span></div>
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:250ms"><div class="skill-card__icon" style="--sc:#2E7D32;--sl:#A5D6A7">🤖</div><h4 class="skill-card__name">Android</h4><div class="progress"><div class="progress__bar" style="--pct:65%"></div></div><span class="skill-card__level">Proficient</span></div>
-          </div>
-        </div>
-        <!-- Tools -->
-        <div class="tabs__panel" id="panel-tools" role="tabpanel">
-          <div class="skills-grid">
-            <div class="skill-card tilt-card reveal"><div class="skill-card__icon" style="--sc:#0277BD;--sl:#4FC3F7">🐳</div><h4 class="skill-card__name">Docker</h4><div class="progress"><div class="progress__bar" style="--pct:80%"></div></div><span class="skill-card__level">Advanced</span></div>
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:50ms"><div class="skill-card__icon" style="--sc:#D84315;--sl:#FF8A65">🔀</div><h4 class="skill-card__name">Git</h4><div class="progress"><div class="progress__bar" style="--pct:85%"></div></div><span class="skill-card__level">Expert</span></div>
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:100ms"><div class="skill-card__icon" style="--sc:#212121;--sl:#757575">🐧</div><h4 class="skill-card__name">Linux</h4><div class="progress"><div class="progress__bar" style="--pct:80%"></div></div><span class="skill-card__level">Advanced</span></div>
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:150ms"><div class="skill-card__icon" style="--sc:#00695C;--sl:#4DB6AC">🐬</div><h4 class="skill-card__name">MySQL</h4><div class="progress"><div class="progress__bar" style="--pct:85%"></div></div><span class="skill-card__level">Expert</span></div>
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:200ms"><div class="skill-card__icon" style="--sc:#B71C1C;--sl:#E57373">🔴</div><h4 class="skill-card__name">Redis</h4><div class="progress"><div class="progress__bar" style="--pct:75%"></div></div><span class="skill-card__level">Advanced</span></div>
-            <div class="skill-card tilt-card reveal" style="--reveal-delay:250ms"><div class="skill-card__icon" style="--sc:#1565C0;--sl:#64B5F6">☸️</div><h4 class="skill-card__name">Kubernetes</h4><div class="progress"><div class="progress__bar" style="--pct:60%"></div></div><span class="skill-card__level">Intermediate</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── PROJECTS ── -->
-<section id="projects" class="section section--projects">
-  <div class="container">
-    <header class="section__header reveal">
-      <div class="section__icon section__icon--projects">
-        <div class="section__icon-cube" style="--cube-color:#7b1fa2;--cube-light:#ce93d8">
-          <div class="si__face si__face--front"><span class="mat-icon">folder_open</span></div>
-          <div class="si__face si__face--back"></div>
-          <div class="si__face si__face--left"></div>
-          <div class="si__face si__face--right"></div>
-          <div class="si__face si__face--top"></div>
-          <div class="si__face si__face--bottom"></div>
-        </div>
-      </div>
-      <h2 class="section__title">Projects</h2>
-      <p class="section__subtitle">Open source work and personal projects</p>
-    </header>
-
-    <div class="projects-grid" id="projects-grid">
-      <div class="projects-grid__loading" id="projects-loading">
-        <div class="spinner"></div>
-        <p>Loading projects from GitHub&hellip;</p>
-      </div>
-    </div>
-
-    <div class="projects__cta reveal">
-      <a href="https://github.com/blueokanna" target="_blank" rel="noopener" class="btn btn--outlined">
-        <span class="mat-icon">open_in_new</span>View All on GitHub
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- ── CONTACT ── -->
-<section id="contact" class="section section--contact">
-  <div class="container">
-    <header class="section__header reveal">
-      <div class="section__icon section__icon--contact">
-        <div class="section__icon-cube" style="--cube-color:#c77600;--cube-light:#ffb74d">
-          <div class="si__face si__face--front"><span class="mat-icon">connect_without_contact</span></div>
-          <div class="si__face si__face--back"></div>
-          <div class="si__face si__face--left"></div>
-          <div class="si__face si__face--right"></div>
-          <div class="si__face si__face--top"></div>
-          <div class="si__face si__face--bottom"></div>
-        </div>
-      </div>
-      <h2 class="section__title">Let's Connect</h2>
-      <p class="section__subtitle">Feel free to reach out for collaborations or just a friendly chat</p>
-    </header>
-
-    <div class="contact-grid">
-      <a href="https://github.com/blueokanna" target="_blank" rel="noopener" class="contact-card tilt-card reveal">
-        <div class="contact-card__icon" style="--sc:#24292e;--sl:#586069">🐙</div>
-        <h4 class="contact-card__title">GitHub</h4>
-        <p class="contact-card__text">@blueokanna</p>
-      </a>
-      <a href="https://blueokanna.gay" target="_blank" rel="noopener" class="contact-card tilt-card reveal" style="--reveal-delay:80ms">
-        <div class="contact-card__icon" style="--sc:#0b57d0;--sl:#a8c7fa">🌐</div>
-        <h4 class="contact-card__title">Website</h4>
-        <p class="contact-card__text">blueokanna.gay</p>
-      </a>
-      <a href="https://www.pulselink.top" class="contact-card tilt-card reveal" style="--reveal-delay:160ms">
-        <div class="contact-card__icon" style="--sc:#7b1fa2;--sl:#ce93d8">💜</div>
-        <h4 class="contact-card__title">PulseLink</h4>
-        <p class="contact-card__text">pulselink.top</p>
-      </a>
-    </div>
-  </div>
-</section>
-
-</main>
-
-<!-- ====== FOOTER ====== -->
-<footer class="footer">
-  <div class="container">
-    <div class="footer__brand">
-      <div class="footer__logo"><img src="media/blue_logo.png" alt="" width="36" height="36"></div>
-      <span class="footer__name">Blue's PulseLink Blog</span>
-    </div>
-    <hr class="divider">
-    <div class="footer__bottom">
-      <p>&copy; 2023 &ndash; 2026 Blueokanna. All rights reserved.</p>
-      <p class="footer__made">Made with <span class="heartbeat">❤️</span> and Material Design 3</p>
-    </div>
-  </div>
-</footer>
-
-<!-- Back-to-top -->
-<button class="fab-top" id="fab-top" type="button" aria-label="Back to top">
-  <span class="mat-icon">arrow_upward</span>
-</button>
-
-<!-- Bottom nav (mobile) -->
-<nav class="bottom-nav" id="bottom-nav" aria-label="Mobile navigation">
-  <a href="#hero" class="bottom-nav__item is-active" data-section="hero"><span class="mat-icon">home</span><span>Home</span></a>
-  <a href="#about" class="bottom-nav__item" data-section="about"><span class="mat-icon">person</span><span>About</span></a>
-  <a href="#skills" class="bottom-nav__item" data-section="skills"><span class="mat-icon">code</span><span>Skills</span></a>
-  <a href="#projects" class="bottom-nav__item" data-section="projects"><span class="mat-icon">folder</span><span>Projects</span></a>
-  <a href="#contact" class="bottom-nav__item" data-section="contact"><span class="mat-icon">mail</span><span>Contact</span></a>
-</nav>
-
-<script src="app.js"></script>
+  <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

@@ -1,0 +1,47 @@
+{
+  "colors": {
+    "bright_green": "#9FE870",
+    "forest_green": "#163300",
+    "bright_orange": "#FFC091",
+    "bright_yellow": "#FFEB69",
+    "bright_blue": "#A0E1E1",
+    "bright_pink": "#FFD7EF",
+    "dark_purple": "#260A2F",
+    "dark_gold": "#3A341C",
+    "dark_charcoal": "#121511",
+    "dark_maroon": "#4B1E1A",
+    "content_primary": "#0E0F0C",
+    "content_secondary": "#454745",
+    "content_tertiary": "#6A6C6A",
+    "interactive_primary": "#163300",
+    "interactive_accent": "#9FE870",
+    "interactive_secondary": "#868685",
+    "background_screen": "#FFFFFF",
+    "background_elevated": "#FFFFFF",
+    "background_neutral_tint": "#F3F5ED",
+    "border_neutral": "#1E201C"
+  },
+  "radius": {
+    "mobile_small": 10,
+    "mobile_medium": 16,
+    "mobile_large": 24,
+    "mobile_xl": 32,
+    "desktop_small": 16,
+    "desktop_medium": 20,
+    "desktop_large": 30,
+    "desktop_xl": 40,
+    "desktop_2xl": 60
+  },
+  "sizes": [
+    16,
+    24,
+    32,
+    48,
+    64,
+    96,
+    128,
+    256,
+    512,
+    1024
+  ]
+}

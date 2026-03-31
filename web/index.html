@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Blue's PulseLink Blog rebuilt with Flutter Web and Material Design 3.">
+  <meta name="theme-color" content="#0f7a65">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="PulseLink">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>Blue's PulseLink Blog</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at top, #d7f6ee 0%, #f8f4ec 45%, #f7efe2 100%);
+      font-family: Inter, "Segoe UI", sans-serif;
+    }
+
+    .boot-shell {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      color: #123128;
+    }
+
+    .boot-card {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 20px 24px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 20px 60px rgba(15, 77, 66, 0.12);
+      backdrop-filter: blur(18px);
+    }
+
+    .boot-mark {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #0f7a65, #37c4a2);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 16px 30px rgba(15, 122, 101, .25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .boot-mark::before,
+    .boot-mark::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+    }
+
+    .boot-mark::before {
+      transform: translate(8px, 8px);
+      background: linear-gradient(135deg, rgba(1, 52, 42, .3), rgba(1, 52, 42, 0));
+    }
+
+    .boot-mark::after {
+      background: linear-gradient(135deg, rgba(255,255,255,.35), rgba(255,255,255,0));
+    }
+
+    .boot-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -.02em;
+    }
+
+    .boot-subtitle {
+      margin-top: 4px;
+      font-size: 13px;
+      color: rgba(18, 49, 40, .68);
+    }
+
+    .boot-spinner {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid rgba(15, 122, 101, .2);
+      border-top-color: #0f7a65;
+      animation: spin .9s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="boot-shell">
+    <div class="boot-card">
+      <div class="boot-mark"></div>
+      <div>
+        <div class="boot-title">Blue's PulseLink Blog</div>
+        <div class="boot-subtitle">Loading Flutter Web experience</div>
+      </div>
+      <div class="boot-spinner" aria-hidden="true"></div>
+    </div>
+  </div>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
