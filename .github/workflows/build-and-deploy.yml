@@ -3,6 +3,10 @@ name: Build and deploy Flutter Web
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -31,11 +35,21 @@ jobs:
         env:
           ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
         run: |
-          flutter build web --release --base-href / --dart-define=ZHIPU_API_KEY=${ZHIPU_API_KEY}
+          flutter build web --release \
+            --base-href / \
+            --dart-define="ZHIPU_API_KEY=${ZHIPU_API_KEY}"
+
+      - name: Copy CNAME into build output
+        run: cp CNAME build/web/CNAME
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: build/web
           publish_branch: gh-pages
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          cname: www.pulselink.top
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'deploy: ${{ github.sha }}'
