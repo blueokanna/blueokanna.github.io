@@ -51,3 +51,25 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/icon/icons/analytics/3d/green/
+    - assets/icon/icons/app/3d/green/
+    - assets/icon/icons/card/3d/green/
+    - assets/icon/icons/confetti/3d/green/
+    - assets/icon/icons/convert/3d/green/
+    - assets/icon/icons/globe/3d/green/
+    - assets/icon/icons/invest/3d/green/
+    - assets/icon/icons/keep/3d/green/
+    - assets/icon/icons/receive/3d/green/
+    - assets/icon/icons/security/3d/green/
+    - assets/icon/icons/send/3d/green/
+    - assets/icon/icons/spend/3d/green/
+    - assets/icon/icons/support/3d/green/
+    - assets/icon/icons/wallet/3d/green/
+    - assets/icon/icons/analytics/3d/tapestry/
+    - assets/icon/icons/app/3d/tapestry/
+    - assets/icon/icons/globe/3d/tapestry/
+    - assets/icon/icons/security/3d/tapestry/
+    - assets/icon/icons/convert/3d/tapestry/
+    - assets/icon/icons/send/3d/tapestry/

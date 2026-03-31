@@ -67,9 +67,11 @@ class WeatherSnapshot {
       String city = defaultCity;
       // Try multiple geolocation services for VPN resilience
       try {
-        final geoRes = await http
-            .get(Uri.parse('https://ipapi.co/json/'))
-            .timeout(const Duration(seconds: 5));
+        // 1) ip.sb — reliable, returns real ISP location
+        final geoRes = await http.get(
+          Uri.parse('https://api.ip.sb/geoip'),
+          headers: const {'Accept': 'application/json'},
+        ).timeout(const Duration(seconds: 5));
         if (geoRes.statusCode == 200) {
           final geo = jsonDecode(geoRes.body) as Map<String, dynamic>;
           final gLat = (geo['latitude'] as num?)?.toDouble();
@@ -85,7 +87,31 @@ class WeatherSnapshot {
           }
         }
       } catch (_) {
-        // Use Guangzhou Panyu defaults
+        // 2) Fallback: ip.skk.moe
+        try {
+          final geoRes2 = await http
+              .get(Uri.parse('https://ip.skk.moe/api'))
+              .timeout(const Duration(seconds: 5));
+          if (geoRes2.statusCode == 200) {
+            final geo2 = jsonDecode(geoRes2.body) as Map<String, dynamic>;
+            final info = geo2['info'] as Map<String, dynamic>?;
+            if (info != null) {
+              final gLat2 = (info['latitude'] as num?)?.toDouble();
+              final gLon2 = (info['longitude'] as num?)?.toDouble();
+              final gCity2 = info['city'] as String?;
+              if (gLat2 != null &&
+                  gLon2 != null &&
+                  gCity2 != null &&
+                  gCity2.isNotEmpty) {
+                lat = gLat2;
+                lon = gLon2;
+                city = gCity2;
+              }
+            }
+          }
+        } catch (_) {
+          // Use Guangzhou Panyu defaults
+        }
       }
       final uri = Uri.parse(
         'https://api.open-meteo.com/v1/forecast'

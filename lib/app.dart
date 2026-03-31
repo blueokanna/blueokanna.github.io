@@ -161,6 +161,11 @@ class _PulseLinkHomePageState extends State<PulseLinkHomePage>
         ),
         NavSection(id: 'blog', label: s.navBlog, icon: Icons.article_rounded),
         NavSection(
+          id: 'tools',
+          label: s.navTools,
+          icon: Icons.build_rounded,
+        ),
+        NavSection(
           id: 'projects',
           label: s.navProjects,
           icon: Icons.folder_copy_rounded,
@@ -421,6 +426,12 @@ class _PulseLinkHomePageState extends State<PulseLinkHomePage>
                               lang: widget.lang,
                               onGenerate: _generateArticle,
                             ),
+                          ),
+                          _sliverSection(
+                            'tools',
+                            hp,
+                            28,
+                            _ToolsSection(lang: widget.lang, dc: dc),
                           ),
                           _sliverSection(
                             'projects',
@@ -1062,42 +1073,34 @@ class _HeroVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = S.of(lang);
     final size = switch (dc) {
       DeviceClass.mobile => 290.0,
       DeviceClass.tablet => 360.0,
       DeviceClass.desktop => 430.0,
     };
+    // Use 3D PNG icons from assets/icon/icons/
     final cubes = [
-      FloatingCubeData(
-        icon: Icons.coffee_rounded,
-        label: 'Java',
-        colorA: const Color(0xFFAA4B12),
-        colorB: const Color(0xFFFFA94D),
+      _HeroAssetCube(
+        assetPath: 'assets/icon/icons/app/3d/green/128.png',
+        label: 'App',
         alignment: const Alignment(-.88, -.78),
         phase: 0,
       ),
-      FloatingCubeData(
-        icon: Icons.hive_rounded,
-        label: 'Rust',
-        colorA: const Color(0xFF8B2E0B),
-        colorB: const Color(0xFFFF7A45),
+      _HeroAssetCube(
+        assetPath: 'assets/icon/icons/security/3d/green/128.png',
+        label: 'Security',
         alignment: const Alignment(.9, -.84),
         phase: .7,
       ),
-      FloatingCubeData(
-        icon: Icons.blur_on_rounded,
+      _HeroAssetCube(
+        assetPath: 'assets/icon/icons/globe/3d/green/128.png',
         label: 'Cloud',
-        colorA: const Color(0xFF0F7A65),
-        colorB: const Color(0xFF4BD7B3),
         alignment: const Alignment(-.92, .32),
         phase: 1.2,
       ),
-      FloatingCubeData(
-        icon: Icons.smart_toy_rounded,
+      _HeroAssetCube(
+        assetPath: 'assets/icon/icons/analytics/3d/green/128.png',
         label: 'AI',
-        colorA: const Color(0xFF6C2DA8),
-        colorB: const Color(0xFFD89AFF),
         alignment: const Alignment(.9, .56),
         phase: 1.9,
       ),
@@ -1132,7 +1135,7 @@ class _HeroVisual extends StatelessWidget {
               child: _AvatarHalo(progress: progress, holiday: holiday),
             ),
           ),
-          // Floating cubes (on top of avatar, never hidden behind it)
+          // Floating 3D icon assets (on top of avatar)
           for (final c in cubes)
             Align(
               alignment: c.alignment,
@@ -1144,12 +1147,18 @@ class _HeroVisual extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    ThreeDCube(
-                      icon: c.icon,
-                      colorA: c.colorA,
-                      colorB: c.colorB,
-                      size: size * .16,
-                      rotation: progress + c.phase,
+                    Image.asset(
+                      c.assetPath,
+                      width: size * .16,
+                      height: size * .16,
+                      filterQuality: FilterQuality.medium,
+                      errorBuilder: (_, __, ___) => ThreeDCube(
+                        icon: Icons.apps_rounded,
+                        colorA: const Color(0xFF0F7A65),
+                        colorB: const Color(0xFF56E1C1),
+                        size: size * .16,
+                        rotation: progress + c.phase,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -1259,6 +1268,20 @@ class _AvatarHalo extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Data for hero floating 3D asset icons
+class _HeroAssetCube {
+  const _HeroAssetCube({
+    required this.assetPath,
+    required this.label,
+    required this.alignment,
+    required this.phase,
+  });
+  final String assetPath;
+  final String label;
+  final Alignment alignment;
+  final double phase;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -1420,52 +1443,43 @@ class _MetricGrid extends StatelessWidget {
         const Color(0xFFD99AFF),
       ),
     ];
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: items.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 14,
-        crossAxisSpacing: 14,
-        childAspectRatio: 1.6,
-      ),
-      itemBuilder: (context, i) {
-        final it = items[i];
-        return _SpringHover(
-          child: _Glass(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-              child: Row(
-                children: [
-                  ThreeDCube(
-                    icon: it.icon,
-                    colorA: it.colorA,
-                    colorB: it.colorB,
-                    size: 44,
-                    rotation: .3 + i * .12,
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: [
+        for (var i = 0; i < items.length; i++)
+          _SpringHover(
+            child: _Glass(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ThreeDCube(
+                      icon: items[i].icon,
+                      colorA: items[i].colorA,
+                      colorB: items[i].colorB,
+                      size: 38,
+                      rotation: .3 + i * .12,
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _AnimNum(
-                          value: it.value,
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -.5,
-                              ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          it.label,
+                          value: items[i].value,
                           style:
-                              Theme.of(context).textTheme.labelMedium?.copyWith(
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -.5,
+                                  ),
+                        ),
+                        Text(
+                          items[i].label,
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: Theme.of(context)
                                         .colorScheme
@@ -1474,13 +1488,12 @@ class _MetricGrid extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        );
-      },
+      ],
     );
   }
 }
@@ -1798,6 +1811,144 @@ class _BlogSection extends StatelessWidget {
             ),
           ),
         ],
+      ],
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Tools Section
+// ═══════════════════════════════════════════════════════════════════════════════
+class _ToolsSection extends StatelessWidget {
+  const _ToolsSection({required this.lang, required this.dc});
+  final AppLanguage lang;
+  final DeviceClass dc;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(lang);
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionHead(
+          eyebrow: s.toolsEyebrow,
+          title: s.toolsTitle,
+          subtitle: s.toolsSubtitle,
+        ),
+        const SizedBox(height: 18),
+        _SpringHover(
+          child: _Glass(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: dc == DeviceClass.mobile
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _m3u8Icon(),
+                        const SizedBox(height: 16),
+                        _m3u8Text(theme, s),
+                        const SizedBox(height: 16),
+                        _m3u8Actions(s),
+                      ],
+                    )
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _m3u8Icon(),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _m3u8Text(theme, s),
+                              const SizedBox(height: 16),
+                              _m3u8Actions(s),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _m3u8Icon() {
+    return Image.asset(
+      'assets/icon/icons/convert/3d/green/128.png',
+      width: 72,
+      height: 72,
+      filterQuality: FilterQuality.medium,
+      errorBuilder: (_, __, ___) => const ThreeDCube(
+        icon: Icons.video_library_rounded,
+        colorA: Color(0xFF0F7A65),
+        colorB: Color(0xFF56E1C1),
+        size: 64,
+        rotation: .2,
+      ),
+    );
+  }
+
+  Widget _m3u8Text(ThemeData theme, S s) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              s.m3u8DownloaderTitle,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: -.3,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F7A65).withValues(alpha: .12),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: const Text(
+                'WASM',
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          s.m3u8DownloaderDesc,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            height: 1.6,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _m3u8Actions(S s) {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: [
+        Link(
+          uri: Uri.parse('https://github.com/blueokanna/m3u8-downloader'),
+          target: LinkTarget.blank,
+          builder: (context, follow) => FilledButton.tonalIcon(
+            onPressed: follow,
+            icon: const Icon(Icons.code_rounded),
+            label: Text(s.viewSource),
+            style: FilledButton.styleFrom(
+              shape: const StadiumBorder(),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -2634,116 +2785,59 @@ class ThreeDCube extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final d = size * .16;
     return SizedBox(
-      width: size + d,
-      height: size + d,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // Bottom face
-          Positioned(
-            left: d * .55,
-            top: d * .88,
-            child: Transform(
-              alignment: Alignment.center,
-              transform: Matrix4.identity()
-                ..setEntry(3, 2, .001)
-                ..rotateX(.72)
-                ..rotateZ(.06),
-              child: Container(
-                width: size,
-                height: d,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [_shade(colorA, -.16), _shade(colorA, -.30)],
-                  ),
-                  borderRadius: BorderRadius.circular(size * .20),
-                ),
-              ),
+      width: size,
+      height: size,
+      child: Transform(
+        alignment: Alignment.center,
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, .001)
+          ..rotateX(.12 + math.sin(rotation * math.pi * 2) * .02)
+          ..rotateY(-.14 + math.cos(rotation * math.pi * 2) * .03),
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [colorA, colorB],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-          ),
-          // Right face
-          Positioned(
-            left: d * .82,
-            top: d * .30,
-            child: Transform(
-              alignment: Alignment.center,
-              transform: Matrix4.identity()
-                ..setEntry(3, 2, .001)
-                ..rotateY(-.76)
-                ..rotateZ(-.02),
-              child: Container(
-                width: d,
-                height: size,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [_shade(colorA, -.12), _shade(colorA, -.28)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                  borderRadius: BorderRadius.circular(size * .20),
-                ),
+            borderRadius: BorderRadius.circular(size * .26),
+            boxShadow: [
+              BoxShadow(
+                color: colorA.withValues(alpha: .20),
+                blurRadius: size * .35,
+                offset: Offset(size * .06, size * .14),
               ),
-            ),
+            ],
           ),
-          // Front face
-          Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, .001)
-              ..rotateX(.18 + math.sin(rotation * math.pi * 2) * .02)
-              ..rotateY(-.22 + math.cos(rotation * math.pi * 2) * .03),
-            child: Container(
-              width: size,
-              height: size,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [colorA, colorB],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(size * .26),
-                boxShadow: [
-                  BoxShadow(
-                    color: colorA.withValues(alpha: .22),
-                    blurRadius: size * .30,
-                    offset: Offset(0, size * .18),
-                  ),
-                ],
-              ),
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(size * .26),
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.white.withValues(alpha: .28),
-                            Colors.white.withValues(alpha: 0),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.center,
-                        ),
-                      ),
+          child: Stack(
+            children: [
+              // Highlight gloss
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(size * .26),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.white.withValues(alpha: .30),
+                        Colors.white.withValues(alpha: 0),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.center,
                     ),
                   ),
-                  Center(
-                    child: Icon(icon, color: Colors.white, size: size * .40),
-                  ),
-                ],
+                ),
               ),
-            ),
+              Center(
+                child: Icon(icon, color: Colors.white, size: size * .40),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
-  }
-
-  static Color _shade(Color c, double amt) {
-    final hsl = HSLColor.fromColor(c);
-    return hsl.withLightness((hsl.lightness + amt).clamp(0.0, 1.0)).toColor();
   }
 }
 

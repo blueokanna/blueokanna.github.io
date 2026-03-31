@@ -41,15 +41,24 @@ jobs:
             echo "ZHIPU_API_KEY is set (length=${#ZHIPU_API_KEY})"
           fi
 
-      - name: Build release web (inject ZHIPU key)
+      - name: Write dart-define file (avoids shell escaping issues with dots)
         env:
           ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+        run: |
+          python3 -c "
+          import json, os
+          with open('dart_defines.json', 'w') as f:
+              json.dump({'ZHIPU_API_KEY': os.environ.get('ZHIPU_API_KEY', '')}, f)
+          "
+
+      - name: Build release web
         run: |
           flutter clean
           flutter pub get
           flutter build web --release \
             --base-href / \
-            --dart-define="ZHIPU_API_KEY=$ZHIPU_API_KEY"
+            --dart-define-from-file=dart_defines.json
+          rm -f dart_defines.json
 
       - name: Copy CNAME into build output
         run: cp CNAME build/web/CNAME
