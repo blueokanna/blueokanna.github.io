@@ -2,36 +2,37 @@
 
 基于 **Flutter Web** 和 **Material Design 3 Expressive** 完全重建的个人博客，部署在 GitHub Pages。
 
-在线访问：https://www.pulselink.top/
+在线访问：[https://www.pulselink.top/](https://www.pulselink.top/)
 
 ## 概述
 
 本仓库使用 Flutter Web 作为唯一渲染层，设计风格深度参考 Wise 平台的产品级美学。
 
 核心目标：
+
 - **纯 Flutter Web 架构** — 不依赖 HTML/CSS/JS 手写页面
 - **Material Design 3 Expressive** — 全面使用 M3 设计系统，包括 squircle 形状、弹性动画、自适应色彩
 - **中英双语** — 一键切换中文与英文
-- **AI 博客集成** — 使用智谱清言 GLM-4-Flash 大模型，实时生成原创科技分析文章
+- **实时博客/快讯聚合** — 多源拉取最新技术内容（DEV/HN/GitHub Release/GitHub Activity），含缓存与兜底
 - **AI 对话助手** — 内嵌 AI 聊天面板，支持实时问答
 - **响应式布局** — 手机、平板、桌面完美适配，参考 Wise 的断点设计
-- **丝滑动画** — 弹性曲线（easeOutBack）、3D 图标浮动、渐入动效
+- **丝滑动画** — 弹性曲线（easeOutBack）、MD3 图标轨道浮动、渐入动效
 - **天气感知** — 基于 IP 定位自动获取当前城市天气
 - **节日主题** — 自动识别春节、圣诞、中秋等节日并调整色调
-- **3D 图标系统** — 大量使用伪 3D 图标立方体，增加视觉深度
+- **MD3 图标系统** — 统一 Material Design 3 图标语言与表达性动效
 
 ## 功能亮点
 
 | 功能 | 描述 |
-|------|------|
+| --- | --- |
 | 🌐 双语切换 | 顶栏一键切换中/英文，所有文案同步更新 |
-| 🤖 AI 博客 | 智谱 GLM-4-Flash 实时生成原创科技文章 |
+| 📰 实时博客快讯 | 自动聚合多源最新技术内容，支持刷新与异常兜底 |
 | 💬 AI 助手 | 侧边 AI 对话面板，支持多轮对话 |
 | 🎨 M3 Expressive | squircle 卡片、弹性动画、自适应色彩 |
 | 📱 完美响应式 | 手机/平板/桌面三档适配 |
 | 🌤️ 天气感知 | 自动获取地理位置和实时天气 |
 | 🎄 节日主题 | 自动识别节日并切换色调和图标 |
-| 🧊 3D 图标 | 伪 3D 立方体图标系统 |
+| 🧩 MD3 图标 | 统一 Material Design 3 图标系统 |
 | ⭐ GitHub 数据 | 实时拉取仓库和 Star 数据 |
 | 🔐 API 安全 | API 密钥通过构建参数注入，不存储在代码中 |
 
@@ -48,17 +49,18 @@
 
 ## 项目结构
 
-```
+```text
 ├── lib/
 │   ├── main.dart         # 入口
 │   ├── app.dart          # 主应用 UI、动画、布局
 │   ├── l10n.dart         # 中英双语本地化
-│   └── services.dart     # 服务层（天气/GitHub/智谱AI）+ 数据模型
+│   └── services.dart     # 服务层（天气/GitHub/实时博客聚合）+ 数据模型
 ├── web/
 │   └── index.html        # Flutter Web 宿主页（M3 Expressive 加载动画）
 ├── test/
 │   └── widget_test.dart  # 基础渲染测试
-├── assets/               # 图标和装饰素材
+├── assets/
+│   └── icon.png          # 应用图标唯一源文件（自动生成 web/icons 与 favicon）
 ├── CNAME                 # 自定义域名 (www.pulselink.top)
 └── pubspec.yaml          # 包配置
 ```
@@ -98,9 +100,6 @@ flutter test
 
 # 本地调试（Chrome）
 flutter run -d chrome
-
-# 带 AI 功能的本地调试
-flutter run -d chrome --dart-define=ZHIPU_API_KEY=你的密钥
 
 # 发布构建
 flutter build web --release --base-href /

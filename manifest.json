@@ -1,11 +1,11 @@
 {
-    "name": "pulselink_site",
-    "short_name": "pulselink_site",
+    "name": "PulseLink",
+    "short_name": "PulseLink",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#091411",
+    "theme_color": "#0F7A65",
+    "description": "PulseLink blog powered by Flutter Web and Material Design 3.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

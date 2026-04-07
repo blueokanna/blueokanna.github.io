@@ -26,8 +26,8 @@ class S {
         'Blue builds fast, calm and expressive products for the web.',
       );
   String get heroSubtitle => _p(
-        '基于Flutter Web与Material Design 3重建的个人博客，采用自适应布局、动感3D图标系统，以及像Wise一样干净自信的设计语言。',
-        "A Flutter Web rewrite for Blue's personal blog, grounded in Material Design 3, adaptive layouts, kinetic 3D icon systems and the clean confidence that makes Wise feel effortless.",
+        '基于Flutter Web与Material Design 3重建的个人博客，采用自适应布局、MD3图标语言与流畅动态，以及像Wise一样干净自信的设计语言。',
+        "A Flutter Web rewrite for Blue's personal blog, grounded in Material Design 3, adaptive layouts, expressive MD3 icon language, and the clean confidence that makes Wise feel effortless.",
       );
   String get exploreProjects => _p('探索项目', 'Explore Projects');
   String get letsConnect => _p('联系我', "Let's Connect");
@@ -77,8 +77,8 @@ class S {
   // ── Skills ──
   String get skillsEyebrow => _p('技能栈', 'Skills');
   String get skillsTitle => _p(
-        '全栈技术能力，配以3D图标语言呈现。',
-        'Full-stack capabilities with a 3D icon language.',
+        '全栈技术能力，配以MD3图标语言呈现。',
+        'Full-stack capabilities with an MD3 icon language.',
       );
   String get skillsSubtitle => _p(
         '界面使用深度来传达分组、优先级和愉悦感，同时在小屏设备上保持可用性。',

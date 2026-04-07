@@ -617,12 +617,25 @@ class BlogArticle {
     required this.summary,
     required this.content,
     required this.generatedAt,
+    this.source = 'PulseLink',
+    this.url,
+    this.tag,
   });
 
   final String title, summary, content;
   final DateTime generatedAt;
+  final String source;
+  final String? url;
+  final String? tag;
 
-  static List<BlogArticle> localFeed(AppLanguage lang) {
+  static Future<List<BlogArticle>> loadLatest(
+    AppLanguage lang, {
+    bool forceRefresh = false,
+  }) {
+    return BlogFeedService.loadLatest(lang, forceRefresh: forceRefresh);
+  }
+
+  static List<BlogArticle> fallbackFeed(AppLanguage lang) {
     final isZh = lang == AppLanguage.zh;
     return [
       BlogArticle(
@@ -645,7 +658,9 @@ class BlogArticle {
                 '2. Reduce blur and heavy shadows on mobile for readability.\n'
                 '3. Provide fallback content for every online data block.\n\n'
                 'Once a clear performance budget exists, expressive visuals can be layered back in safely.',
-        generatedAt: DateTime(2026, 4, 7, 10, 0),
+        generatedAt: DateTime.now().subtract(const Duration(hours: 8)),
+        source: 'PulseLink',
+        tag: isZh ? '架构' : 'Architecture',
       ),
       BlogArticle(
         title: isZh
@@ -667,10 +682,235 @@ class BlogArticle {
                 '2. Let bottom navigation scroll horizontally instead of squeezing labels.\n'
                 '3. Prefer readable card widths over rigid fixed sizes.\n\n'
                 'When layout follows task flow instead of pixel ratio, cross-device UX becomes consistent.',
-        generatedAt: DateTime(2026, 4, 3, 14, 30),
+        generatedAt: DateTime.now().subtract(const Duration(days: 2)),
+        source: 'PulseLink',
+        tag: isZh ? '体验' : 'UX',
       ),
     ];
   }
+}
+
+class BlogFeedService {
+  BlogFeedService._();
+
+  static const Duration _cacheTtl = Duration(minutes: 10);
+  static final Map<AppLanguage, _BlogCacheEntry> _cache =
+      <AppLanguage, _BlogCacheEntry>{};
+
+  static Future<List<BlogArticle>> loadLatest(
+    AppLanguage lang, {
+    bool forceRefresh = false,
+  }) async {
+    final cached = _cache[lang];
+    final now = DateTime.now();
+    if (!forceRefresh &&
+        cached != null &&
+        now.difference(cached.cachedAt) < _cacheTtl) {
+      return cached.items;
+    }
+
+    final providers = <Future<List<BlogArticle>>>[
+      _safe(() => _loadDevTo(lang)),
+      _safe(() => _loadHackerNews(lang)),
+      _safe(() => _loadFlutterReleases(lang)),
+      _safe(() => _loadRepoActivity(lang)),
+    ];
+
+    final resultGroups = await Future.wait(providers);
+    final merged = resultGroups.expand((e) => e).toList();
+    final items = merged.isEmpty
+        ? BlogArticle.fallbackFeed(lang)
+        : _normalizeAndSort(merged);
+
+    _cache[lang] = _BlogCacheEntry(cachedAt: now, items: items);
+    return items;
+  }
+
+  static Future<List<BlogArticle>> _safe(
+    Future<List<BlogArticle>> Function() loader,
+  ) async {
+    try {
+      return await loader();
+    } catch (_) {
+      return const <BlogArticle>[];
+    }
+  }
+
+  static List<BlogArticle> _normalizeAndSort(List<BlogArticle> items) {
+    final dedup = <String, BlogArticle>{};
+    for (final item in items) {
+      final k = (item.url?.trim().isNotEmpty ?? false)
+          ? item.url!.trim().toLowerCase()
+          : item.title.trim().toLowerCase();
+      final existing = dedup[k];
+      if (existing == null || item.generatedAt.isAfter(existing.generatedAt)) {
+        dedup[k] = item;
+      }
+    }
+    final normalized = dedup.values.toList()
+      ..sort((a, b) => b.generatedAt.compareTo(a.generatedAt));
+    return normalized.take(10).toList(growable: false);
+  }
+
+  static Future<List<BlogArticle>> _loadDevTo(AppLanguage lang) async {
+    final isZh = lang == AppLanguage.zh;
+    final uri = Uri.parse('https://dev.to/api/articles?tag=flutter&per_page=8');
+    final res = await http.get(uri).timeout(const Duration(seconds: 9));
+    if (res.statusCode != 200) return const <BlogArticle>[];
+    final list = (jsonDecode(res.body) as List).cast<Map<String, dynamic>>();
+    return list.map((m) {
+      final published = DateTime.tryParse(m['published_timestamp'] as String? ??
+              m['published_at'] as String? ??
+              '') ??
+          DateTime.now();
+      final summary = _sanitizeText(m['description'] as String?);
+      return BlogArticle(
+        title: _sanitizeText(m['title'] as String?)
+            .ifEmpty(isZh ? '来自 DEV 的最新内容' : 'Latest from DEV'),
+        summary: summary.ifEmpty(
+          isZh
+              ? '来自 DEV Community 的 Flutter 最新文章。'
+              : 'Latest Flutter post from DEV Community.',
+        ),
+        content: summary.ifEmpty(
+          isZh
+              ? '当前文章未提供摘要，请点击原文查看完整内容。'
+              : 'No inline summary is available. Open the original article for full details.',
+        ),
+        generatedAt: published,
+        source: 'DEV Community',
+        url: m['url'] as String?,
+        tag: isZh ? '实时' : 'Live',
+      );
+    }).toList(growable: false);
+  }
+
+  static Future<List<BlogArticle>> _loadHackerNews(AppLanguage lang) async {
+    final isZh = lang == AppLanguage.zh;
+    final uri = Uri.parse(
+      'https://hn.algolia.com/api/v1/search_by_date?query=flutter%20web&tags=story',
+    );
+    final res = await http.get(uri).timeout(const Duration(seconds: 9));
+    if (res.statusCode != 200) return const <BlogArticle>[];
+    final map = jsonDecode(res.body) as Map<String, dynamic>;
+    final hits = (map['hits'] as List? ?? const <dynamic>[])
+        .cast<Map<String, dynamic>>()
+        .take(8);
+    return hits.map((m) {
+      final title = _sanitizeText(m['title'] as String?);
+      final body = _sanitizeText(m['story_text'] as String?);
+      final summary = body.ifEmpty(
+        isZh ? '来自 Hacker News 的实时讨论。' : 'Live discussion from Hacker News.',
+      );
+      final published =
+          DateTime.tryParse(m['created_at'] as String? ?? '') ?? DateTime.now();
+      return BlogArticle(
+        title:
+            title.ifEmpty(isZh ? 'Hacker News 新动态' : 'New Hacker News update'),
+        summary: summary,
+        content: summary,
+        generatedAt: published,
+        source: 'Hacker News',
+        url: (m['url'] as String?) ?? (m['story_url'] as String?),
+        tag: isZh ? '讨论' : 'Discussion',
+      );
+    }).toList(growable: false);
+  }
+
+  static Future<List<BlogArticle>> _loadFlutterReleases(
+      AppLanguage lang) async {
+    final isZh = lang == AppLanguage.zh;
+    final uri = Uri.parse(
+        'https://api.github.com/repos/flutter/flutter/releases?per_page=5');
+    final res = await http.get(
+      uri,
+      headers: const {
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+    ).timeout(const Duration(seconds: 9));
+    if (res.statusCode != 200) return const <BlogArticle>[];
+    final list = (jsonDecode(res.body) as List).cast<Map<String, dynamic>>();
+    return list.map((m) {
+      final body = _sanitizeText(m['body'] as String?);
+      final published = DateTime.tryParse(m['published_at'] as String? ?? '') ??
+          DateTime.tryParse(m['created_at'] as String? ?? '') ??
+          DateTime.now();
+      return BlogArticle(
+        title: _sanitizeText(m['name'] as String?)
+            .ifEmpty(isZh ? 'Flutter 新版本发布' : 'Flutter release update'),
+        summary: body.ifEmpty(
+          isZh
+              ? 'Flutter 官方发布了新的版本信息。'
+              : 'Flutter has published a new release note.',
+        ),
+        content: body.ifEmpty(
+          isZh
+              ? '请打开原文查看完整发布说明。'
+              : 'Open the source link to view full release notes.',
+        ),
+        generatedAt: published,
+        source: 'Flutter Releases',
+        url: m['html_url'] as String?,
+        tag: isZh ? '版本' : 'Release',
+      );
+    }).toList(growable: false);
+  }
+
+  static Future<List<BlogArticle>> _loadRepoActivity(AppLanguage lang) async {
+    final isZh = lang == AppLanguage.zh;
+    final uri = Uri.parse(
+      'https://api.github.com/users/blueokanna/repos?sort=updated&per_page=6',
+    );
+    final res = await http.get(
+      uri,
+      headers: const {
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+    ).timeout(const Duration(seconds: 9));
+    if (res.statusCode != 200) return const <BlogArticle>[];
+    final list = (jsonDecode(res.body) as List).cast<Map<String, dynamic>>();
+    return list.map((m) {
+      final name = _sanitizeText(m['name'] as String?);
+      final description = _sanitizeText(m['description'] as String?);
+      final updated =
+          DateTime.tryParse(m['updated_at'] as String? ?? '') ?? DateTime.now();
+      return BlogArticle(
+        title: isZh ? '仓库更新: $name' : 'Repository Updated: $name',
+        summary: description.ifEmpty(
+          isZh
+              ? '该仓库有新的提交与维护更新。'
+              : 'This repository received fresh commits and maintenance updates.',
+        ),
+        content: description.ifEmpty(
+          isZh
+              ? '点击原文查看项目详情与最新代码变更。'
+              : 'Open source to inspect the latest project changes.',
+        ),
+        generatedAt: updated,
+        source: 'GitHub',
+        url: m['html_url'] as String?,
+        tag: isZh ? '项目' : 'Project',
+      );
+    }).toList(growable: false);
+  }
+
+  static String _sanitizeText(String? v) {
+    if (v == null) return '';
+    final noHtml = v.replaceAll(RegExp(r'<[^>]*>'), ' ');
+    return noHtml.replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
+}
+
+class _BlogCacheEntry {
+  const _BlogCacheEntry({required this.cachedAt, required this.items});
+  final DateTime cachedAt;
+  final List<BlogArticle> items;
+}
+
+extension on String {
+  String ifEmpty(String fallback) => trim().isEmpty ? fallback : this;
 }
 
 class ChatMessage {

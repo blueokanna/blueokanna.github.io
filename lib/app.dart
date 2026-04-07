@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -174,12 +175,12 @@ class _PulseLinkHomePageState extends State<PulseLinkHomePage>
       vsync: this,
       duration: const Duration(seconds: 22),
       value: .35,
-    );
+    )..repeat(reverse: true);
     _pulseCtrl = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 5),
       value: .55,
-    );
+    )..repeat(reverse: true);
     _scrollCtrl = ScrollController()..addListener(_onScroll);
     _loadWeather();
     _loadGitHub();
@@ -221,6 +222,10 @@ class _PulseLinkHomePageState extends State<PulseLinkHomePage>
   Future<void> _scrollTo(String id) async {
     final ctx = _sectionKeys[id]?.currentContext;
     if (ctx != null) {
+      final idx = _sections.indexWhere((s) => s.id == id);
+      if (idx >= 0 && idx != _selectedIdx && mounted) {
+        setState(() => _selectedIdx = idx);
+      }
       await Scrollable.ensureVisible(
         ctx,
         duration: const Duration(milliseconds: 700),
@@ -428,7 +433,12 @@ class _PulseLinkHomePageState extends State<PulseLinkHomePage>
                   child: _MobileNav(
                     sections: _sections,
                     selectedIdx: _selectedIdx,
-                    onSelect: (i) => _scrollTo(_sections[i].id),
+                    onSelect: (i) {
+                      if (i != _selectedIdx) {
+                        setState(() => _selectedIdx = i);
+                      }
+                      _scrollTo(_sections[i].id);
+                    },
                   ),
                 ),
             ],
@@ -445,8 +455,8 @@ class _PulseLinkHomePageState extends State<PulseLinkHomePage>
     Widget child,
   ) {
     return SliverToBoxAdapter(
-      key: _sectionKeys[id],
       child: Padding(
+        key: _sectionKeys[id],
         padding: EdgeInsets.fromLTRB(hp, 0, hp, bottom),
         child: child,
       ),
@@ -988,36 +998,40 @@ class _HeroVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final size = switch (dc) {
       DeviceClass.mobile => 290.0,
       DeviceClass.tablet => 360.0,
       DeviceClass.desktop => 430.0,
     };
-    // Use 3D PNG icons from assets/icon/icons/
-    final cubes = [
-      _HeroAssetCube(
-        assetPath: 'assets/icon/icons/app/3d/green/128.png',
+    final orbits = [
+      _HeroOrbitItem(
+        icon: Icons.grid_view_rounded,
         label: 'App',
         alignment: const Alignment(-.88, -.78),
         phase: 0,
+        color: cs.primary,
       ),
-      _HeroAssetCube(
-        assetPath: 'assets/icon/icons/security/3d/green/128.png',
+      _HeroOrbitItem(
+        icon: Icons.security_rounded,
         label: 'Security',
         alignment: const Alignment(.9, -.84),
         phase: .7,
+        color: cs.tertiary,
       ),
-      _HeroAssetCube(
-        assetPath: 'assets/icon/icons/globe/3d/green/128.png',
+      _HeroOrbitItem(
+        icon: Icons.language_rounded,
         label: 'Cloud',
         alignment: const Alignment(-.92, .32),
         phase: 1.2,
+        color: holiday.accent,
       ),
-      _HeroAssetCube(
-        assetPath: 'assets/icon/icons/analytics/3d/green/128.png',
+      _HeroOrbitItem(
+        icon: Icons.insights_rounded,
         label: 'Design',
         alignment: const Alignment(.9, .56),
         phase: 1.9,
+        color: holiday.highlight,
       ),
     ];
     return SizedBox(
@@ -1050,8 +1064,8 @@ class _HeroVisual extends StatelessWidget {
               child: _AvatarHalo(progress: progress, holiday: holiday),
             ),
           ),
-          // Floating 3D icon assets (on top of avatar)
-          for (final c in cubes)
+          // Floating MD3 icon orbits (on top of avatar)
+          for (final c in orbits)
             Align(
               alignment: c.alignment,
               child: Transform.translate(
@@ -1062,18 +1076,12 @@ class _HeroVisual extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(
-                      c.assetPath,
-                      width: size * .16,
-                      height: size * .16,
-                      filterQuality: FilterQuality.low,
-                      errorBuilder: (_, __, ___) => ThreeDCube(
-                        icon: Icons.apps_rounded,
-                        colorA: const Color(0xFF0F7A65),
-                        colorB: const Color(0xFF56E1C1),
-                        size: size * .16,
-                        rotation: progress + c.phase,
-                      ),
+                    ThreeDCube(
+                      icon: c.icon,
+                      colorA: c.color.withValues(alpha: .86),
+                      colorB: Color.lerp(c.color, Colors.white, .35)!,
+                      size: size * .16,
+                      rotation: progress + c.phase,
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -1185,18 +1193,19 @@ class _AvatarHalo extends StatelessWidget {
   }
 }
 
-/// Data for hero floating 3D asset icons
-class _HeroAssetCube {
-  const _HeroAssetCube({
-    required this.assetPath,
+class _HeroOrbitItem {
+  const _HeroOrbitItem({
+    required this.icon,
     required this.label,
     required this.alignment,
     required this.phase,
+    required this.color,
   });
-  final String assetPath;
+  final IconData icon;
   final String label;
   final Alignment alignment;
   final double phase;
+  final Color color;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -1575,30 +1584,124 @@ class _SkillsSection extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════════════════════════
 //  Blog Section (static feed)
 // ═══════════════════════════════════════════════════════════════════════════════
-class _BlogSection extends StatelessWidget {
+class _BlogSection extends StatefulWidget {
   const _BlogSection({required this.lang});
   final AppLanguage lang;
 
   @override
+  State<_BlogSection> createState() => _BlogSectionState();
+}
+
+class _BlogSectionState extends State<_BlogSection> {
+  late Future<List<BlogArticle>> _future;
+  Timer? _autoRefresh;
+  DateTime _lastRefresh = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _future = BlogArticle.loadLatest(widget.lang);
+    _autoRefresh = Timer.periodic(const Duration(minutes: 8), (_) {
+      if (mounted) {
+        _reload(force: true);
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant _BlogSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.lang != widget.lang) {
+      _reload(force: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _autoRefresh?.cancel();
+    super.dispose();
+  }
+
+  void _reload({bool force = false}) {
+    setState(() {
+      _lastRefresh = DateTime.now();
+      _future = BlogArticle.loadLatest(widget.lang, forceRefresh: force);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final s = S.of(lang);
-    final articles = BlogArticle.localFeed(lang);
+    final s = S.of(widget.lang);
+    final isZh = s.isZh;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SectionHead(
           eyebrow: s.blogEyebrow,
-          title: s.blogTitle,
-          subtitle: s.blogSubtitle,
+          title:
+              isZh ? '最新博客与实时技术快讯。' : 'Latest blogs and real-time tech briefs.',
+          subtitle: isZh
+              ? '自动聚合多源更新，支持手动刷新与故障兜底，确保内容持续保持新鲜。'
+              : 'Aggregated from multiple live sources with manual refresh and robust fallback to keep content fresh.',
         ),
-        const SizedBox(height: 18),
-        for (final article in articles)
-          Padding(
-            padding: const EdgeInsets.only(top: 14),
-            child: _ArticleCard(article: article, lang: lang),
-          ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Icon(
+              Icons.update_rounded,
+              size: 18,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                isZh
+                    ? '最近刷新: ${_fmtDate(_lastRefresh)}'
+                    : 'Last refresh: ${_fmtDate(_lastRefresh)}',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ),
+            FilledButton.tonalIcon(
+              onPressed: () => _reload(force: true),
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text(isZh ? '刷新' : 'Refresh'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        FutureBuilder<List<BlogArticle>>(
+          future: _future,
+          builder: (context, snap) {
+            if (snap.connectionState == ConnectionState.waiting &&
+                !snap.hasData) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Center(child: CircularProgressIndicator.adaptive()),
+              );
+            }
+            final articles = (snap.data == null || snap.data!.isEmpty)
+                ? BlogArticle.fallbackFeed(widget.lang)
+                : snap.data!;
+            return Column(
+              children: [
+                for (final article in articles)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 14),
+                    child: _ArticleCard(article: article, lang: widget.lang),
+                  ),
+              ],
+            );
+          },
+        ),
       ],
     );
+  }
+
+  String _fmtDate(DateTime d) {
+    return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')} '
+        '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
   }
 }
 
@@ -1663,18 +1766,12 @@ class _ToolsSection extends StatelessWidget {
   }
 
   Widget _m3u8Icon() {
-    return Image.asset(
-      'assets/icon/icons/convert/3d/green/128.png',
-      width: 72,
-      height: 72,
-      filterQuality: FilterQuality.low,
-      errorBuilder: (_, __, ___) => const ThreeDCube(
-        icon: Icons.video_library_rounded,
-        colorA: Color(0xFF0F7A65),
-        colorB: Color(0xFF56E1C1),
-        size: 64,
-        rotation: .2,
-      ),
+    return const ThreeDCube(
+      icon: Icons.video_library_rounded,
+      colorA: Color(0xFF0F7A65),
+      colorB: Color(0xFF56E1C1),
+      size: 64,
+      rotation: .2,
     );
   }
 
@@ -1797,13 +1894,34 @@ class _ArticleCardState extends State<_ArticleCard> {
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: Text(
-                                s.articleGenerated,
+                                a.source,
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color: cs.primary,
                                 ),
                               ),
                             ),
+                            if ((a.tag?.trim().isNotEmpty ?? false)) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: cs.secondaryContainer
+                                      .withValues(alpha: .6),
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  a.tag!,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: cs.onSecondaryContainer,
+                                  ),
+                                ),
+                              ),
+                            ],
                             const SizedBox(width: 8),
                             Text(
                               _fmtDate(a.generatedAt),
@@ -1849,9 +1967,25 @@ class _ArticleCardState extends State<_ArticleCard> {
               const SizedBox(height: 10),
               Align(
                 alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => setState(() => _expanded = !_expanded),
-                  child: Text(_expanded ? s.collapse : s.readMore),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    if ((a.url?.trim().isNotEmpty ?? false))
+                      Link(
+                        uri: Uri.parse(a.url!),
+                        target: LinkTarget.blank,
+                        builder: (context, follow) => TextButton.icon(
+                          onPressed: follow,
+                          icon: const Icon(Icons.open_in_new_rounded),
+                          label: Text(s.isZh ? '原文' : 'Source'),
+                        ),
+                      ),
+                    TextButton(
+                      onPressed: () => setState(() => _expanded = !_expanded),
+                      child: Text(_expanded ? s.collapse : s.readMore),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -2321,7 +2455,7 @@ class _SectionHead extends StatelessWidget {
   }
 }
 
-/// 3D Icon Cube
+/// Material 3 expressive icon badge
 class ThreeDCube extends StatelessWidget {
   const ThreeDCube({
     super.key,
@@ -2337,57 +2471,64 @@ class ThreeDCube extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pulse = .5 + (math.sin(rotation * math.pi * 2) * .5);
     return SizedBox(
       width: size,
       height: size,
-      child: Transform(
+      child: Stack(
         alignment: Alignment.center,
-        transform: Matrix4.identity()
-          ..setEntry(3, 2, .001)
-          ..rotateX(.12 + math.sin(rotation * math.pi * 2) * .02)
-          ..rotateY(-.14 + math.cos(rotation * math.pi * 2) * .03),
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [colorA, colorB],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        children: [
+          Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: colorA.withValues(alpha: .15 + pulse * .05),
             ),
-            borderRadius: BorderRadius.circular(size * .26),
-            boxShadow: [
-              BoxShadow(
-                color: colorA.withValues(alpha: .20),
-                blurRadius: size * .35,
-                offset: Offset(size * .06, size * .14),
-              ),
-            ],
           ),
-          child: Stack(
-            children: [
-              // Highlight gloss
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(size * .26),
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.white.withValues(alpha: .30),
-                        Colors.white.withValues(alpha: 0),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.center,
+          Container(
+            width: size * .84,
+            height: size * .84,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [colorA, colorB],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(size * .30),
+              border: Border.all(color: Colors.white.withValues(alpha: .16)),
+              boxShadow: [
+                BoxShadow(
+                  color: colorA.withValues(alpha: .24),
+                  blurRadius: size * .28,
+                  offset: Offset(0, size * .12),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(size * .30),
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withValues(alpha: .30),
+                          Colors.white.withValues(alpha: .02),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Center(
-                child: Icon(icon, color: Colors.white, size: size * .40),
-              ),
-            ],
+                Center(
+                  child: Icon(icon, color: Colors.white, size: size * .36),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
