@@ -116,12 +116,12 @@ class S {
       );
 
   // ── Blog ──
-  String get blogEyebrow => _p('AI博客', 'AI Blog');
+  String get blogEyebrow => _p('博客', 'Blog');
   String get blogTitle =>
-      _p('AI驱动的科技洞察与原创分析。', 'AI-powered tech insights and original analysis.');
+      _p('精选技术洞察与工程实践。', 'Curated technical insights and engineering notes.');
   String get blogSubtitle => _p(
-        '使用智谱清言GLM-4-Flash大模型，实时生成深度原创科技分析文章。',
-        'Powered by Zhipu GLM-4-Flash, generating deep original tech analysis articles in real-time.',
+        '采用纯前端静态内容分发，保证在 GitHub Pages 上稳定可访问。',
+        'Served as static front-end content for stable access on GitHub Pages.',
       );
   String get generateArticle => _p('生成新文章', 'Generate Article');
   String get generating => _p('AI正在创作中…', 'AI is writing…');

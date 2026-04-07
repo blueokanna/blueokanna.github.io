@@ -595,84 +595,16 @@ class RepoCardData {
 class ZhipuAiService {
   ZhipuAiService._();
 
-  static const _apiKey = String.fromEnvironment('ZHIPU_API_KEY');
-  static const _endpoint =
-      'https://open.bigmodel.cn/api/paas/v4/chat/completions';
-  static bool get isConfigured => _apiKey.isNotEmpty;
+  // GitHub Pages static mode: AI endpoints are intentionally disabled.
+  static bool get isConfigured => false;
 
   static Future<String?> chat(List<Map<String, String>> messages) async {
-    if (!isConfigured) return null;
-    try {
-      final res = await http.post(
-        Uri.parse(_endpoint),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_apiKey',
-        },
-        body: jsonEncode({'model': 'glm-4-flash', 'messages': messages}),
-      );
-      if (res.statusCode == 200) {
-        final data = jsonDecode(res.body) as Map<String, dynamic>;
-        final choices = data['choices'] as List?;
-        if (choices != null && choices.isNotEmpty) {
-          return (choices[0] as Map<String, dynamic>)['message']?['content']
-              as String?;
-        }
-      }
-    } catch (_) {}
+    if (messages.isEmpty) return null;
     return null;
   }
 
   static Future<BlogArticle?> generateTechArticle(AppLanguage lang) async {
-    final isZh = lang == AppLanguage.zh;
-    final sysPrompt = isZh
-        ? '你是一位资深科技博主和技术分析师。你将撰写原创的、深度的科技分析文章。'
-            '要求绝对原创，禁止抄袭任何已有文章。必须基于你的知识和分析能力产出全新内容。'
-        : 'You are a senior tech blogger and technology analyst. '
-            'You write original, deep tech analysis articles. '
-            'Absolutely original — never plagiarize. Generate entirely new content based on your knowledge.';
-    final userPrompt = isZh
-        ? '请选择一个具体的前沿技术话题（如AI大模型、量子计算、边缘计算、Rust生态、'
-            'WebAssembly、隐私计算等），撰写一篇800-1200字的专业科技分析文章。'
-            '要求：\n'
-            '1. 标题简洁有力\n'
-            '2. 包含独特的见解和原创观点\n'
-            '3. 分析该技术的最新发展趋势和行业影响\n'
-            '4. 语言流畅、结构清晰\n\n'
-            '请严格以如下JSON格式返回（不要包含```json标记）：\n'
-            '{"title":"文章标题","summary":"50字以内摘要","content":"完整正文（使用\\n换行）"}'
-        : 'Pick a specific cutting-edge technology topic (e.g. LLMs, quantum computing, '
-            'edge computing, Rust ecosystem, WebAssembly, privacy-preserving computation) '
-            'and write a professional 400-600 word tech analysis article.\n'
-            'Requirements:\n'
-            '1. Concise, punchy title\n'
-            '2. Unique insights and original perspectives\n'
-            '3. Analyze latest trends and industry impact\n'
-            '4. Well-structured, fluent language\n\n'
-            'Return STRICTLY in this JSON format (no ```json markers):\n'
-            '{"title":"Article title","summary":"Brief summary under 30 words","content":"Full body text (use \\n for line breaks)"}';
-    final raw = await chat([
-      {'role': 'system', 'content': sysPrompt},
-      {'role': 'user', 'content': userPrompt},
-    ]);
-    if (raw == null) return null;
-    try {
-      final clean = raw.replaceAll(RegExp(r'```json\s*|```'), '').trim();
-      final map = jsonDecode(clean) as Map<String, dynamic>;
-      return BlogArticle(
-        title: map['title'] as String? ?? (isZh ? '未命名文章' : 'Untitled'),
-        summary: map['summary'] as String? ?? '',
-        content: (map['content'] as String? ?? '').replaceAll('\\n', '\n'),
-        generatedAt: DateTime.now(),
-      );
-    } catch (_) {
-      return BlogArticle(
-        title: isZh ? 'AI科技洞察' : 'AI Tech Insight',
-        summary: '',
-        content: raw,
-        generatedAt: DateTime.now(),
-      );
-    }
+    return null;
   }
 }
 
@@ -689,6 +621,56 @@ class BlogArticle {
 
   final String title, summary, content;
   final DateTime generatedAt;
+
+  static List<BlogArticle> localFeed(AppLanguage lang) {
+    final isZh = lang == AppLanguage.zh;
+    return [
+      BlogArticle(
+        title: isZh
+            ? 'Flutter Web 在静态托管中的性能取舍'
+            : 'Flutter Web Performance on Static Hosting',
+        summary: isZh
+            ? '如何在 GitHub Pages 里平衡动画表达与首屏流畅度。'
+            : 'Balancing expressive motion and smooth first paint on GitHub Pages.',
+        content: isZh
+            ? '静态托管环境没有后端兜底，页面体验要先保证“可用和稳定”。\n\n'
+                '实践里最有效的是三点：\n'
+                '1. 首屏尽量少做持续动画，把高频 repaint 控制在局部。\n'
+                '2. 对移动端减少模糊与大阴影，优先可读性和交互命中率。\n'
+                '3. 所有在线能力都要有离线兜底，避免空白区块。\n\n'
+                '当性能预算明确后，再逐步加回设计表现，才能在不同设备上保持稳定。'
+            : 'Static hosting has no backend safety net, so reliability must come first.\n\n'
+                'In practice, three rules matter most:\n'
+                '1. Keep continuous animations local to small regions.\n'
+                '2. Reduce blur and heavy shadows on mobile for readability.\n'
+                '3. Provide fallback content for every online data block.\n\n'
+                'Once a clear performance budget exists, expressive visuals can be layered back in safely.',
+        generatedAt: DateTime(2026, 4, 7, 10, 0),
+      ),
+      BlogArticle(
+        title: isZh
+            ? '响应式不是缩放：从信息密度到操作路径'
+            : 'Responsive Means Flow, Not Just Scaling',
+        summary: isZh
+            ? '同一内容在手机与桌面应走不同信息路径。'
+            : 'Mobile and desktop should follow different information paths.',
+        content: isZh
+            ? '真正的响应式不是把组件按比例缩小，而是重排信息优先级。\n\n'
+                '例如在手机端：\n'
+                '1. 顶部信息改成分层结构，先品牌与操作，再状态信息。\n'
+                '2. 底部导航允许横向滚动，避免硬挤导致文字截断。\n'
+                '3. 卡片宽度以可读为先，避免固定宽导致边缘裁切。\n\n'
+                '当布局跟随“任务路径”而不是“像素比例”，体验才真正一致。'
+            : 'True responsiveness is about re-prioritizing information, not shrinking widgets.\n\n'
+                'On mobile:\n'
+                '1. Split top content into clear layers (brand/actions first, status second).\n'
+                '2. Let bottom navigation scroll horizontally instead of squeezing labels.\n'
+                '3. Prefer readable card widths over rigid fixed sizes.\n\n'
+                'When layout follows task flow instead of pixel ratio, cross-device UX becomes consistent.',
+        generatedAt: DateTime(2026, 4, 3, 14, 30),
+      ),
+    ];
+  }
 }
 
 class ChatMessage {
