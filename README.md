@@ -120,6 +120,12 @@ flutter build web --release --base-href / --dart-define=ZHIPU_API_KEY=${{ secret
 Copy-Item -Path "build\web\*" -Destination "." -Recurse -Force
 ```
 
+生产环境推荐一键发布（防止遗漏字体/资产拷贝）：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/publish_web.ps1
+```
+
 自定义域名通过 `CNAME` 文件保持：`www.pulselink.top`
 
 ## 设计理念
