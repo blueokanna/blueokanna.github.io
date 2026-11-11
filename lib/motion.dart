@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 abstract final class Motion {
@@ -19,8 +20,10 @@ class Aurora extends StatefulWidget {
 
 class _AuroraState extends State<Aurora>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
-  late final AnimationController _clock =
-      AnimationController(vsync: this, duration: const Duration(seconds: 24));
+  late final AnimationController _clock = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 24),
+  );
   bool _foreground = true;
   @override
   void initState() {
@@ -31,7 +34,8 @@ class _AuroraState extends State<Aurora>
   }
 
   void _sync() {
-    final run = _foreground &&
+    final run =
+        _foreground &&
         !widget.paused &&
         !MediaQuery.disableAnimationsOf(context) &&
         TickerMode.valuesOf(context).enabled;
@@ -70,32 +74,38 @@ class _AuroraState extends State<Aurora>
 
 class AuroraArt extends CustomPainter {
   AuroraArt(this.clock, {required this.dark, this.hero = false})
-      : super(repaint: clock);
+    : super(repaint: clock);
   final Animation<double> clock;
   final bool dark, hero;
   @override
   void paint(Canvas canvas, Size size) {
     final t = clock.value * math.pi * 2;
     if (!hero) {
-      final center =
-          Offset(size.width * (.8 + .08 * math.sin(t)), size.height * .24);
+      final center = Offset(
+        size.width * (.8 + .08 * math.sin(t)),
+        size.height * .24,
+      );
       final radius = size.longestSide * .7;
       canvas.drawCircle(
-          center,
-          radius,
-          Paint()
-            ..shader = RadialGradient(colors: [
+        center,
+        radius,
+        Paint()
+          ..shader = RadialGradient(
+            colors: [
               (dark ? const Color(0xFF65843A) : const Color(0xFFDBE9B6))
                   .withValues(alpha: .22),
               Colors.transparent,
-            ]).createShader(Rect.fromCircle(center: center, radius: radius)));
+            ],
+          ).createShader(Rect.fromCircle(center: center, radius: radius)),
+      );
       return;
     }
     final center = size.center(Offset.zero);
     final radius = size.shortestSide * .40;
     canvas.save();
     canvas.translate(center.dx, center.dy);
-    canvas.rotate(t * .15);
+    // Periodic rotation keeps the last frame continuous with the next cycle.
+    canvas.rotate(math.sin(t) * .15);
     final path = Path();
     for (var i = 0; i <= 240; i++) {
       final a = i / 240 * math.pi * 2;
@@ -109,27 +119,35 @@ class AuroraArt extends CustomPainter {
     }
     path.close();
     canvas.drawPath(
-        path,
-        Paint()
-          ..shader = const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFE3F9AA), Color(0xFFB9DF72), Color(0xFF709D64)],
-          ).createShader(Rect.fromCircle(center: Offset.zero, radius: radius)));
+      path,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFE3F9AA), Color(0xFFB9DF72), Color(0xFF709D64)],
+        ).createShader(Rect.fromCircle(center: Offset.zero, radius: radius)),
+    );
     for (var i = 0; i < 4; i++) {
       canvas.save();
       canvas.rotate(i * math.pi / 2 + .3 * math.sin(t));
       canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset.zero, width: radius * 1.5, height: radius * .59),
-          Paint()
-            ..color = const Color(0xFF24493B).withValues(alpha: .65)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.1);
+        Rect.fromCenter(
+          center: Offset.zero,
+          width: radius * 1.5,
+          height: radius * .59,
+        ),
+        Paint()
+          ..color = const Color(0xFF24493B).withValues(alpha: .65)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.1,
+      );
       canvas.restore();
     }
     canvas.drawCircle(
-        Offset.zero, radius * .1, Paint()..color = const Color(0xFF24493B));
+      Offset.zero,
+      radius * .1,
+      Paint()..color = const Color(0xFF24493B),
+    );
     canvas.restore();
   }
 

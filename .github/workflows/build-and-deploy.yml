@@ -20,6 +20,10 @@ jobs:
           flutter-version: '3.47.9'
           channel: stable
           cache: true
+      - name: Show SDK versions
+        run: |
+          flutter --version
+          dart --version
       - run: flutter pub get --enforce-lockfile
       - run: dart format --output=none --set-exit-if-changed lib test
       - run: flutter analyze

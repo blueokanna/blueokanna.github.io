@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
 Uri? safeWebUri(String value) {
@@ -13,7 +14,12 @@ Uri? safeWebUri(String value) {
 
 class Repository {
   const Repository(
-      this.name, this.description, this.url, this.language, this.stars);
+    this.name,
+    this.description,
+    this.url,
+    this.language,
+    this.stars,
+  );
   final String name, description, url, language;
   final int stars;
 }
@@ -29,12 +35,15 @@ class RepositoryService {
         DateTime.now().difference(_loadedAt!) < const Duration(minutes: 10)) {
       return _cache!;
     }
-    final response = await _client.get(
-        Uri.https('api.github.com', '/users/blueokanna/repos',
-            {'per_page': '100', 'sort': 'updated'}),
-        headers: {
-          'Accept': 'application/vnd.github+json'
-        }).timeout(const Duration(seconds: 12));
+    final response = await _client
+        .get(
+          Uri.https('api.github.com', '/users/blueokanna/repos', {
+            'per_page': '100',
+            'sort': 'updated',
+          }),
+          headers: {'Accept': 'application/vnd.github+json'},
+        )
+        .timeout(const Duration(seconds: 12));
     if (response.statusCode != 200) {
       throw StateError('GitHub HTTP ${response.statusCode}');
     }
@@ -53,14 +62,15 @@ class RepositoryService {
           safeWebUri(url)?.host != 'github.com') {
         continue;
       }
-      repos.add(Repository(
+      repos.add(
+        Repository(
           name,
           item['description'] is String ? item['description'] as String : '',
           url,
           item['language'] is String ? item['language'] as String : 'Code',
-          item['stargazers_count'] is int
-              ? item['stargazers_count'] as int
-              : 0));
+          item['stargazers_count'] is int ? item['stargazers_count'] as int : 0,
+        ),
+      );
     }
     _cache = List.unmodifiable(repos.take(6));
     _loadedAt = DateTime.now();

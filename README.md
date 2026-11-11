@@ -15,6 +15,10 @@ flutter test
 flutter build web --release --base-href / --no-web-resources-cdn
 ```
 
+修改 `pubspec.yaml` 的 SDK 约束后，先运行 `flutter pub get --enforce-lockfile`，再运行 `dart format lib test`。格式器使用包的 Dart 语言版本；只调整 SDK 下限而不重新格式化，可能让 CI 格式检查失败。`--output=none` 只检查，不会把修正写回文件。
+
+Windows 可以运行 `./scripts/publish_web.ps1`，按 CI 顺序执行依赖、格式、分析、测试和构建检查。所有检查通过后才生成部署产物。
+
 产物位于 `build/web`。CanvasKit 随站点分发，不依赖公共渲染器 CDN。首次加载仍需下载 Flutter 引擎与字体；这不是轻量 HTML 博客，不能承诺任何网络条件下都秒开。
 
 ## 内容与结构
@@ -24,7 +28,7 @@ flutter build web --release --base-href / --no-web-resources-cdn
 - `lib/motion.dart`：Aurora 动效时钟、绘制路径与统一过渡参数。
 - `lib/services.dart`：GitHub 数据读取、会话缓存、外链校验。
 - `web/`：启动页面、失败重试和资源清单。
-- `test/site_test.dart`：链接校验、缓存与错误处理、三种宽度交互、减少动画。
+- `test/site_test.dart`：链接校验、缓存与错误处理、四种宽度交互、动效暂停与后台恢复、循环首尾绘制一致性、剪贴板失败处理。
 
 添加友链时，在 `friends` 中追加 `FriendLink`，填写名称、HTTPS 地址、中英文简介和可选头像。已加入 Lxns Network 和陶然；陶然使用提供的 SVG 头像地址。头像不可用时显示本地图标。
 
