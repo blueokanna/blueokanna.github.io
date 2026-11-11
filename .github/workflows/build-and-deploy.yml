@@ -49,11 +49,15 @@ jobs:
       - run: flutter test
       - run: node --test test/comments_test.mjs
       - run: flutter build web --release --base-href / --no-web-resources-cdn
-      - run: npm run test:browser
+      - name: Verify browser startup and routes
+        timeout-minutes: 10
+        run: |
+          npm run test:browser-readiness
+          npm run test:browser
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: browser-check-screenshots
+          name: browser-check-diagnostics
           path: build/qa/browser
           if-no-files-found: ignore
       - run: cp CNAME build/web/CNAME

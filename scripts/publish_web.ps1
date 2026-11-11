@@ -26,5 +26,7 @@ flutter build web --release --base-href / --no-web-resources-cdn
 if ($LASTEXITCODE -ne 0) { throw 'Build failed' }
 npm run test:browser
 if ($LASTEXITCODE -ne 0) { throw 'Browser checks failed' }
+npm run test:browser-readiness
+if ($LASTEXITCODE -ne 0) { throw 'Browser readiness regression checks failed' }
 Copy-Item -LiteralPath (Join-Path $projectRoot 'CNAME') -Destination (Join-Path $projectRoot 'build/web/CNAME') -Force
 Write-Host 'Verified output: build/web. Push main to deploy using GitHub Actions.'

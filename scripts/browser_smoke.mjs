@@ -3,9 +3,8 @@ import http from 'node:http';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {readFile, mkdir, readdir} from 'node:fs/promises';
-import {existsSync} from 'node:fs';
 import assert from 'node:assert/strict';
-import puppeteer from 'puppeteer';
+import {launchBrowser, observeAppReadiness, navigateToApp, collectBrowserDiagnostics} from './browser_app.mjs';
 const root = fileURLToPath(new URL('../build/web/', import.meta.url));
 const screenshots = fileURLToPath(new URL('../build/qa/browser/', import.meta.url));
 await mkdir(screenshots, {recursive: true});
@@ -23,25 +22,22 @@ const server = http.createServer(async (req, res) => {
 });
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 const address = `http://127.0.0.1:${server.address().port}`;
-const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || [
-  'C:/Program Files/Google/Chrome/Application/chrome.exe', '/usr/bin/google-chrome', '/usr/bin/chromium',
-].find(existsSync);
-let browser;
+let browser, diagnostics;
+let phase = 'launch';
 try {
-  browser = await puppeteer.launch({headless:true, executablePath,
-    args: process.env.CI ? ['--no-sandbox'] : [],
-  });
+  browser = await launchBrowser();
+  console.log(`Browser: ${await browser.version()}`);
   const page = await browser.newPage();
-  const errors = [];
-  page.on('pageerror', error => errors.push(error.message));
+  diagnostics = collectBrowserDiagnostics(page, screenshots);
+  await observeAppReadiness(page);
   await page.evaluateOnNewDocument(() => {
     if (!localStorage.getItem('flutter.mode')) localStorage.setItem('flutter.mode', JSON.stringify('dark'));
     localStorage.setItem('flutter.paused', 'false');
   });
   await page.setViewport({width:1440,height:1000,deviceScaleFactor:1});
-  await page.goto(address, {waitUntil:'networkidle0'});
-  await page.waitForSelector('flutter-view');
-  await page.waitForSelector('#boot', {hidden:true,timeout:60000});
+  phase = 'home startup';
+  console.log(`Checking ${phase}`);
+  await navigateToApp(page, address);
   await page.screenshot({path:path.join(screenshots,'home.png')});
   const before = await page.screenshot();
   await new Promise(resolve => setTimeout(resolve, 1200));
@@ -51,15 +47,16 @@ try {
     ['projects','/zh-CN/projects',1440], ['article','/zh-CN/posts/segmeris-guide',390],
     ['project-detail','/de/projects/courierust',768],
   ]) {
+    phase = `${name} deep-link refresh`;
+    console.log(`Checking ${phase}`);
     await page.setViewport({width,height:1000,deviceScaleFactor:1});
-    await page.goto(`${address}/#${route}`, {waitUntil:'networkidle0'});
-    await page.reload({waitUntil:'networkidle0'});
-    await page.waitForSelector('#boot', {hidden:true,timeout:60000});
+    await navigateToApp(page, `${address}/#${route}`);
+    await navigateToApp(page, undefined, {reload:true});
     assert.equal(new URL(page.url()).hash, '#' + route, 'Refreshing a deep link must retain its route.');
     await new Promise(resolve => setTimeout(resolve, 500));
     await page.screenshot({path:path.join(screenshots,`${name}.png`)});
   }
-  assert.deepEqual(errors,[],'Browser JavaScript errors');
+  assert.deepEqual(diagnostics.errors,[],'Browser JavaScript errors');
   console.log('Release browser smoke passed: boot, visible motion, desktop/mobile/tablet deep-link refresh.');
   if (process.env.CHECK_GISCUS === '1') {
     // Serve the unpublished build under its intended HTTPS origin inside this
@@ -80,10 +77,11 @@ try {
     });
     await page.setViewport({width:1200,height:1000,deviceScaleFactor:1});
     for (const mode of ['dark', 'light']) {
+      phase = `${mode} live comments`;
+      console.log(`Checking ${phase}`);
       await page.evaluate(value => localStorage.setItem('flutter.mode',JSON.stringify(value)),mode);
-      await page.goto(`${previewOrigin}/#/zh-CN/about`, {waitUntil:'networkidle0'});
-      await page.reload({waitUntil:'networkidle0'});
-      await page.waitForSelector('#boot',{hidden:true,timeout:60000});
+      await navigateToApp(page, `${previewOrigin}/#/zh-CN/about`);
+      await navigateToApp(page, undefined, {reload:true});
       const semantics = await page.$('pierce/flt-semantics-placeholder');
       await semantics?.evaluate(element => element.click());
       await page.waitForSelector('pierce/flt-semantics', {timeout:10000});
@@ -128,7 +126,14 @@ try {
     }
     console.log('Live giscus embed passed: custom light/dark CSS loaded; root background is transparent.');
   }
+} catch (error) {
+  try { await diagnostics?.capture(error, phase); }
+  catch (captureError) { console.error('Could not save diagnostics:', captureError); }
+  throw error;
 } finally {
-  await browser?.close();
-  await new Promise(resolve => server.close(resolve));
+  try { await browser?.close(); }
+  finally {
+    server.closeAllConnections();
+    await new Promise(resolve => server.close(resolve));
+  }
 }

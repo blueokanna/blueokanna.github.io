@@ -29,6 +29,8 @@ Windows 可运行 `./scripts/publish_web.ps1`，依次检查字体、格式、�
 
 设置环境变量 `CHECK_GISCUS=1` 可额外检查真实 giscus 服务的深浅主题与手机布局。这项检查将本次站点构建映射到预期 HTTPS 地址，仅在隔离浏览器中生效；不会发布文件或发送评论，也不依赖已登录的 GitHub 账户。
 
+浏览器检查分别等待 HTML 文档解析（30 秒上限）与 Flutter 的 `pulselink-ready` 首帧信号、启动遮罩退出（90 秒上限），不使用全局网络静默作为就绪条件。`npm run test:browser-readiness` 验证请求挂起时仍能识别就绪，以及启动失败、刷新和 404 不会被误判为成功。检查失败会在 `build/qa/browser` 保存 `failure.json`、HTML 和截图，记录检查阶段、未完成请求、HTTP 错误及控制台消息；CI 会上传这份诊断资料。
+
 ## 路由与语言
 
 使用 Flutter hash URL，直接刷新不会要求 GitHub Pages 重写任意路径：

@@ -6,6 +6,7 @@
   "scripts": {
     "diagrams": "node scripts/build_diagrams.mjs",
     "test": "node --test test/comments_test.mjs",
+    "test:browser-readiness": "node --test test/browser_readiness_test.mjs",
     "test:browser": "node scripts/browser_smoke.mjs"
   },
   "devDependencies": {
