@@ -1,0 +1,103 @@
+{
+  "home": "Accueil",
+  "posts": "Articles",
+  "projects": "Projets",
+  "friends": "Amis",
+  "about": "À propos",
+  "language": "Langue",
+  "appearance": "Apparence",
+  "light": "Clair",
+  "dark": "Sombre",
+  "system": "Système",
+  "motion": "Animer les illustrations",
+  "palette": "Palette de couleurs",
+  "close": "Fermer",
+  "read": "Lire l’article",
+  "allPosts": "Tous les articles",
+  "heroLabel": "LE BLOG PERSONNEL DE BLUE",
+  "heroTitle": "Du code, de la curiosité\net des choses à partager.",
+  "heroBody": "Des notes pratiques issues de projets open source. Des pistes à explorer, des problèmes à démêler et des idées à échanger.",
+  "latest": "Sur le blog",
+  "postsIntro": "Outils, médias et ingénierie : des explications à partir de problèmes concrets.",
+  "projectIntro": "Découvrez les projets, comprenez leurs limites et consultez directement leur code.",
+  "friendsIntro": "Des coins indépendants du Web, reliés par la curiosité.",
+  "aboutBody": "Je suis Blue. PulseLink réunit mes projets open source et mes articles techniques. Lisez un article, explorez le code ou rejoignez la conversation au bas d’une publication.",
+  "search": "Rechercher des articles",
+  "noResults": "Aucun article correspondant. Essayez une autre recherche.",
+  "contents": "Dans cet article",
+  "discussion": "Discussion",
+  "commentIntro": "Questions, corrections et retours d’expérience sont les bienvenus. Connectez-vous avec GitHub pour participer.",
+  "loadComments": "Charger les commentaires",
+  "openDiscussion": "Ouvrir GitHub Discussions",
+  "commentUnavailable": "La discussion intégrée n’est pas encore disponible. Vous pouvez consulter la page Discussions du dépôt.",
+  "source": "Code source",
+  "releases": "Versions",
+  "back": "Retour aux articles",
+  "notFound": "Cette page est introuvable.",
+  "copyLink": "Copier le lien",
+  "copied": "Lien copié",
+  "copyFailed": "La copie a échoué. Copiez l’adresse depuis votre navigateur.",
+  "related": "Poursuivre la lecture",
+  "sourceNote": "Cet article s’appuie sur la documentation du projet. Consultez le dépôt pour connaître les plateformes actuellement prises en charge et les détails des versions.",
+  "pantoneNote": "Mocha Mousse, Peach Fuzz et Very Peri sont des approximations à l’écran inspirées de Pantone, sans correspondance colorimétrique certifiée.",
+  "friendLxns": "Lxns Network · Une équipe de développement chinoise",
+  "friendTaoran": "Un blog chaleureux comme de l’argile",
+  "projectName": "Segmeris",
+  "projectSummary": "Un outil de téléchargement vidéo en Flutter, avec un moteur Rust. Il détecte les médias, télécharge les segments et prépare des fichiers MP4.",
+  "projectDetails": "Segmeris prend en charge les listes de lecture HLS, les liens directs vers des médias et les pages Bilibili. Analysez un lien pour examiner les flux disponibles, puis choisissez une destination et lancez la tâche. Les transferts peuvent être mis en pause et repris ; la conversion constitue une étape distincte. Sur ordinateur, le traitement multimédia utilise FFmpeg ; sur Android, il utilise les API multimédias de la plateforme. L’enregistrement en direct et les contenus protégés par DRM ne sont pas pris en charge. Les formats disponibles dépendent toujours de la source et des autorisations de votre compte.",
+  "offlineProjects": "Les données GitHub sont indisponibles. Le projet mis en avant et sa documentation restent accessibles.",
+  "retry": "Réessayer",
+  "otherProjects": "Autres dépôts",
+  "loading": "Chargement…",
+  "footer": "Créé avec Flutter · Hébergé sur GitHub Pages",
+  "articles": [
+    {
+      "id": "segmeris-guide",
+      "category": "Segmeris",
+      "title": "D’un lien vidéo à un fichier : premiers pas avec Segmeris",
+      "summary": "Analyser avant de télécharger, choisir un mode de traitement et savoir où retrouver le fichier terminé.",
+      "sections": [
+        {
+          "heading": "Commencez par analyser le lien",
+          "body": "Une page vidéo et un fichier multimédia ne sont pas la même chose. Collez l’URL d’une page prise en charge dans Segmeris et choisissez d’abord l’analyse. Les résultats permettent d’examiner les flux proposés par la source, notamment les qualités et les codecs disponibles. Une qualité supérieure peut nécessiter un compte disposant des autorisations requises ; se connecter ne donne pas à ce compte des droits qu’il ne possède pas.\n\nDans le cas d’un lien direct vers un média ou d’une liste HLS, la source identifie déjà l’entrée. Vérifiez néanmoins la destination et le nom du fichier avant de démarrer. Les URL signées peuvent expirer : un lien qui fonctionnait hier ne garantit pas que la requête actuelle aboutira."
+        },
+        {
+          "heading": "Choisissez consciemment entre copie et encodage",
+          "body": "Un débit de 0 demande une copie des flux. Les échantillons compressés sont conservés lorsque le conteneur de sortie les accepte ; un format incompatible peut néanmoins imposer un encodage. Choisir un débit plus faible revient à demander un traitement du média, pas à accélérer le téléchargement HTTP.\n\nSur ordinateur, FFmpeg et ffprobe doivent être accessibles dans PATH. Android utilise plutôt MediaCodec et MediaMuxer. La disponibilité de l’accélération matérielle dépend de l’appareil et du codec : la présence d’un GPU ne garantit pas que chaque conversion pourra en bénéficier."
+        },
+        {
+          "heading": "Suivez la tâche jusqu’à l’exportation",
+          "body": "La pause et la reprise concernent le transfert, pas la conversion ni l’exportation. Une lecture réseau en cours peut devoir se terminer ou atteindre son délai d’expiration avant que la pause prenne effet. Les segments vérifiés et les données pouvant être reprises en toute sécurité sont réutilisables, mais un serveur ne prenant pas correctement en charge les plages d’octets peut imposer un nouveau transfert.\n\nAndroid exporte les fichiers terminés dans le dossier public Downloads. Sur ordinateur, le chemin choisi est utilisé. Les sous-titres sont enregistrés dans des fichiers SRT séparés portant le même nom de base. Attendez la réussite de l’exportation avant de considérer un fichier temporaire comme le résultat final."
+        },
+        {
+          "heading": "Rédigez un signalement de bug utile",
+          "body": "Indiquez votre plateforme, le mode de traitement, l’étape qui échoue et un exemple public permettant de reproduire le problème. Une requête de liste de lecture échouée, un encodeur indisponible et un fichier de sortie invalide correspondent à des pannes différentes. Conservez le message d’erreur au lieu de le remplacer par « le téléchargement a échoué ».\n\nRetirez des journaux les cookies, SESSDATA, les jetons d’API et les URL signées privées. Référez-vous aux versions et à la documentation actuelles du dépôt. L’enregistrement en direct et les entrées protégées par DRM ne font pas partie des fonctionnalités implémentées."
+        }
+      ]
+    },
+    {
+      "id": "download-remux-encode",
+      "category": "Multimédia",
+      "title": "Télécharger, remultiplexer, encoder : trois tâches à ne pas confondre",
+      "summary": "Pourquoi changer le débit ne corrige pas un réseau lent, et pourquoi joindre des segments vidéo ne suffit pas toujours.",
+      "sections": [
+        {
+          "heading": "Télécharger, c’est transférer des octets",
+          "body": "Le téléchargement transfère les données d’un serveur. Sa vitesse dépend du réseau, du serveur et de la manière dont les requêtes sont effectuées. Augmenter le nombre de requêtes simultanées peut aider lorsque chaque requête est limitée, mais peut aussi déclencher une limitation de débit ou saturer la connexion. Commencez avec les réglages par défaut et examinez la panne réelle avant d’augmenter le nombre de tentatives.\n\nUne réponse HTTP 404 signifie que la ressource demandée n’est pas disponible à cette adresse. Une erreur TLS survient avant l’obtention d’une réponse exploitable. Choisir un encodeur matériel ne résout aucun de ces deux problèmes."
+        },
+        {
+          "heading": "Remultiplexer, c’est reconstruire le conteneur",
+          "body": "Un conteneur décrit l’organisation, l’horodatage et l’indexation des données audio et vidéo compressées. Le remultiplexage copie ces échantillons dans un autre conteneur sans les réencoder. Il demande généralement bien moins de travail que l’encodage, mais les flux doivent être compatibles avec le conteneur cible.\n\nHLS peut référencer des sections d’initialisation, des plages d’octets et des discontinuités. Concaténer simplement les fragments MP4 téléchargés ne produit pas nécessairement un film complet avec une durée valide. La sortie doit être assemblée et validée, pas seulement renommée."
+        },
+        {
+          "heading": "Encoder, c’est changer la représentation du média",
+          "body": "Modifier le codec, la résolution ou le débit d’une vidéo nécessite généralement un décodage puis un encodage. Cela consomme des ressources de calcul et peut modifier la qualité. Un encodeur matériel peut accélérer les opérations qu’il prend en charge ; il ne fait pas envoyer les octets plus vite par le serveur.\n\nLa prise en charge dépend du système d’exploitation, du pilote, du codec et des dimensions de l’image. Dans Segmeris, un test d’encodeur réussi prouve qu’un petit essai a fonctionné. Il ne remplace pas la vérification de la vidéo réellement exportée sur l’appareil visé."
+        },
+        {
+          "heading": "Diagnostiquez dans l’ordre du traitement",
+          "body": "Vérifiez d’abord que la source est accessible. Confirmez ensuite les flux sélectionnés et les autorisations nécessaires. Examinez alors les erreurs de transfert et la possibilité de reprise. Enfin, vérifiez le traitement et l’exportation. Cet ordre évite de modifier des paramètres sans rapport avec la panne.\n\nSi le téléchargement se termine mais produit un fichier défectueux, examinez la durée du conteneur, la synchronisation audio/vidéo et le journal de traitement. Si une requête ne démarre jamais, commencez par l’erreur HTTP ou TLS. Une observation précise est plus utile que de changer toutes les options à répétition."
+        }
+      ]
+    }
+  ]
+}

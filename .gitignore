@@ -32,6 +32,8 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+/.font-cache/
+/.font-tools/
 
 # Symbolication related
 app.*.symbols

@@ -19,13 +19,13 @@
     body{margin:0;background:#f6f7ef;color:#243f34;font:16px/1.8 system-ui,sans-serif}
     #boot{position:fixed;inset:0;display:grid;place-content:center;text-align:center;padding:24px}
     h1{font-size:32px;letter-spacing:-1px}a{color:inherit}button{font:inherit;padding:10px 24px;border:1px solid #243f34;border-radius:28px;background:#d9f29d;cursor:pointer}
-    .mark{font-size:64px;animation:breathe 2s ease-in-out infinite}
+    .mark{position:relative;width:150px;height:150px;margin:auto;display:grid;place-items:center;font-size:64px;animation:breathe 4s ease-in-out infinite}.mark span{position:absolute;width:22px;height:22px;background:#a9cd9e;border-radius:7px;transform:rotate(calc(var(--i)*60deg)) translateX(64px);animation:petal 3s ease-in-out infinite;animation-delay:calc(var(--i)*-.35s)}.mark span:nth-child(even){border-radius:50% 20% 50% 20%;background:#91bfc0}@keyframes petal{50%{border-radius:50%;opacity:.55}}
     @keyframes breathe{50%{transform:rotate(45deg) scale(.9)}}
-    @media(prefers-reduced-motion:reduce){.mark{animation:none}}
+    @media(prefers-reduced-motion:reduce){.mark,.mark span{animation:none}}
   </style>
 </head>
 <body>
-  <main id="boot" role="status" aria-live="polite"><div class="mark" aria-hidden="true">✳</div><h1>Blue · PulseLink</h1><p id="boot-message">正在打开数字花园…</p><button id="retry" hidden onclick="location.reload()">重新加载</button><p><a href="https://github.com/blueokanna">GitHub / blueokanna</a></p></main>
+  <main id="boot" role="status" aria-live="polite"><div class="mark" aria-hidden="true">✳<span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span><span style="--i:5"></span></div><h1>Blue · PulseLink</h1><p id="boot-message">正在打开数字花园…</p><button id="retry" hidden onclick="location.reload()">重新加载</button><p><a href="https://github.com/blueokanna">GitHub / blueokanna</a></p></main>
   <noscript>本站使用 Flutter Web，请启用 JavaScript。你也可以访问上面的 GitHub 主页。</noscript>
   <script>
     window.pulseBootTimer=setTimeout(function(){var m=document.getElementById('boot-message');if(m){m.textContent='加载时间较长，请检查网络后重试。';document.getElementById('retry').hidden=false;}},25000);

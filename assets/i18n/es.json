@@ -1,0 +1,103 @@
+{
+  "home": "Inicio",
+  "posts": "Artículos",
+  "projects": "Proyectos",
+  "friends": "Amigos",
+  "about": "Acerca de",
+  "language": "Idioma",
+  "appearance": "Apariencia",
+  "light": "Claro",
+  "dark": "Oscuro",
+  "system": "Sistema",
+  "motion": "Animar las ilustraciones",
+  "palette": "Paleta de colores",
+  "close": "Cerrar",
+  "read": "Leer artículo",
+  "allPosts": "Todos los artículos",
+  "heroLabel": "EL BLOG PERSONAL DE BLUE",
+  "heroTitle": "Código, curiosidad\ny cosas que compartir.",
+  "heroBody": "Notas prácticas de proyectos de código abierto. Cosas que probar, problemas que desentrañar e ideas que intercambiar.",
+  "latest": "En el blog",
+  "postsIntro": "Herramientas, multimedia e ingeniería explicadas a través de problemas concretos.",
+  "projectIntro": "Explora los proyectos, conoce sus límites y consulta directamente el código.",
+  "friendsIntro": "Rincones independientes de internet, unidos por la curiosidad.",
+  "aboutBody": "Soy Blue. PulseLink reúne mis proyectos de código abierto y mis artículos técnicos. Lee un artículo, examina el código o participa en la conversación al final de una publicación.",
+  "search": "Buscar artículos",
+  "noResults": "No hay artículos que coincidan. Prueba otra búsqueda.",
+  "contents": "En este artículo",
+  "discussion": "Conversación",
+  "commentIntro": "Las preguntas, correcciones y experiencias son bienvenidas. Inicia sesión con GitHub para participar.",
+  "loadComments": "Cargar comentarios",
+  "openDiscussion": "Abrir GitHub Discussions",
+  "commentUnavailable": "La conversación integrada aún no está disponible. Puedes visitar la página Discussions del repositorio.",
+  "source": "Código fuente",
+  "releases": "Versiones",
+  "back": "Volver a los artículos",
+  "notFound": "No se ha encontrado esta página.",
+  "copyLink": "Copiar enlace",
+  "copied": "Enlace copiado",
+  "copyFailed": "No se pudo copiar. Copia la dirección desde tu navegador.",
+  "related": "Seguir leyendo",
+  "sourceNote": "Basado en la documentación del proyecto. Consulta el repositorio para conocer las plataformas compatibles y los detalles de las versiones actuales.",
+  "pantoneNote": "Mocha Mousse, Peach Fuzz y Very Peri son aproximaciones en pantalla inspiradas en Pantone, no coincidencias de color certificadas.",
+  "friendLxns": "Lxns Network · Un equipo de desarrollo de China",
+  "friendTaoran": "Un blog cálido como la arcilla",
+  "projectName": "Segmeris",
+  "projectSummary": "Un descargador de vídeo en Flutter con un motor Rust. Detecta contenido multimedia, descarga segmentos y prepara archivos MP4.",
+  "projectDetails": "Segmeris admite listas HLS, enlaces directos a contenido multimedia y páginas de Bilibili. Analiza un enlace para examinar los flujos disponibles, elige un destino e inicia la tarea. Las transferencias se pueden pausar y reanudar; la conversión es una etapa independiente. En escritorio, el procesamiento multimedia utiliza FFmpeg; en Android, utiliza las API multimedia de la plataforma. No se admite la grabación en directo ni el contenido protegido con DRM. Los formatos disponibles siguen dependiendo de la fuente y de los permisos de tu cuenta.",
+  "offlineProjects": "Los datos de GitHub no están disponibles. El proyecto destacado y su documentación siguen siendo accesibles.",
+  "retry": "Reintentar",
+  "otherProjects": "Más repositorios",
+  "loading": "Cargando…",
+  "footer": "Creado con Flutter · Alojado en GitHub Pages",
+  "articles": [
+    {
+      "id": "segmeris-guide",
+      "category": "Segmeris",
+      "title": "De un enlace de vídeo a un archivo: primeros pasos con Segmeris",
+      "summary": "Analiza antes de descargar, elige un modo de procesamiento y descubre dónde se guarda el archivo terminado.",
+      "sections": [
+        {
+          "heading": "Empieza por analizar el enlace",
+          "body": "Una página de vídeo y un archivo multimedia no son lo mismo. Pega en Segmeris la URL de una página compatible y selecciona primero la opción de análisis. Los resultados permiten examinar los flujos que ofrece la fuente, incluidas las opciones de calidad y códec disponibles. Una calidad superior puede requerir una cuenta autorizada; iniciar sesión no concede permisos que esa cuenta no tenga.\n\nEn un enlace directo a contenido multimedia o una lista HLS, la fuente ya identifica la entrada. Aun así, comprueba el destino y el nombre del archivo antes de empezar. Las URL firmadas pueden caducar: que un enlace funcionase ayer no garantiza que la solicitud actual vaya a completarse."
+        },
+        {
+          "heading": "Elige entre copiar y codificar con criterio",
+          "body": "Una tasa de bits de 0 solicita la copia de flujos. Esto conserva las muestras comprimidas cuando el contenedor de salida las admite; los formatos incompatibles pueden seguir necesitando codificación. Elegir una tasa de bits inferior solicita procesar el contenido, no acelera la descarga HTTP.\n\nEn escritorio, FFmpeg y ffprobe deben estar disponibles en PATH. Android utiliza MediaCodec y MediaMuxer en su lugar. La disponibilidad de la aceleración por hardware depende del dispositivo y del códec: tener una GPU no garantiza que todas las conversiones puedan utilizarla."
+        },
+        {
+          "heading": "Sigue la tarea hasta la exportación",
+          "body": "Pausar y reanudar se aplica a la transferencia, no a la conversión ni a la exportación. Puede ser necesario que una lectura de red pendiente termine o agote su tiempo de espera antes de que la pausa tenga efecto. Se pueden reutilizar segmentos verificados y datos cuya reanudación sea segura, pero un servidor sin soporte adecuado de rangos puede exigir una nueva transferencia.\n\nAndroid exporta los archivos terminados a la carpeta pública Downloads. En escritorio se utiliza la ruta elegida. Los subtítulos se guardan como archivos SRT separados con el mismo nombre base. Espera a que la exportación termine correctamente antes de considerar un archivo temporal como el resultado final."
+        },
+        {
+          "heading": "Prepara un informe de error útil",
+          "body": "Incluye la plataforma, el modo de procesamiento, la etapa que falla y un ejemplo público que reproduzca el problema. Una solicitud de lista de reproducción fallida, un codificador no disponible y un archivo de salida inválido son fallos diferentes. Conserva el mensaje de error en lugar de sustituirlo por «la descarga ha fallado».\n\nElimina de los registros las cookies, SESSDATA, los tokens de API y las URL firmadas privadas. Toma como referencia las versiones y la documentación actuales del repositorio. La grabación en directo y las entradas protegidas con DRM quedan fuera de las funciones implementadas."
+        }
+      ]
+    },
+    {
+      "id": "download-remux-encode",
+      "category": "Multimedia",
+      "title": "Descargar, remultiplexar y codificar: tres tareas que no conviene confundir",
+      "summary": "Por qué cambiar la tasa de bits no soluciona una red lenta y por qué unir segmentos de vídeo no siempre basta.",
+      "sections": [
+        {
+          "heading": "Descargar es transferir bytes",
+          "body": "La descarga transfiere datos desde un servidor. Su velocidad depende de la red, del servidor y del patrón de solicitudes. Aumentar la concurrencia puede ayudar cuando cada solicitud tiene un límite, pero también puede activar restricciones de velocidad o saturar una conexión. Empieza con los valores predeterminados y examina el fallo real antes de aumentar los reintentos.\n\nUn HTTP 404 indica que el recurso solicitado no está disponible en esa dirección. Un fallo TLS se produce antes de obtener una respuesta utilizable. Ninguno de los dos se resuelve seleccionando un codificador por hardware."
+        },
+        {
+          "heading": "Remultiplexar es reconstruir el contenedor",
+          "body": "Un contenedor describe cómo se organizan, se marcan temporalmente y se indexan el audio y el vídeo comprimidos. La remultiplexación copia esas muestras a otro contenedor sin volver a codificarlas. Suele requerir mucho menos trabajo que la codificación, pero los flujos deben ser compatibles con el contenedor de destino.\n\nHLS puede referenciar secciones de inicialización, rangos de bytes y discontinuidades. Concatenar los fragmentos MP4 descargados no produce necesariamente una película completa con una duración válida. La salida debe ensamblarse y validarse, no basta con cambiarle el nombre."
+        },
+        {
+          "heading": "Codificar cambia la representación del contenido",
+          "body": "Cambiar el códec, la resolución o la tasa de bits de un vídeo suele requerir decodificar y codificar. Esto consume recursos de cálculo y puede modificar la calidad. Un codificador por hardware puede acelerar las tareas de codificación que admite; no hace que el servidor entregue los bytes más rápido.\n\nLa compatibilidad depende del sistema operativo, del controlador, del códec y de las dimensiones de la imagen. En Segmeris, una prueba de codificador satisfactoria demuestra que una prueba pequeña ha funcionado. No sustituye la comprobación del vídeo exportado real en el dispositivo previsto."
+        },
+        {
+          "heading": "Diagnostica en el orden del proceso",
+          "body": "Primero comprueba que se puede obtener la fuente. Después confirma los flujos elegidos y sus permisos. A continuación examina los errores de transferencia y la posibilidad de reanudarla. Por último, verifica el procesamiento y la exportación. Esta secuencia evita cambiar ajustes que no tienen relación con el fallo.\n\nSi una descarga termina pero genera un archivo defectuoso, examina la duración del contenedor, la sincronización de audio y vídeo y el registro de procesamiento. Si una solicitud nunca llega a iniciarse, comprueba primero el error HTTP o TLS. Una observación precisa resulta más útil que cambiar todas las opciones una y otra vez."
+        }
+      ]
+    }
+  ]
+}

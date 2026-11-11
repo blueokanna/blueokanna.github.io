@@ -35,6 +35,12 @@ dependencies:
   cupertino_icons: ^1.0.8
   http: ^1.4.0
   url_launcher: ^6.3.1
+  go_router: ^18.1.4
+  shared_preferences: ^2.5.6
+  web: ^1.1.2
+  flutter_localizations:
+    sdk: flutter
+  material_ui: ^1.11.0
 
 dev_dependencies:
   flutter_test:
@@ -56,3 +62,21 @@ flutter:
 
   assets:
     - assets/icon.png
+    - assets/i18n/
+    - assets/fonts/googlesans-OFL.txt
+    - assets/fonts/notosanssc-OFL.txt
+    - assets/fonts/notosanstc-OFL.txt
+    - assets/fonts/notosansjp-OFL.txt
+  fonts:
+    - family: Google Sans
+      fonts:
+        - asset: assets/fonts/googlesans.ttf
+    - family: Noto Sans SC
+      fonts:
+        - asset: assets/fonts/notosanssc.ttf
+    - family: Noto Sans TC
+      fonts:
+        - asset: assets/fonts/notosanstc.ttf
+    - family: Noto Sans JP
+      fonts:
+        - asset: assets/fonts/notosansjp.ttf

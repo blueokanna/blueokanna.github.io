@@ -25,9 +25,18 @@ jobs:
           flutter --version
           dart --version
       - run: flutter pub get --enforce-lockfile
-      - run: dart format --output=none --set-exit-if-changed lib test
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install -r scripts/requirements-fonts.txt
+      - run: python scripts/prepare_fonts.py
+      - run: dart format --output=none --set-exit-if-changed lib test tool
       - run: flutter analyze
       - run: flutter test
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test test/comments_test.mjs
       - run: flutter build web --release --base-href / --no-web-resources-cdn
       - run: cp CNAME build/web/CNAME
       - uses: actions/upload-pages-artifact@v3

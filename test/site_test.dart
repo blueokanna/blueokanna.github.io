@@ -8,10 +8,70 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:pulselink_site/app.dart';
 import 'package:pulselink_site/content.dart';
+import 'package:pulselink_site/localization.dart';
+import 'package:pulselink_site/preferences.dart';
 import 'package:pulselink_site/motion.dart';
 import 'package:pulselink_site/services.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  late BlogCatalog catalog;
+  setUpAll(() async {
+    catalog = await BlogCatalog.load();
+  });
+
+  test(
+    'all ten languages have complete article and interface translations',
+    () {
+      final source = catalog.translations['en']!;
+      expect(catalog.translations.keys.toSet(), languages.keys.toSet());
+      for (final translation in catalog.translations.values) {
+        expect(translation.data.keys.toSet(), source.data.keys.toSet());
+        expect(
+          translation.posts.map((p) => p.id),
+          source.posts.map((p) => p.id),
+        );
+        for (final post in translation.posts) {
+          expect(post.title, isNotEmpty);
+          expect(post.sections.length, 4);
+          for (final section in post.sections) {
+            expect(section.heading, isNotEmpty);
+            expect(section.body.length, greaterThan(100));
+          }
+        }
+      }
+    },
+  );
+
+  for (final language in languages.keys) {
+    testWidgets('$language deep links support enlarged mobile text', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 1.4;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final preferences = BlogPreferences()..paused = true;
+      addTearDown(preferences.dispose);
+      await tester.pumpWidget(
+        PulseLinkApp(
+          catalog: catalog,
+          preferences: preferences,
+          initialLocation: '/$language/posts/segmeris-guide',
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.text(catalog.translations[language]!.posts.first.title),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    });
+  }
+
   test('only safe HTTPS destinations are accepted', () {
     for (final url in [
       'javascript:alert(1)',
@@ -78,33 +138,34 @@ void main() {
       service.dispose();
     }
   });
-  for (final width in [320.0, 360.0, 768.0, 1440.0]) {
-    testWidgets('responsive navigation, reader and language at $width', (
-      tester,
-    ) async {
+  for (final width in [320.0, 768.0, 1440.0]) {
+    testWidgets('article navigation and reading at $width', (tester) async {
       tester.view.physicalSize = Size(width, 1000);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(const PulseLinkApp());
-      await tester.pump(const Duration(seconds: 1));
-      expect(find.text('代码有逻辑，'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-      await tester.tap(find.byTooltip('暂停动效'));
-      await tester.pump();
-      await tester.tap(find.text('走进笔记'));
-      await tester.pump(const Duration(seconds: 1));
-      await tester.tap(find.text(journal.first.title));
-      await tester.pump(const Duration(seconds: 1));
-      expect(find.byType(Dialog), findsOneWidget);
-      await tester.tap(find.byTooltip('关闭'));
-      await tester.pump(const Duration(seconds: 1));
-      await tester.tap(find.byTooltip('Switch to English'));
-      await tester.pump(const Duration(seconds: 1));
-      expect(find.text('Built with logic.'), findsOneWidget);
+
+      final preferences = BlogPreferences()..paused = true;
+      addTearDown(preferences.dispose);
+      await tester.pumpWidget(
+        PulseLinkApp(
+          catalog: catalog,
+          preferences: preferences,
+          initialLocation: '/zh-CN/posts',
+        ),
+      );
+      await tester.pumpAndSettle();
+      final title = catalog.translations['zh-CN']!.posts.first.title;
+      await tester.ensureVisible(find.text(title));
+      await tester.tap(find.text(title));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(catalog.translations['zh-CN']!.text('contents')),
+        findsOneWidget,
+      );
+      expect(find.text(title), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
-      await tester.pump(const Duration(seconds: 13));
     });
   }
   testWidgets('reduced motion stops the shared clock', (tester) async {
@@ -187,7 +248,7 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('clipboard rejection is handled without an uncaught exception', (
+  testWidgets('clipboard rejection is handled on an article route', (
     tester,
   ) async {
     final messenger =
@@ -201,14 +262,25 @@ void main() {
     addTearDown(
       () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
     );
-    await tester.pumpWidget(const PulseLinkApp());
-    await tester.pump(const Duration(seconds: 1));
-    await tester.ensureVisible(find.text('复制本站友链'));
-    await tester.tap(find.text('复制本站友链'));
+
+    final preferences = BlogPreferences()..paused = true;
+    addTearDown(preferences.dispose);
+    await tester.pumpWidget(
+      PulseLinkApp(
+        catalog: catalog,
+        preferences: preferences,
+        initialLocation: '/en/posts/segmeris-guide',
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Copy link'));
+    await tester.tap(find.text('Copy link'));
     await tester.pump();
-    expect(find.text('浏览器未允许写入剪贴板，请手动复制本站地址。'), findsOneWidget);
+    expect(
+      find.text(catalog.translations['en']!.text('copyFailed')),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
-    await tester.pump(const Duration(seconds: 13));
   });
 }

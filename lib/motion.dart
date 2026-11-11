@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart'
+    show MaterialShapes, MaterialShapeBorder;
 
 abstract final class Motion {
   static const duration = Duration(milliseconds: 520);
@@ -73,10 +75,29 @@ class _AuroraState extends State<Aurora>
 }
 
 class AuroraArt extends CustomPainter {
-  AuroraArt(this.clock, {required this.dark, this.hero = false})
-    : super(repaint: clock);
+  static final _shapes = [
+    MaterialShapes.cookie9Sided,
+    MaterialShapes.clover4Leaf,
+    MaterialShapes.softBurst,
+    MaterialShapes.flower,
+    MaterialShapes.puffy,
+    MaterialShapes.gem,
+  ];
+  static final _borders = _shapes
+      .map((shape) => MaterialShapeBorder(shape: shape))
+      .toList();
+
+  AuroraArt(
+    this.clock, {
+    required this.dark,
+    this.hero = false,
+    this.seed = const Color(0xFF52734D),
+    this.variant = 0,
+  }) : super(repaint: clock);
   final Animation<double> clock;
   final bool dark, hero;
+  final Color seed;
+  final int variant;
   @override
   void paint(Canvas canvas, Size size) {
     final t = clock.value * math.pi * 2;
@@ -91,40 +112,61 @@ class AuroraArt extends CustomPainter {
         radius,
         Paint()
           ..shader = RadialGradient(
-            colors: [
-              (dark ? const Color(0xFF65843A) : const Color(0xFFDBE9B6))
-                  .withValues(alpha: .22),
-              Colors.transparent,
-            ],
+            colors: [seed.withValues(alpha: .22), Colors.transparent],
           ).createShader(Rect.fromCircle(center: center, radius: radius)),
       );
       return;
     }
     final center = size.center(Offset.zero);
-    final radius = size.shortestSide * .40;
+    final radius = size.shortestSide * .32;
+    // All satellites share the same clock and repaint boundary as the bloom.
+    for (var i = 0; i < 6; i++) {
+      final angle = i * math.pi / 3 + .12 * math.sin(t);
+      final orbit = size.shortestSide * .44;
+      final position =
+          center + Offset(math.cos(angle) * orbit, math.sin(angle) * orbit);
+      canvas.save();
+      canvas.translate(position.dx, position.dy);
+      canvas.rotate(angle + .3 * math.sin(t + i));
+      final little = size.shortestSide * (.032 + .008 * math.sin(t + i));
+      final paint = Paint()
+        ..color = Color.lerp(
+          seed,
+          dark ? Colors.white : Colors.black,
+          .15,
+        )!.withValues(alpha: .7);
+      canvas.scale(little * 2);
+      canvas.translate(-.5, -.5);
+      canvas.drawPath(
+        _borders[i].getOuterPath(const Rect.fromLTWH(0, 0, 1, 1)),
+        paint,
+      );
+      canvas.restore();
+    }
     canvas.save();
     canvas.translate(center.dx, center.dy);
     // Periodic rotation keeps the last frame continuous with the next cycle.
     canvas.rotate(math.sin(t) * .15);
-    final path = Path();
-    for (var i = 0; i <= 240; i++) {
-      final a = i / 240 * math.pi * 2;
-      final r = radius * (1 + .085 * math.cos(8 * a + math.sin(t)));
-      final x = r * math.cos(a), y = r * math.sin(a);
-      if (i == 0) {
-        path.moveTo(x, y);
-      } else {
-        path.lineTo(x, y);
-      }
-    }
-    path.close();
+    final index = variant % _borders.length;
+    final border = ShapeBorder.lerp(
+      _borders[index],
+      _borders[(index + 1) % _borders.length],
+      (1 - math.cos(t)) / 2,
+    )!;
+    final path = border.getOuterPath(
+      Rect.fromCircle(center: Offset.zero, radius: radius),
+    );
     canvas.drawPath(
       path,
       Paint()
-        ..shader = const LinearGradient(
+        ..shader = LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFE3F9AA), Color(0xFFB9DF72), Color(0xFF709D64)],
+          colors: [
+            Color.lerp(seed, Colors.white, .8)!,
+            Color.lerp(seed, Colors.white, .4)!,
+            seed,
+          ],
         ).createShader(Rect.fromCircle(center: Offset.zero, radius: radius)),
     );
     for (var i = 0; i < 4; i++) {
@@ -155,5 +197,7 @@ class AuroraArt extends CustomPainter {
   bool shouldRepaint(AuroraArt oldDelegate) =>
       oldDelegate.dark != dark ||
       oldDelegate.hero != hero ||
+      oldDelegate.seed != seed ||
+      oldDelegate.variant != variant ||
       oldDelegate.clock != clock;
 }

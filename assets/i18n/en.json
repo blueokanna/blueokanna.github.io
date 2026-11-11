@@ -1,0 +1,45 @@
+{
+  "home": "Home", "posts": "Articles", "projects": "Projects", "friends": "Friends", "about": "About",
+  "language": "Language", "appearance": "Appearance", "light": "Light", "dark": "Dark", "system": "System",
+  "motion": "Animate artwork", "palette": "Color palette", "close": "Close", "read": "Read article", "allPosts": "All articles",
+  "heroLabel": "BLUE’S PERSONAL BLOG", "heroTitle": "Code, curiosity,\nand things worth sharing.",
+  "heroBody": "Practical notes from open-source projects. Things to try, problems to untangle, and ideas to exchange.",
+  "latest": "From the blog", "postsIntro": "Tools, media and engineering — explained through concrete problems.",
+  "projectIntro": "Explore the work, understand its limits, and go straight to the source.",
+  "friendsIntro": "Independent corners of the internet, connected by curiosity.",
+  "aboutBody": "I’m Blue. PulseLink brings together my open-source projects and technical writing. Browse an article, inspect the code, or join the conversation below a post.",
+  "search": "Search articles", "noResults": "No matching articles. Try another search.", "contents": "In this article",
+  "discussion": "Conversation", "commentIntro": "Questions, corrections and experiences are welcome. Sign in with GitHub to join the discussion.",
+  "loadComments": "Load comments", "openDiscussion": "Open GitHub Discussions", "commentUnavailable": "The embedded discussion is not available yet. You can visit the repository’s Discussions page.",
+  "source": "Source", "releases": "Releases", "back": "Back to articles", "notFound": "This page could not be found.",
+  "copyLink": "Copy link", "copied": "Link copied", "copyFailed": "Copying failed. Copy the address from your browser.",
+  "related": "Keep reading", "sourceNote": "Based on the project documentation. Check the repository for current platform support and release details.",
+  "pantoneNote": "Mocha Mousse, Peach Fuzz and Very Peri are Pantone-inspired screen approximations, not certified color matches.",
+  "friendLxns": "Lxns Network · A development team from China", "friendTaoran": "A warm clay blog",
+  "projectName": "Segmeris", "projectSummary": "A Flutter video downloader with a Rust engine. Discover media, download segments and prepare MP4 output.",
+  "projectDetails": "Segmeris supports HLS playlists, direct media links and Bilibili pages. Analyze a link to inspect available streams, then choose a destination and start the task. Transfers can be paused and resumed; conversion is a separate stage. Desktop media processing uses FFmpeg, while Android uses platform media APIs. Live recording and DRM content are not supported. Available formats still depend on the source and your account permissions.",
+  "offlineProjects": "GitHub data is unavailable. The featured project and its documentation remain accessible.",
+  "retry": "Retry", "otherProjects": "More repositories", "loading": "Loading…", "footer": "Made with Flutter · Hosted on GitHub Pages",
+  "articles": [
+    {
+      "id": "segmeris-guide", "category": "Segmeris", "title": "From a video link to a file: getting started with Segmeris",
+      "summary": "Analyze before downloading, choose a processing mode, and understand where the finished file goes.",
+      "sections": [
+        {"heading": "Start by analyzing the link", "body": "A video page and a media file are not the same thing. Paste a supported page URL into Segmeris and choose Analyze first. The results let you inspect the streams exposed by the source, including available quality and codec choices. A higher quality tier may require an authorized account; logging in cannot unlock permissions that account does not have.\n\nFor a direct media URL or HLS playlist, the source already identifies the input. Still check the destination and filename before starting. Signed URLs can expire, so a link that worked yesterday is not evidence that the current request will succeed."},
+        {"heading": "Choose copying or encoding deliberately", "body": "A bitrate of 0 requests stream copy. This preserves compressed samples when the output container can accept them; incompatible formats can still require encoding. Choosing a smaller bitrate is a request to process the media, not a way to accelerate the HTTP download.\n\nDesktop processing needs FFmpeg and ffprobe on PATH. Android uses MediaCodec and MediaMuxer instead. Hardware availability depends on the device and codec, so do not interpret the presence of a GPU as a guarantee that every conversion can use it."},
+        {"heading": "Follow the task through to export", "body": "Pause and resume apply to the transfer stage, not to conversion or export. A pending network read may need to finish or time out before a pause takes effect. Verified segments and safely resumable data can be reused, but a server without suitable range support can require a new transfer.\n\nAndroid exports completed files to public Downloads. Desktop builds use the selected path. Subtitles are separate SRT files with the same basename. Wait for successful export before treating a temporary file as the finished result."},
+        {"heading": "Make a useful bug report", "body": "Include your platform, the processing mode, the failing stage and a public sample that reproduces the problem. A failed playlist request, an unavailable encoder and an invalid output file are different failures. Preserve the error message rather than replacing it with ‘download failed’.\n\nRemove cookies, SESSDATA, API tokens and private signed URLs from logs. Use the repository’s current releases and documentation as the source of truth. Live recording and DRM-protected inputs are outside the implemented coverage."}
+      ]
+    },
+    {
+      "id": "download-remux-encode", "category": "Media", "title": "Download, remux, encode: three jobs that should not be confused",
+      "summary": "Why changing a bitrate does not fix a slow network, and why joining video segments is not always enough.",
+      "sections": [
+        {"heading": "Download moves bytes", "body": "Downloading transfers data from a server. Its speed depends on the network, the server and the request pattern. Increasing concurrency can help when individual requests are limited, but can also trigger throttling or overload a connection. Start with the default settings and inspect the actual failure before increasing retry counts.\n\nAn HTTP 404 means the requested resource is unavailable at that address. A TLS failure occurs before a usable response is obtained. Neither is solved by selecting a hardware encoder."},
+        {"heading": "Remuxing rebuilds the container", "body": "A container describes how compressed audio and video are organized, timestamped and indexed. Remuxing copies those samples into another container without re-encoding them. It is usually much less work than encoding, but the streams must be compatible with the target container.\n\nHLS can reference initialization sections, byte ranges and discontinuities. Simply concatenating downloaded MP4 fragments does not necessarily produce a complete movie with a valid duration. The output must be assembled and validated, not merely renamed."},
+        {"heading": "Encoding changes the media representation", "body": "Changing a video codec, resolution or bitrate generally requires decoding and encoding. This consumes compute and can change quality. A hardware encoder can accelerate a supported encoding workload; it does not make the server deliver bytes faster.\n\nSupport is conditional on the operating system, driver, codec and dimensions. In Segmeris, a successful encoder probe is evidence that a small test worked. It does not replace checking the actual exported video on the intended device."},
+        {"heading": "Diagnose in pipeline order", "body": "First check that the source can be fetched. Next confirm the chosen streams and their permissions. Then inspect transfer errors and resumability. Finally verify processing and export. This sequence avoids changing unrelated settings.\n\nFor a download that finishes but produces a broken file, examine container duration, audio/video synchronization and the processing log. For a request that never starts, check the HTTP or TLS error first. One precise observation is more useful than repeatedly switching every option."}
+      ]
+    }
+  ]
+}
