@@ -1,0 +1,1063 @@
+[
+  {
+    "id": "segmeris",
+    "name": "Segmeris",
+    "repository": "https://github.com/blueokanna/Segmeris",
+    "stack": [
+      "Flutter",
+      "Rust",
+      "HLS",
+      "MediaCodec"
+    ],
+    "variant": 0,
+    "articleId": "segmeris-guide",
+    "description": {
+      "zh-CN": "把媒体解析、网络传输与文件导出拆开处理的 Flutter 视频下载器，Rust 负责核心任务。",
+      "zh-TW": "將媒體解析、網路傳輸與檔案匯出分開處理的 Flutter 影片下載器，核心任務由 Rust 負責。",
+      "en": "A Flutter video downloader that separates source analysis, transfer and export, with Rust handling the core tasks.",
+      "ja": "ソース解析・転送・書き出しを分離した Flutter 製動画ダウンローダー。中核の処理は Rust が担当します。",
+      "de": "Ein Flutter-Videodownloader, der Quellenanalyse, Übertragung und Export trennt. Rust übernimmt die Kernaufgaben.",
+      "fr": "Un téléchargeur vidéo Flutter qui sépare analyse de la source, transfert et export, avec un cœur de traitement Rust.",
+      "es": "Un descargador de vídeo en Flutter que separa análisis de la fuente, transferencia y exportación, con un núcleo en Rust.",
+      "ru": "Видеозагрузчик на Flutter, разделяющий анализ источника, передачу и экспорт. Основные задачи выполняет Rust.",
+      "pt": "Um baixador de vídeos em Flutter que separa análise da fonte, transferência e exportação, com núcleo em Rust.",
+      "it": "Un downloader video Flutter che separa analisi della sorgente, trasferimento ed esportazione, con un nucleo Rust."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "负责什么",
+          "body": "Segmeris 接收 HLS 播放列表、媒体直链和 Bilibili 页面。Flutter 展示来源分析、任务状态与下载选项，Rust 处理解析和传输；平台媒体接口负责最终处理。分析页面与下载媒体是两个阶段，可用清晰度和字幕来自实际接口响应，登录不会扩大账号已有权限。"
+        },
+        {
+          "heading": "处理链路",
+          "body": "任务先解析来源，再下载并验证媒体数据，随后转封装或按需转码，最后写入目标目录。HLS 路径处理初始化段、字节范围和独立音轨；快速模式保留压缩样本，不代表直接拼接分片。Android 使用 MediaCodec / MediaMuxer 并导出到公共 Downloads，桌面依赖 FFmpeg 与 ffprobe。"
+        },
+        {
+          "heading": "边界与验证",
+          "body": "暂停和继续适用于传输阶段，不覆盖转码和导出。未结束的直播、EVENT 播放列表及 SAMPLE-AES / DRM 不在支持范围。验收应检查最终文件时长、音画同步、输出位置与失败日志；硬件编码能力依赖设备、驱动及格式，不能仅凭成功下载就判断整个流程正确。"
+        }
+      ],
+      "zh-TW": [
+        {
+          "heading": "負責什麼",
+          "body": "Segmeris 接收 HLS 播放清單、媒體直連網址與 Bilibili 頁面。Flutter 顯示來源分析、任務狀態與下載選項，Rust 處理解析和傳輸；平台媒體介面負責最終處理。分析頁面與下載媒體是兩個階段，可用畫質和字幕來自實際介面回應，登入不會擴大帳號原有權限。"
+        },
+        {
+          "heading": "處理流程",
+          "body": "任務先解析來源，再下載並驗證媒體資料，接著重新封裝或視需要轉碼，最後寫入目標目錄。HLS 路徑處理初始化片段、位元組範圍與獨立音軌；快速模式保留壓縮樣本，不等於直接串接片段。Android 使用 MediaCodec / MediaMuxer 並匯出至公共 Downloads，桌面端依賴 FFmpeg 與 ffprobe。"
+        },
+        {
+          "heading": "限制與驗證",
+          "body": "暫停與繼續適用於傳輸階段，不涵蓋轉碼和匯出。尚未結束的直播、EVENT 播放清單及 SAMPLE-AES / DRM 不在支援範圍。驗收應檢查最終檔案時長、音畫同步、輸出位置及錯誤紀錄；硬體編碼能力取決於裝置、驅動程式與格式，下載成功並不代表整個流程正確。"
+        }
+      ],
+      "en": [
+        {
+          "heading": "Responsibility",
+          "body": "Segmeris accepts HLS playlists, direct media URLs and Bilibili pages. Flutter presents source analysis, task state and download options; Rust handles parsing and transfer, followed by platform media processing. Page analysis and media transfer are separate stages. Available qualities and subtitles come from actual API responses, and signing in does not extend the account's permissions."
+        },
+        {
+          "heading": "Processing path",
+          "body": "A task resolves its source, downloads and validates media data, remuxes or transcodes as required, then writes the destination. The HLS path handles initialization segments, byte ranges and separate audio. Fast mode preserves compressed samples rather than merely concatenating fragments. Android uses MediaCodec / MediaMuxer and public Downloads; desktop processing requires FFmpeg and ffprobe."
+        },
+        {
+          "heading": "Limits and validation",
+          "body": "Pause and resume apply to transfer, not conversion or export. Unfinished live and EVENT playlists, SAMPLE-AES and DRM are outside the supported scope. Validate duration, audio/video synchronization, destination and failure logs in the finished output. Hardware encoding depends on the device, driver and format; a successful transfer alone does not establish end-to-end correctness."
+        }
+      ],
+      "ja": [
+        {
+          "heading": "役割",
+          "body": "Segmeris は HLS プレイリスト、メディアの直接 URL、Bilibili のページを受け付けます。Flutter が解析結果、タスク状態、設定を表示し、Rust が解析と転送を処理した後、プラットフォームのメディア機能へ渡します。利用できる画質と字幕は実際の API 応答に基づき、ログインしてもアカウントの権限は増えません。"
+        },
+        {
+          "heading": "処理の流れ",
+          "body": "ソースを解析し、データを取得・検証してから、必要に応じて再多重化またはトランスコードを行い、保存先へ書き出します。HLS では初期化セグメント、バイト範囲、独立音声を扱います。高速モードは圧縮済みサンプルを保持するもので、単純な断片結合ではありません。Android は MediaCodec / MediaMuxer と公開 Downloads、デスクトップは FFmpeg と ffprobe を使用します。"
+        },
+        {
+          "heading": "制約と検証",
+          "body": "一時停止と再開の対象は転送であり、変換と書き出しではありません。終了していないライブや EVENT プレイリスト、SAMPLE-AES、DRM は対象外です。完成ファイルの再生時間、映像と音声の同期、保存先、失敗ログを確認してください。ハードウェアエンコードは端末・ドライバー・形式に依存し、転送成功だけでは処理全体の正しさを示せません。"
+        }
+      ],
+      "de": [
+        {
+          "heading": "Aufgabe",
+          "body": "Segmeris verarbeitet HLS-Playlists, direkte Medien-URLs und Bilibili-Seiten. Flutter zeigt Analyse, Aufgabenstatus und Optionen; Rust übernimmt Parsing und Übertragung, anschließend folgen die Medienfunktionen der Plattform. Seitenanalyse und Mediendownload sind getrennte Schritte. Verfügbare Qualitätsstufen und Untertitel stammen aus tatsächlichen API-Antworten. Eine Anmeldung erweitert die Berechtigungen des Kontos nicht."
+        },
+        {
+          "heading": "Verarbeitung",
+          "body": "Eine Aufgabe löst die Quelle auf, lädt und prüft die Mediendaten, führt bei Bedarf Remuxing oder Transkodierung aus und schreibt das Ergebnis. HLS berücksichtigt Initialisierungssegmente, Bytebereiche und separate Tonspuren. Der schnelle Modus erhält komprimierte Samples, statt Fragmente bloß zu verketten. Android nutzt MediaCodec / MediaMuxer und den öffentlichen Downloads-Ordner; am Desktop werden FFmpeg und ffprobe benötigt."
+        },
+        {
+          "heading": "Grenzen und Prüfung",
+          "body": "Pause und Fortsetzung gelten für die Übertragung, nicht für Konvertierung oder Export. Unbeendete Live- und EVENT-Playlists, SAMPLE-AES und DRM werden nicht unterstützt. Zu prüfen sind Laufzeit, Bild-Ton-Synchronität, Zielpfad und Fehlerprotokolle. Hardware-Encoding hängt von Gerät, Treiber und Format ab; eine erfolgreiche Übertragung belegt noch keinen korrekten Gesamtablauf."
+        }
+      ],
+      "fr": [
+        {
+          "heading": "Rôle",
+          "body": "Segmeris accepte les listes HLS, les URL directes de médias et les pages Bilibili. Flutter présente l'analyse, l'état des tâches et les options ; Rust assure l'analyse des données et le transfert avant le traitement multimédia propre à la plateforme. Les qualités et sous-titres disponibles proviennent des réponses réelles de l'API. La connexion ne donne aucun droit supplémentaire au compte."
+        },
+        {
+          "heading": "Chemin de traitement",
+          "body": "La tâche résout la source, télécharge et vérifie les données, remuxe ou transcode selon le besoin, puis écrit le résultat. Le chemin HLS gère les segments d'initialisation, les plages d'octets et l'audio séparé. Le mode rapide préserve les échantillons compressés plutôt que de simplement concaténer les fragments. Android utilise MediaCodec / MediaMuxer et Downloads ; le bureau nécessite FFmpeg et ffprobe."
+        },
+        {
+          "heading": "Limites et validation",
+          "body": "La pause et la reprise concernent le transfert, pas la conversion ni l'export. Les listes live et EVENT non terminées, SAMPLE-AES et DRM ne sont pas pris en charge. Vérifier la durée finale, la synchronisation audiovisuelle, le dossier de sortie et les journaux d'erreur. L'encodage matériel dépend de l'appareil, du pilote et du format ; un transfert réussi ne suffit pas à valider toute la chaîne."
+        }
+      ],
+      "es": [
+        {
+          "heading": "Función",
+          "body": "Segmeris acepta listas HLS, URL directas de medios y páginas de Bilibili. Flutter muestra el análisis, el estado de las tareas y sus opciones; Rust realiza el análisis de datos y la transferencia antes del procesamiento multimedia de cada plataforma. Las calidades y los subtítulos disponibles proceden de respuestas reales de la API. Iniciar sesión no amplía los permisos de la cuenta."
+        },
+        {
+          "heading": "Flujo de procesamiento",
+          "body": "La tarea resuelve la fuente, descarga y valida los datos, remultiplexa o transcodifica cuando hace falta y escribe el resultado. La ruta HLS gestiona segmentos de inicialización, rangos de bytes y audio separado. El modo rápido conserva muestras comprimidas, en lugar de limitarse a concatenar fragmentos. Android usa MediaCodec / MediaMuxer y Downloads; el escritorio requiere FFmpeg y ffprobe."
+        },
+        {
+          "heading": "Límites y validación",
+          "body": "La pausa y la reanudación se aplican a la transferencia, no a la conversión ni a la exportación. No se admiten listas live o EVENT sin finalizar, SAMPLE-AES ni DRM. Hay que comprobar duración, sincronización audiovisual, destino y registros de error. La codificación por hardware depende del dispositivo, el controlador y el formato; una descarga correcta no valida por sí sola todo el proceso."
+        }
+      ],
+      "ru": [
+        {
+          "heading": "Назначение",
+          "body": "Segmeris принимает плейлисты HLS, прямые ссылки на медиа и страницы Bilibili. Flutter показывает анализ, состояние задач и настройки; Rust разбирает данные и выполняет передачу, после чего используются медиасредства платформы. Анализ страницы и загрузка медиа — отдельные этапы. Доступные качества и субтитры берутся из реальных ответов API; вход не расширяет права аккаунта."
+        },
+        {
+          "heading": "Путь обработки",
+          "body": "Задача определяет источник, загружает и проверяет данные, при необходимости меняет контейнер или перекодирует медиа, затем записывает результат. HLS обрабатывает сегменты инициализации, диапазоны байтов и отдельное аудио. Быстрый режим сохраняет сжатые сэмплы, а не просто склеивает фрагменты. Android использует MediaCodec / MediaMuxer и общую папку Downloads; настольным системам нужны FFmpeg и ffprobe."
+        },
+        {
+          "heading": "Ограничения и проверка",
+          "body": "Пауза и продолжение относятся к передаче, но не к преобразованию или экспорту. Незавершённые live- и EVENT-плейлисты, SAMPLE-AES и DRM не поддерживаются. Проверять следует длительность, синхронизацию аудио и видео, место сохранения и журналы ошибок. Аппаратное кодирование зависит от устройства, драйвера и формата; успешная передача ещё не доказывает корректность всей цепочки."
+        }
+      ],
+      "pt": [
+        {
+          "heading": "Responsabilidade",
+          "body": "O Segmeris aceita listas HLS, URLs diretas de mídia e páginas do Bilibili. O Flutter apresenta a análise, o estado das tarefas e as opções; o Rust interpreta os dados e realiza a transferência antes do processamento de mídia da plataforma. As qualidades e legendas disponíveis vêm das respostas reais da API. Fazer login não amplia as permissões da conta."
+        },
+        {
+          "heading": "Fluxo de processamento",
+          "body": "A tarefa resolve a fonte, baixa e valida os dados, faz remux ou transcodifica quando necessário e grava o resultado. O caminho HLS trata segmentos de inicialização, intervalos de bytes e áudio separado. O modo rápido preserva amostras comprimidas, em vez de apenas concatenar fragmentos. O Android usa MediaCodec / MediaMuxer e Downloads; no desktop, são necessários FFmpeg e ffprobe."
+        },
+        {
+          "heading": "Limites e validação",
+          "body": "Pausa e retomada se aplicam à transferência, não à conversão ou exportação. Listas live e EVENT ainda não encerradas, SAMPLE-AES e DRM não são suportados. Verifique duração, sincronização audiovisual, destino e registros de falha. A codificação por hardware depende do dispositivo, driver e formato; uma transferência bem-sucedida não valida sozinha todo o processo."
+        }
+      ],
+      "it": [
+        {
+          "heading": "Funzione",
+          "body": "Segmeris accetta playlist HLS, URL diretti di contenuti multimediali e pagine Bilibili. Flutter mostra analisi, stato delle attività e opzioni; Rust interpreta i dati e gestisce il trasferimento, seguito dall'elaborazione multimediale della piattaforma. Qualità e sottotitoli disponibili provengono dalle risposte effettive dell'API. L'accesso non estende le autorizzazioni dell'account."
+        },
+        {
+          "heading": "Flusso di elaborazione",
+          "body": "L'attività risolve la sorgente, scarica e verifica i dati, esegue remux o transcodifica quando necessario e scrive il risultato. Il percorso HLS gestisce segmenti di inizializzazione, intervalli di byte e audio separato. La modalità rapida conserva i campioni compressi, anziché limitarsi a concatenare i frammenti. Android usa MediaCodec / MediaMuxer e Downloads; sul desktop servono FFmpeg e ffprobe."
+        },
+        {
+          "heading": "Limiti e verifica",
+          "body": "Pausa e ripresa riguardano il trasferimento, non la conversione o l'esportazione. Playlist live ed EVENT non terminate, SAMPLE-AES e DRM non sono supportati. Verificare durata, sincronizzazione audiovisiva, destinazione e registri degli errori. La codifica hardware dipende da dispositivo, driver e formato; un trasferimento riuscito non dimostra da solo la correttezza dell'intera catena."
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · fe69043",
+        "url": "https://github.com/blueokanna/Segmeris/blob/fe69043aa9d9f9b9be473dab429130122b0a0e4f/README.md"
+      },
+      {
+        "label": "Download service",
+        "url": "https://github.com/blueokanna/Segmeris/blob/fe69043aa9d9f9b9be473dab429130122b0a0e4f/rust/src/download_service.rs"
+      }
+    ]
+  },
+  {
+    "id": "arcadiaplus",
+    "name": "ArcadiaPlus",
+    "repository": "https://github.com/blueokanna/ArcadiaPlus",
+    "stack": [
+      "Flutter",
+      "Rust",
+      "Corduit",
+      "TUN"
+    ],
+    "variant": 1,
+    "description": {
+      "zh-CN": "把代理配置、规则执行和平台网络接管放进同一界面的 Flutter 客户端，实际网络引擎由 Corduit 提供。",
+      "zh-TW": "把代理設定、規則執行與平台網路接管整合到同一介面的 Flutter 用戶端，實際網路引擎由 Corduit 提供。",
+      "en": "A Flutter client that brings proxy configuration, rule execution and platform traffic capture together, powered by Corduit.",
+      "ja": "プロキシ設定、ルールの実行状況、プラットフォームの通信取り込みをまとめた Flutter クライアント。エンジンは Corduit です。",
+      "de": "Ein Flutter-Client für Proxy-Konfiguration, Regelausführung und plattformspezifische Verkehrserfassung mit Corduit als Engine.",
+      "fr": "Un client Flutter réunissant configuration proxy, exécution des règles et capture du trafic propre à chaque plateforme, avec Corduit comme moteur.",
+      "es": "Un cliente Flutter para configurar proxies, observar reglas y capturar tráfico por plataforma, con Corduit como motor.",
+      "ru": "Клиент Flutter для настройки прокси, наблюдения за правилами и перехвата трафика средствами платформы. Сетевой движок — Corduit.",
+      "pt": "Um cliente Flutter para configuração de proxy, execução de regras e captura de tráfego por plataforma, com o motor Corduit.",
+      "it": "Un client Flutter per configurare proxy, osservare le regole e acquisire il traffico tramite le piattaforme, con il motore Corduit."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "负责什么",
+          "body": "ArcadiaPlus 的重点是把配置转换成可检查的运行状态。Flutter 管理配置、策略组和规则集，Rust 仓库只承担 FFI、数据映射与平台入口，协议和 TUN 数据面来自 Corduit。规则页可以查看命中次数、转换警告和规则集刷新状态，避免只看到一个连接开关却不知道流量如何走。"
+        },
+        {
+          "heading": "处理链路",
+          "body": "Clash 形态配置经校验后进入引擎；规则集由 Dart 下载、验证并缓存，必要缓存缺失时拒绝启动。连接经过规则、策略组和选中成员到达出口。Android 由 VpnService 接管网络，Windows 使用系统代理或 Wintun；切换路由模式由引擎处理，不必为每次切换重建隧道。"
+        },
+        {
+          "heading": "边界与验证",
+          "body": "项目不提供服务器、节点或订阅。平台目录不等于功能完整：macOS 尚无 Network Extension，iOS 尚无 Packet Tunnel Extension；Linux TUN 当前只允许 global。测试应核对规则命中、实际出口、权限失败、网络切换和设备上的长连接行为，不能用 UI 能运行代替平台网络验证。"
+        }
+      ],
+      "zh-TW": [
+        {
+          "heading": "負責什麼",
+          "body": "ArcadiaPlus 著重將設定轉換成可檢查的執行狀態。Flutter 管理設定、策略群組和規則集，Rust 倉庫只負責 FFI、資料映射與平台入口，協定和 TUN 資料路徑來自 Corduit。規則頁可查看命中次數、轉換警告及規則集更新狀態，避免只有連線開關卻不清楚流量走向。"
+        },
+        {
+          "heading": "處理流程",
+          "body": "Clash 形式的設定通過驗證後交給引擎；Dart 下載、驗證及快取規則集，必要快取缺失時拒絕啟動。連線依序經過規則、策略群組和選定成員到達出口。Android 使用 VpnService，Windows 使用系統代理或 Wintun；路由模式由引擎切換，不必每次重建隧道。"
+        },
+        {
+          "heading": "限制與驗證",
+          "body": "專案不提供伺服器、節點或訂閱。有平台目錄不代表功能完整：macOS 尚無 Network Extension，iOS 尚無 Packet Tunnel Extension；Linux TUN 目前僅允許 global。測試應核對規則命中、實際出口、權限失敗、網路切換及真實裝置的長連線行為，不能以介面能執行取代網路整合驗證。"
+        }
+      ],
+      "en": [
+        {
+          "heading": "Responsibility",
+          "body": "ArcadiaPlus turns configuration into inspectable runtime behavior. Flutter manages profiles, policy groups and rule providers. Its Rust repository handles FFI, data mapping and platform entry points; Corduit owns protocols and the TUN data path. The rules view exposes hit counts, conversion warnings and refresh state, so the interface explains routing rather than offering only a connection switch."
+        },
+        {
+          "heading": "Processing path",
+          "body": "Clash-shaped configuration is validated before reaching the engine. Dart downloads, validates and caches rule sets; missing mandatory caches prevent startup. Connections follow rules, groups and their selected members to an outbound. Android uses VpnService; Windows uses system proxy settings or Wintun. Routing mode changes happen in the engine without rebuilding the tunnel for each change."
+        },
+        {
+          "heading": "Limits and validation",
+          "body": "The project supplies no servers, nodes or subscriptions. Platform directories do not imply complete integration: macOS lacks Network Extension, iOS lacks Packet Tunnel Extension, and Linux TUN currently allows only global mode. Check rule hits, actual outbound, permission failures, network changes and long-lived connections on devices. A working UI is not platform networking validation."
+        }
+      ],
+      "ja": [
+        {
+          "heading": "役割",
+          "body": "ArcadiaPlus は設定を確認可能な実行状態へ変換します。Flutter がプロファイル、ポリシーグループ、ルールセットを管理し、Rust 側は FFI、データ変換、プラットフォーム入口を担当します。プロトコルと TUN データ処理は Corduit が所有します。ルール画面にはヒット数、変換警告、更新状態が表示され、通信の経路を追えます。"
+        },
+        {
+          "heading": "処理の流れ",
+          "body": "Clash 形式の設定を検証してからエンジンへ渡します。Dart がルールセットを取得・検証・キャッシュし、必須キャッシュがなければ起動を拒否します。接続はルール、グループ、選択メンバーを経て出口へ進みます。Android は VpnService、Windows はシステムプロキシまたは Wintun を使用し、モード変更はトンネルを毎回作り直さずエンジン内で処理します。"
+        },
+        {
+          "heading": "制約と検証",
+          "body": "サーバー、ノード、サブスクリプションは提供しません。プラットフォーム用ディレクトリがあっても完全対応とは限らず、macOS は Network Extension、iOS は Packet Tunnel Extension が未実装です。Linux TUN は現在 global のみです。ルールのヒット、実際の出口、権限エラー、ネットワーク変更、長時間接続を実機で検証する必要があります。"
+        }
+      ],
+      "de": [
+        {
+          "heading": "Aufgabe",
+          "body": "ArcadiaPlus macht aus Konfiguration überprüfbares Laufzeitverhalten. Flutter verwaltet Profile, Richtliniengruppen und Regelquellen. Das Rust-Repository übernimmt FFI, Datenabbildung und Plattform-Einstiegspunkte; Protokolle und TUN-Datenpfad gehören Corduit. Die Regelansicht zeigt Trefferzahlen, Konvertierungswarnungen und Aktualisierungszustand. So wird die tatsächliche Weiterleitung sichtbar, statt nur ein Verbindungsschalter angeboten."
+        },
+        {
+          "heading": "Verarbeitung",
+          "body": "Konfiguration im Clash-Format wird vor der Übergabe an die Engine geprüft. Dart lädt, validiert und speichert Regelsätze; fehlt ein notwendiger Cache, wird der Start verweigert. Verbindungen folgen Regeln, Gruppen und ausgewählten Mitgliedern zum Ausgang. Android nutzt VpnService, Windows Systemproxy oder Wintun. Moduswechsel erfolgen in der Engine ohne jedes Mal einen neuen Tunnel aufzubauen."
+        },
+        {
+          "heading": "Grenzen und Prüfung",
+          "body": "Das Projekt liefert keine Server, Knoten oder Abonnements. Plattformverzeichnisse bedeuten keine vollständige Integration: macOS fehlt Network Extension, iOS Packet Tunnel Extension; Linux TUN unterstützt derzeit nur global. Zu prüfen sind Regeltreffer, tatsächlicher Ausgang, Berechtigungsfehler, Netzwechsel und langlebige Verbindungen auf Geräten. Eine funktionierende Oberfläche ersetzt diese Netzwerkprüfung nicht."
+        }
+      ],
+      "fr": [
+        {
+          "heading": "Rôle",
+          "body": "ArcadiaPlus rend observable le comportement issu d'une configuration. Flutter gère les profils, groupes de politiques et fournisseurs de règles. Le dépôt Rust assure la FFI, la conversion des données et les points d'entrée des plateformes ; Corduit fournit les protocoles et le chemin TUN. La vue des règles affiche compteurs, avertissements de conversion et état des mises à jour."
+        },
+        {
+          "heading": "Chemin de traitement",
+          "body": "La configuration au format Clash est validée avant d'atteindre le moteur. Dart télécharge, vérifie et met en cache les règles ; l'absence d'un cache obligatoire interdit le démarrage. Les connexions suivent règles, groupes et membres sélectionnés jusqu'à la sortie. Android utilise VpnService, Windows le proxy système ou Wintun. Le moteur change de mode sans reconstruire le tunnel à chaque fois."
+        },
+        {
+          "heading": "Limites et validation",
+          "body": "Le projet ne fournit ni serveur, ni nœud, ni abonnement. Les répertoires de plateformes ne prouvent pas leur prise en charge complète : macOS n'a pas de Network Extension, iOS pas de Packet Tunnel Extension, et le TUN Linux n'accepte actuellement que global. Tester les règles, la sortie effective, les autorisations, les changements de réseau et les connexions longues sur appareil réel."
+        }
+      ],
+      "es": [
+        {
+          "heading": "Función",
+          "body": "ArcadiaPlus convierte la configuración en un comportamiento verificable. Flutter gestiona perfiles, grupos de políticas y proveedores de reglas. El repositorio Rust contiene la FFI, la conversión de datos y los puntos de entrada de plataforma; Corduit aporta los protocolos y la ruta TUN. La vista de reglas muestra coincidencias, avisos de conversión y estado de actualización."
+        },
+        {
+          "heading": "Flujo de procesamiento",
+          "body": "La configuración con estructura Clash se valida antes de llegar al motor. Dart descarga, verifica y almacena las reglas; sin una caché obligatoria válida, el inicio se rechaza. Las conexiones recorren reglas, grupos y miembros seleccionados hasta la salida. Android usa VpnService y Windows el proxy del sistema o Wintun. Los modos cambian dentro del motor sin reconstruir el túnel cada vez."
+        },
+        {
+          "heading": "Límites y validación",
+          "body": "El proyecto no ofrece servidores, nodos ni suscripciones. Tener directorios de plataforma no implica integración completa: macOS carece de Network Extension, iOS de Packet Tunnel Extension y Linux TUN solo admite global actualmente. Compruebe reglas, salida real, fallos de permisos, cambios de red y conexiones prolongadas en dispositivos. Una interfaz funcional no sustituye la validación de red."
+        }
+      ],
+      "ru": [
+        {
+          "heading": "Назначение",
+          "body": "ArcadiaPlus делает результат конфигурации наблюдаемым. Flutter управляет профилями, группами политик и источниками правил. Rust-репозиторий отвечает за FFI, преобразование данных и платформенные точки входа; протоколы и путь данных TUN принадлежат Corduit. Экран правил показывает счётчики совпадений, предупреждения преобразования и состояние обновления, а не только переключатель соединения."
+        },
+        {
+          "heading": "Путь обработки",
+          "body": "Конфигурация в формате Clash проверяется до передачи движку. Dart загружает, проверяет и кэширует наборы правил; отсутствие обязательного кэша блокирует запуск. Соединение проходит через правило, группу и выбранного участника к выходу. Android использует VpnService, Windows — системный прокси или Wintun. Режим меняется внутри движка без пересоздания туннеля при каждом переключении."
+        },
+        {
+          "heading": "Ограничения и проверка",
+          "body": "Проект не предоставляет серверы, узлы или подписки. Наличие каталога платформы не означает полной интеграции: для macOS нет Network Extension, для iOS — Packet Tunnel Extension; Linux TUN пока допускает только global. Нужны проверки совпадений правил, фактического выхода, отказов разрешений, смены сети и долгих соединений на устройствах. Работающий интерфейс их не заменяет."
+        }
+      ],
+      "pt": [
+        {
+          "heading": "Responsabilidade",
+          "body": "O ArcadiaPlus transforma configurações em comportamento verificável. O Flutter gerencia perfis, grupos de políticas e provedores de regras. O repositório Rust cuida da FFI, do mapeamento de dados e das entradas de plataforma; protocolos e fluxo TUN pertencem ao Corduit. A tela de regras mostra contadores, avisos de conversão e estado das atualizações, além do simples botão de conexão."
+        },
+        {
+          "heading": "Fluxo de processamento",
+          "body": "A configuração no formato Clash é validada antes de chegar ao motor. O Dart baixa, verifica e armazena regras; a ausência de um cache obrigatório válido impede a inicialização. Conexões percorrem regras, grupos e membros selecionados até a saída. O Android usa VpnService, e o Windows, proxy do sistema ou Wintun. A troca de modo ocorre no motor sem reconstruir o túnel a cada vez."
+        },
+        {
+          "heading": "Limites e validação",
+          "body": "O projeto não fornece servidores, nós nem assinaturas. Diretórios de plataforma não significam integração completa: falta Network Extension no macOS e Packet Tunnel Extension no iOS; o TUN do Linux permite apenas global atualmente. Verifique regras, saída efetiva, falhas de permissão, mudanças de rede e conexões longas em dispositivos reais. Uma interface funcional não substitui esses testes."
+        }
+      ],
+      "it": [
+        {
+          "heading": "Funzione",
+          "body": "ArcadiaPlus rende verificabile il comportamento prodotto dalla configurazione. Flutter gestisce profili, gruppi di politiche e sorgenti di regole. Il repository Rust contiene FFI, conversione dei dati e punti d'ingresso delle piattaforme; protocolli e percorso TUN appartengono a Corduit. La vista delle regole mostra conteggi, avvisi di conversione e stato degli aggiornamenti, oltre al semplice interruttore di connessione."
+        },
+        {
+          "heading": "Flusso di elaborazione",
+          "body": "La configurazione in formato Clash viene validata prima di raggiungere il motore. Dart scarica, verifica e memorizza le regole; senza una cache obbligatoria valida, l'avvio viene rifiutato. Le connessioni seguono regole, gruppi e membri selezionati fino all'uscita. Android usa VpnService e Windows proxy di sistema o Wintun. Il cambio di modalità avviene nel motore senza ricreare ogni volta il tunnel."
+        },
+        {
+          "heading": "Limiti e verifica",
+          "body": "Il progetto non fornisce server, nodi o abbonamenti. Le directory delle piattaforme non implicano un'integrazione completa: macOS manca di Network Extension, iOS di Packet Tunnel Extension; Linux TUN consente attualmente solo global. Verificare regole, uscita effettiva, errori di autorizzazione, cambi di rete e connessioni lunghe su dispositivi reali. Un'interfaccia funzionante non sostituisce queste prove."
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · b7f0089",
+        "url": "https://github.com/blueokanna/ArcadiaPlus/blob/b7f00898553d416fee7f071f2347fddf91e470cd/README.md"
+      },
+      {
+        "label": "Flutter / Rust bridge",
+        "url": "https://github.com/blueokanna/ArcadiaPlus/blob/b7f00898553d416fee7f071f2347fddf91e470cd/rust/src/lib.rs"
+      }
+    ]
+  },
+  {
+    "id": "recursex",
+    "name": "RecurseX",
+    "repository": "https://github.com/blueokanna/RecurseX",
+    "stack": [
+      "Rust",
+      "DNS",
+      "Semantic cache"
+    ],
+    "variant": 2,
+    "description": {
+      "zh-CN": "具有分层语义缓存、查询预算与刷新调度的 Rust DNS 解析器，重点是可观测的解析行为。",
+      "zh-TW": "具有分層語意快取、查詢預算與更新排程的 Rust DNS 解析器，重點是可觀察的解析行為。",
+      "en": "A Rust DNS resolver with semantic cache tiers, query budgets and refresh scheduling, designed around observable behavior.",
+      "ja": "階層型セマンティックキャッシュ、クエリ予算、更新スケジューリングを備えた Rust DNS リゾルバーです。",
+      "de": "Ein Rust-DNS-Resolver mit semantischen Cache-Stufen, Abfragebudgets und Aktualisierungsplanung für nachvollziehbares Verhalten.",
+      "fr": "Un résolveur DNS Rust avec cache sémantique à plusieurs niveaux, budgets de requêtes et planification des rafraîchissements.",
+      "es": "Un resolutor DNS en Rust con niveles de caché semántica, presupuestos de consulta y programación de actualizaciones.",
+      "ru": "DNS-резолвер на Rust с уровнями семантического кэша, бюджетами запросов и планированием обновлений.",
+      "pt": "Um resolvedor DNS em Rust com níveis de cache semântico, orçamentos de consulta e agendamento de atualizações.",
+      "it": "Un resolver DNS Rust con livelli di cache semantica, budget per le query e pianificazione degli aggiornamenti."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "负责什么",
+          "body": "RecurseX 处理递归解析和上游查询，缓存正向与否定结果，并合并并发的相同请求。它把记录声明的 TTL 与观测到的内容变化分开：前者来自权威响应，后者用于估计刷新价值。近似 Gamma 变化率模型指导资源分配，不把缓存热度或统计预测当作 DNS 数据真实性的证明。"
+        },
+        {
+          "heading": "处理链路",
+          "body": "查询先经过规范化与缓存检查，必要时沿根、顶级域和权威服务器迭代，或使用配置的上游传输。候选服务器共享查询截止时间，UDP 超时或截断可在预算内尝试 TCP。后台刷新受并发和交换预算约束；可选内存观察环记录真实应答、缓存来源、耗时与错误类别。"
+        },
+        {
+          "heading": "边界与验证",
+          "body": "过期数据服务默认关闭，开启失败后回退或实验性即时模式必须明确选择。统计下界只在模型假设内成立，不能排除采样之间发生 A→B→A，也不替代 DNSSEC。验证应覆盖冷缓存、真实缓存命中、不可达权威服务器、截断响应与超时；性能比较必须注明网络、缓存状态和测试口径。"
+        }
+      ],
+      "zh-TW": [
+        {
+          "heading": "負責什麼",
+          "body": "RecurseX 處理遞迴解析及上游查詢，快取正向與否定結果，並合併同時發生的相同請求。它區分記錄宣告的 TTL 與觀察到的內容變化：前者來自權威回應，後者用於估計更新價值。近似 Gamma 變化率模型指導資源分配，不將快取熱度或統計預測視為 DNS 資料真實性的證明。"
+        },
+        {
+          "heading": "處理流程",
+          "body": "查詢先經過正規化及快取檢查，必要時沿根、頂級域與權威伺服器逐步解析，或使用設定的上游傳輸。候選伺服器共用查詢期限，UDP 逾時或截斷可在預算內嘗試 TCP。背景更新受並行與交換預算限制；可選的記憶體觀察環記錄實際回應、快取來源、耗時及錯誤類別。"
+        },
+        {
+          "heading": "限制與驗證",
+          "body": "過期資料服務預設關閉，失敗後回退或實驗性即時模式必須明確啟用。統計下界只在模型假設內成立，不能排除兩次取樣間發生 A→B→A，也不能取代 DNSSEC。驗證應包含冷快取、真正的快取命中、不可達權威伺服器、截斷回應及逾時；效能比較必須交代網路、快取狀態與測試方法。"
+        }
+      ],
+      "en": [
+        {
+          "heading": "Responsibility",
+          "body": "RecurseX performs recursive resolution and upstream queries, caches positive and negative results, and coalesces concurrent identical requests. It distinguishes an authoritative record's declared TTL from observed content changes. An approximate Gamma change-rate model ranks refresh value and resource allocation; neither popularity nor a statistical prediction authenticates DNS data."
+        },
+        {
+          "heading": "Processing path",
+          "body": "Queries pass through normalization and cache lookup, then iterate through root, TLD and authoritative servers or use configured upstream transports. Authority attempts share a query deadline; UDP timeouts or truncation can retry through TCP within that budget. Background refresh has concurrency and exchange limits. An optional in-memory observation ring records actual answers, cache provenance, elapsed time and error categories."
+        },
+        {
+          "heading": "Limits and validation",
+          "body": "Stale service is disabled by default; refresh-failure fallback or immediate experimental service requires explicit selection. Statistical bounds depend on model assumptions and cannot exclude A→B→A changes between samples or replace DNSSEC. Validation should include cold caches, real cache hits, unreachable authorities, truncation and timeout. Performance comparisons need the network, cache state and measurement procedure."
+        }
+      ],
+      "ja": [
+        {
+          "heading": "役割",
+          "body": "RecurseX は再帰解決と上流への問い合わせを行い、肯定・否定応答をキャッシュし、同時に来た同じ要求をまとめます。権威サーバーが宣言する TTL と、観測された内容変化を区別します。近似 Gamma 変化率モデルは更新価値と資源配分の順位付けに使われ、人気度や統計予測が DNS データの真正性を証明するわけではありません。"
+        },
+        {
+          "heading": "処理の流れ",
+          "body": "クエリを正規化してキャッシュを調べ、必要ならルート、TLD、権威サーバーをたどるか、設定済み上流を使います。権威サーバーへの試行は期限を共有し、UDP のタイムアウトや切り詰めは予算内で TCP に再試行できます。バックグラウンド更新には並列数と通信量の予算があり、任意のメモリ内観測リングに応答、キャッシュ出所、経過時間、エラーを記録できます。"
+        },
+        {
+          "heading": "制約と検証",
+          "body": "期限切れ応答の提供は既定で無効です。更新失敗時のフォールバックや実験的な即時提供は明示的な選択が必要です。統計的な境界はモデルの仮定に依存し、観測間の A→B→A を除外できず、DNSSEC の代わりにもなりません。コールドキャッシュ、実際のヒット、到達不能な権威サーバー、切り詰め、タイムアウトを検証し、性能比較では条件を明記します。"
+        }
+      ],
+      "de": [
+        {
+          "heading": "Aufgabe",
+          "body": "RecurseX übernimmt rekursive Auflösung und Upstream-Abfragen, speichert positive wie negative Antworten und bündelt identische parallele Anfragen. Er unterscheidet die vom autoritativen Server angegebene TTL von beobachteten Inhaltsänderungen. Ein approximatives Gamma-Modell der Änderungsrate priorisiert Aktualisierung und Ressourcen; Beliebtheit und statistische Vorhersagen authentifizieren keine DNS-Daten."
+        },
+        {
+          "heading": "Verarbeitung",
+          "body": "Abfragen durchlaufen Normalisierung und Cache-Suche, anschließend Root-, TLD- und autoritative Server oder konfigurierte Upstreams. Die Versuche teilen eine Abfragefrist; nach UDP-Timeout oder abgeschnittener Antwort ist innerhalb des Budgets ein TCP-Versuch möglich. Hintergrundaktualisierungen begrenzen Parallelität und Austauschaufwand. Ein optionaler Beobachtungsring im Speicher erfasst Antworten, Cache-Herkunft, Dauer und Fehlerkategorien."
+        },
+        {
+          "heading": "Grenzen und Prüfung",
+          "body": "Die Auslieferung veralteter Daten ist standardmäßig aus. Rückfall nach Aktualisierungsfehlern und sofortige experimentelle Auslieferung müssen ausdrücklich gewählt werden. Statistische Grenzen gelten nur unter Modellannahmen, schließen A→B→A zwischen Stichproben nicht aus und ersetzen DNSSEC nicht. Tests sollten kalte Caches, echte Treffer, unerreichbare Autoritäten, abgeschnittene Antworten und Timeouts umfassen; Leistungsangaben brauchen Netz- und Messbedingungen."
+        }
+      ],
+      "fr": [
+        {
+          "heading": "Rôle",
+          "body": "RecurseX assure la résolution récursive et les requêtes amont, conserve les réponses positives et négatives et regroupe les requêtes identiques simultanées. Il distingue le TTL annoncé par l'autorité des changements réellement observés. Un modèle Gamma approximatif du taux de changement classe l'intérêt des rafraîchissements ; ni la popularité ni une prévision statistique n'authentifient les données DNS."
+        },
+        {
+          "heading": "Chemin de traitement",
+          "body": "Les requêtes passent par normalisation et cache, puis parcourent racine, TLD et autorités ou utilisent les transports amont configurés. Les tentatives partagent une échéance ; un délai UDP dépassé ou une réponse tronquée peut entraîner un essai TCP dans ce budget. Les rafraîchissements limitent concurrence et échanges. Un anneau d'observation facultatif en mémoire conserve réponses, provenance du cache, durée et catégories d'erreurs."
+        },
+        {
+          "heading": "Limites et validation",
+          "body": "Le service de données périmées est désactivé par défaut ; les modes de secours après échec et immédiat expérimental exigent un choix explicite. Les bornes statistiques restent conditionnées au modèle, n'excluent pas A→B→A entre observations et ne remplacent pas DNSSEC. Tester caches froids, vrais succès de cache, autorités injoignables, troncatures et délais. Toute comparaison doit préciser réseau, état du cache et méthode."
+        }
+      ],
+      "es": [
+        {
+          "heading": "Función",
+          "body": "RecurseX realiza resolución recursiva y consultas a servidores ascendentes, almacena respuestas positivas y negativas y agrupa solicitudes idénticas simultáneas. Distingue el TTL declarado por la autoridad de los cambios de contenido observados. Un modelo Gamma aproximado de la tasa de cambios prioriza las actualizaciones y los recursos; ni la popularidad ni una predicción estadística autentican los datos DNS."
+        },
+        {
+          "heading": "Flujo de procesamiento",
+          "body": "Las consultas pasan por normalización y caché, y luego recorren raíz, TLD y autoridades o usan los transportes ascendentes configurados. Los intentos comparten un plazo; un timeout UDP o una respuesta truncada permite intentar TCP dentro del presupuesto. Las actualizaciones de fondo limitan concurrencia e intercambios. Un registro circular opcional en memoria conserva respuestas, procedencia de caché, tiempo y errores."
+        },
+        {
+          "heading": "Límites y validación",
+          "body": "Servir datos caducados está desactivado por defecto; tanto el recurso tras fallo como el modo inmediato experimental requieren selección explícita. Los límites estadísticos dependen del modelo, no descartan cambios A→B→A entre muestras ni sustituyen DNSSEC. Pruebe caché fría, aciertos reales, autoridades inaccesibles, truncamiento y tiempos de espera. Las comparaciones deben especificar red, estado de caché y metodología."
+        }
+      ],
+      "ru": [
+        {
+          "heading": "Назначение",
+          "body": "RecurseX выполняет рекурсивное разрешение и запросы к вышестоящим серверам, кэширует положительные и отрицательные ответы и объединяет одинаковые одновременные запросы. Он различает TTL, объявленный авторитетным сервером, и наблюдаемые изменения содержимого. Приближённая Gamma-модель частоты изменений ранжирует полезность обновлений; популярность и статистический прогноз не подтверждают подлинность DNS-данных."
+        },
+        {
+          "heading": "Путь обработки",
+          "body": "Запрос проходит нормализацию и проверку кэша, затем обращается к корню, TLD и авторитетным серверам либо к настроенным транспортам. Попытки используют общий срок; тайм-аут UDP или усечённый ответ допускает повтор по TCP в пределах бюджета. Фоновые обновления ограничены по параллелизму и обменам. Необязательный кольцевой журнал в памяти хранит ответы, происхождение кэша, время и категории ошибок."
+        },
+        {
+          "heading": "Ограничения и проверка",
+          "body": "Выдача просроченных данных по умолчанию отключена. Режим после неудачного обновления и экспериментальная немедленная выдача требуют явного выбора. Статистические границы зависят от модели, не исключают A→B→A между наблюдениями и не заменяют DNSSEC. Проверяйте холодный кэш, реальные попадания, недоступные авторитетные серверы, усечение и тайм-ауты; при сравнении скорости указывайте сеть, кэш и методику."
+        }
+      ],
+      "pt": [
+        {
+          "heading": "Responsabilidade",
+          "body": "O RecurseX faz resolução recursiva e consultas a servidores upstream, armazena respostas positivas e negativas e agrupa solicitações idênticas simultâneas. Ele distingue o TTL declarado pela autoridade das mudanças observadas no conteúdo. Um modelo Gamma aproximado da taxa de mudanças prioriza atualizações e recursos; popularidade e previsão estatística não autenticam dados DNS."
+        },
+        {
+          "heading": "Fluxo de processamento",
+          "body": "As consultas passam por normalização e cache antes de percorrer raiz, TLD e autoridades ou usar os transportes upstream configurados. As tentativas compartilham um prazo; timeout UDP ou resposta truncada pode levar a uma tentativa TCP dentro do orçamento. Atualizações em segundo plano limitam concorrência e trocas. Um registro circular opcional em memória guarda respostas, origem do cache, tempo e categorias de erro."
+        },
+        {
+          "heading": "Limites e validação",
+          "body": "Servir dados expirados é desativado por padrão; o fallback após falha e o modo imediato experimental exigem escolha explícita. Os limites estatísticos dependem do modelo, não excluem A→B→A entre amostras e não substituem DNSSEC. Teste cache frio, acertos reais, autoridades inacessíveis, truncamento e timeout. Comparações de desempenho precisam informar rede, estado do cache e procedimento."
+        }
+      ],
+      "it": [
+        {
+          "heading": "Funzione",
+          "body": "RecurseX esegue risoluzione ricorsiva e query upstream, memorizza risposte positive e negative e accorpa richieste identiche simultanee. Distingue il TTL dichiarato dall'autorità dai cambiamenti osservati nel contenuto. Un modello Gamma approssimato del tasso di cambiamento ordina il valore degli aggiornamenti e l'allocazione delle risorse; popolarità e previsioni statistiche non autenticano i dati DNS."
+        },
+        {
+          "heading": "Flusso di elaborazione",
+          "body": "Le query attraversano normalizzazione e cache, poi interrogano radice, TLD e autorità o usano i trasporti upstream configurati. I tentativi condividono una scadenza; timeout UDP e risposte troncate consentono un tentativo TCP entro il budget. Gli aggiornamenti di fondo limitano concorrenza e scambi. Un registro circolare facoltativo in memoria conserva risposte, provenienza della cache, durata e categorie di errore."
+        },
+        {
+          "heading": "Limiti e verifica",
+          "body": "Servire dati scaduti è disabilitato per impostazione predefinita; il ripiego dopo un errore e la modalità immediata sperimentale richiedono una scelta esplicita. I limiti statistici dipendono dal modello, non escludono A→B→A tra campioni e non sostituiscono DNSSEC. Verificare cache fredda, veri riscontri, autorità irraggiungibili, troncamento e timeout; i confronti devono dichiarare rete, cache e metodo."
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 299967e",
+        "url": "https://github.com/blueokanna/RecurseX/blob/299967e51fccdf2557ad5aa09b56adfe6926d690/README.md"
+      },
+      {
+        "label": "Configuration and cache settings",
+        "url": "https://github.com/blueokanna/RecurseX/blob/299967e51fccdf2557ad5aa09b56adfe6926d690/src/config.rs"
+      }
+    ]
+  },
+  {
+    "id": "corduit",
+    "name": "Corduit",
+    "repository": "https://github.com/blueokanna/Corduit",
+    "stack": [
+      "Rust",
+      "Routing",
+      "TUN",
+      "FFI"
+    ],
+    "variant": 3,
+    "description": {
+      "zh-CN": "同步执行的 Rust 代理引擎，把配置校验、规则路由、DNS 与 TUN 数据路径组织成可复用库。",
+      "zh-TW": "同步執行的 Rust 代理引擎，將設定驗證、規則路由、DNS 與 TUN 資料路徑組織為可重用程式庫。",
+      "en": "A synchronous Rust proxy engine combining configuration validation, rule routing, DNS and TUN data paths in a reusable library.",
+      "ja": "設定検証、ルールルーティング、DNS、TUN データ処理を再利用可能なライブラリにまとめた同期型 Rust プロキシエンジンです。",
+      "de": "Eine synchrone Rust-Proxy-Engine, die Konfigurationsprüfung, regelbasiertes Routing, DNS und TUN als Bibliothek bereitstellt.",
+      "fr": "Un moteur proxy Rust synchrone réunissant validation de configuration, routage par règles, DNS et chemins TUN dans une bibliothèque.",
+      "es": "Un motor proxy síncrono en Rust que reúne validación de configuración, reglas de enrutamiento, DNS y rutas TUN en una biblioteca.",
+      "ru": "Синхронный прокси-движок Rust, объединяющий проверку конфигурации, правила маршрутизации, DNS и пути данных TUN в библиотеке.",
+      "pt": "Um motor proxy síncrono em Rust que reúne validação de configuração, roteamento por regras, DNS e TUN em uma biblioteca.",
+      "it": "Un motore proxy Rust sincrono che riunisce validazione della configurazione, regole di routing, DNS e percorsi TUN in una libreria."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "负责什么",
+          "body": "Corduit 是引擎库而不是带订阅的客户端。配置模型、规则路由、出口选择和用户态网络栈在库内协作，HTTP / TLS 等基础协议能力复用 Courierust，DNS 解析依赖 RecurseX。核心可在 no_std + alloc 下构建，操作系统网络和线程能力属于启用 std 的运行层。"
+        },
+        {
+          "heading": "处理链路",
+          "body": "连接从监听器或平台 TUN 入口进入，路由器依据目标和规则选择出口，再执行握手与双向转发。短任务进入工作窃取线程池，长连接由连接线程和复制线程处理，连接预算约束并发数量。运行层还提供热重载和流量统计；选择同步模型并不意味着长连接没有线程成本。"
+        },
+        {
+          "heading": "边界与验证",
+          "body": "协议能力由 Cargo feature 和实际实现共同决定。缺少所需 feature 的出口会在配置阶段报错；redir、tproxy 和 inbounds 中的 tun 项目前没有对应监听器，不能因为类型能解析就当作可用。验收需覆盖认证失败、半关闭、取消、并发预算以及与目标服务端的互操作，不在博客中把编译通过等同于协议全面兼容。"
+        }
+      ],
+      "zh-TW": [
+        {
+          "heading": "負責什麼",
+          "body": "Corduit 是引擎程式庫，不是附帶訂閱的用戶端。設定模型、規則路由、出口選擇及使用者空間網路堆疊在庫內協作，HTTP / TLS 等基礎能力重用 Courierust，DNS 解析依賴 RecurseX。核心可在 no_std + alloc 下建置，作業系統網路與執行緒能力屬於啟用 std 的執行層。"
+        },
+        {
+          "heading": "處理流程",
+          "body": "連線從監聽器或平台 TUN 入口進入，路由器依目標與規則選擇出口，再執行交握及雙向轉送。短任務交給工作竊取執行緒池，長連線由連線執行緒和複製執行緒處理，連線預算限制並行數量。執行層亦提供熱重新載入和流量統計；同步模型不代表長連線沒有執行緒成本。"
+        },
+        {
+          "heading": "限制與驗證",
+          "body": "協定能力取決於 Cargo feature 及實際實作。缺少必要 feature 的出口在設定階段就報錯；redir、tproxy 和 inbounds 裡的 tun 項目尚無對應監聽器，能解析類型不等於可用。驗收須涵蓋認證失敗、半關閉、取消、並行預算及與目標伺服器的互通，不能以編譯成功代表協定全面相容。"
+        }
+      ],
+      "en": [
+        {
+          "heading": "Responsibility",
+          "body": "Corduit is an engine library, not a client with supplied subscriptions. Its configuration model, rule router, outbound selection and userspace network stack work together. It reuses Courierust for foundational HTTP / TLS capabilities and RecurseX for DNS. The core builds with no_std + alloc; operating-system networking and threads belong to the std-enabled runtime."
+        },
+        {
+          "heading": "Processing path",
+          "body": "Connections enter through listeners or platform TUN entry points. The router selects an outbound from the target and rules, followed by handshake and bidirectional relay. Short tasks use a work-stealing pool; long-lived connections use a connection thread and a copy thread, bounded by connection budgets. Hot reload and traffic accounting are available; synchronous execution does not eliminate per-connection thread cost."
+        },
+        {
+          "heading": "Limits and validation",
+          "body": "Protocol availability depends on both Cargo features and implemented behavior. Missing required features reject an outbound during configuration. redir, tproxy and tun entries inside inbounds currently lack listeners; parsing a type does not make it usable. Validate authentication failures, half-close, cancellation, connection budgets and interoperability with target servers. Successful compilation is not evidence of complete protocol compatibility."
+        }
+      ],
+      "ja": [
+        {
+          "heading": "役割",
+          "body": "Corduit はエンジンライブラリであり、サブスクリプション付きのクライアントではありません。設定モデル、ルールルーター、出口選択、ユーザー空間ネットワークスタックが連携します。HTTP / TLS の基盤は Courierust、DNS は RecurseX を再利用します。コアは no_std + alloc でビルドでき、OS のネットワークやスレッドは std 実行層に属します。"
+        },
+        {
+          "heading": "処理の流れ",
+          "body": "接続はリスナーまたはプラットフォームの TUN 入口から入り、宛先とルールに基づく出口選択、ハンドシェイク、双方向中継へ進みます。短い処理はワークスティーリングプール、長時間接続は接続スレッドとコピースレッドが担当し、接続予算で並列数を制限します。ホットリロードと通信量集計も提供しますが、同期実行でも接続ごとのスレッドコストは残ります。"
+        },
+        {
+          "heading": "制約と検証",
+          "body": "プロトコルの可用性は Cargo feature と実装の両方に依存します。必要な feature がなければ設定時に拒否されます。redir、tproxy、inbounds 内の tun には現在対応リスナーがなく、型を解析できても使用可能とは限りません。認証失敗、半閉鎖、キャンセル、接続予算、対象サーバーとの相互運用を検証し、コンパイル成功を完全互換性とみなさないことが重要です。"
+        }
+      ],
+      "de": [
+        {
+          "heading": "Aufgabe",
+          "body": "Corduit ist eine Engine-Bibliothek, kein Client mit mitgelieferten Abonnements. Konfigurationsmodell, Regelrouter, Ausgangsauswahl und Netzwerkstack im Userspace arbeiten zusammen. HTTP-/TLS-Grundlagen stammen aus Courierust, DNS aus RecurseX. Der Kern lässt sich mit no_std + alloc bauen; Betriebssystemnetzwerk und Threads gehören zur std-Laufzeitschicht."
+        },
+        {
+          "heading": "Verarbeitung",
+          "body": "Verbindungen kommen über Listener oder plattformspezifische TUN-Einstiege. Der Router wählt anhand von Ziel und Regeln den Ausgang, danach folgen Handshake und bidirektionale Weiterleitung. Kurze Aufgaben nutzen einen Work-Stealing-Pool, langlebige Verbindungen einen Verbindungs- und einen Kopierthread. Verbindungsbudgets begrenzen die Anzahl. Hot Reload und Verkehrszählung sind vorhanden; synchrone Ausführung beseitigt nicht die Thread-Kosten jeder Verbindung."
+        },
+        {
+          "heading": "Grenzen und Prüfung",
+          "body": "Protokolle hängen sowohl von Cargo-Features als auch von der Implementierung ab. Fehlende erforderliche Features führen zu Konfigurationsfehlern. redir, tproxy und tun in inbounds haben derzeit keine Listener; ein parsebarer Typ ist nicht automatisch nutzbar. Zu prüfen sind Authentifizierungsfehler, Half-Close, Abbruch, Budgets und Interoperabilität mit Zielservern. Erfolgreiches Kompilieren belegt keine vollständige Protokollkompatibilität."
+        }
+      ],
+      "fr": [
+        {
+          "heading": "Rôle",
+          "body": "Corduit est une bibliothèque moteur, pas un client livré avec des abonnements. Modèle de configuration, routeur, choix de sortie et pile réseau en espace utilisateur coopèrent. HTTP / TLS reposent sur Courierust, et DNS sur RecurseX. Le cœur peut être compilé en no_std + alloc ; réseau du système et threads relèvent de la couche d'exécution std."
+        },
+        {
+          "heading": "Chemin de traitement",
+          "body": "Les connexions entrent par des écouteurs ou les points TUN des plateformes. Le routeur choisit la sortie selon la destination et les règles, puis viennent négociation et relais bidirectionnel. Les tâches courtes utilisent un pool avec vol de travail ; les longues connexions occupent un thread de connexion et un de copie, sous budget. Rechargement à chaud et comptage du trafic sont disponibles ; le modèle synchrone conserve un coût par connexion."
+        },
+        {
+          "heading": "Limites et validation",
+          "body": "La disponibilité dépend des features Cargo et de l'implémentation. Une feature requise absente provoque un rejet de configuration. redir, tproxy et tun dans inbounds n'ont actuellement pas d'écouteur : reconnaître leur type ne les rend pas utilisables. Vérifier échecs d'authentification, demi-fermeture, annulation, budgets et interopérabilité avec les serveurs ciblés. Compiler ne démontre pas une compatibilité complète."
+        }
+      ],
+      "es": [
+        {
+          "heading": "Función",
+          "body": "Corduit es una biblioteca de motor, no un cliente con suscripciones incluidas. Cooperan su modelo de configuración, el enrutador de reglas, la selección de salida y la pila de red en espacio de usuario. Reutiliza Courierust para HTTP / TLS y RecurseX para DNS. El núcleo compila con no_std + alloc; la red del sistema y los hilos pertenecen a la capa std."
+        },
+        {
+          "heading": "Flujo de procesamiento",
+          "body": "Las conexiones entran por listeners o puntos TUN de plataforma. El enrutador elige la salida según el destino y las reglas, seguido del handshake y la retransmisión bidireccional. Las tareas cortas usan un pool con robo de trabajo; las conexiones largas ocupan un hilo de conexión y otro de copia, limitados por un presupuesto. Hay recarga en caliente y contabilidad de tráfico; el modelo síncrono no elimina el coste por conexión."
+        },
+        {
+          "heading": "Límites y validación",
+          "body": "La disponibilidad depende de las features de Cargo y de la implementación. La falta de una feature obligatoria rechaza la configuración. redir, tproxy y tun dentro de inbounds carecen actualmente de listeners: interpretar el tipo no lo hace utilizable. Valide autenticación fallida, semicierre, cancelación, presupuestos e interoperabilidad con los servidores de destino. Compilar no demuestra compatibilidad completa."
+        }
+      ],
+      "ru": [
+        {
+          "heading": "Назначение",
+          "body": "Corduit — библиотека движка, а не клиент с готовыми подписками. Модель конфигурации, маршрутизатор, выбор выхода и пользовательский сетевой стек работают совместно. Основы HTTP / TLS предоставляет Courierust, DNS — RecurseX. Ядро собирается с no_std + alloc; системная сеть и потоки относятся к слою исполнения со std."
+        },
+        {
+          "heading": "Путь обработки",
+          "body": "Соединения входят через слушатели или платформенные входы TUN. По цели и правилам маршрутизатор выбирает выход, затем выполняются рукопожатие и двунаправленная передача. Короткие задачи используют пул с кражей работы; долгие соединения — поток соединения и поток копирования, ограниченные бюджетом. Есть горячая перезагрузка и учёт трафика; синхронная модель не устраняет стоимость потоков на соединение."
+        },
+        {
+          "heading": "Ограничения и проверка",
+          "body": "Поддержка протоколов зависит от Cargo features и реализации. Отсутствие обязательной возможности вызывает ошибку конфигурации. У redir, tproxy и tun в inbounds пока нет слушателей: распознавание типа не означает работоспособности. Проверяйте отказ аутентификации, полузакрытие, отмену, бюджеты и взаимодействие с целевыми серверами. Успешная компиляция не доказывает полной совместимости протокола."
+        }
+      ],
+      "pt": [
+        {
+          "heading": "Responsabilidade",
+          "body": "O Corduit é uma biblioteca de motor, não um cliente com assinaturas prontas. Modelo de configuração, roteador de regras, seleção de saída e pilha de rede em espaço de usuário trabalham juntos. HTTP / TLS reutilizam o Courierust, e DNS usa o RecurseX. O núcleo compila com no_std + alloc; rede do sistema e threads pertencem à camada std."
+        },
+        {
+          "heading": "Fluxo de processamento",
+          "body": "Conexões entram por listeners ou entradas TUN de plataforma. O roteador escolhe a saída pelo destino e pelas regras, seguindo para handshake e retransmissão bidirecional. Tarefas curtas usam um pool com roubo de trabalho; conexões longas ocupam uma thread de conexão e outra de cópia, limitadas por orçamento. Há recarga em execução e contagem de tráfego; o modelo síncrono não elimina o custo por conexão."
+        },
+        {
+          "heading": "Limites e validação",
+          "body": "A disponibilidade depende das features Cargo e da implementação. Uma feature obrigatória ausente rejeita a configuração. redir, tproxy e tun dentro de inbounds ainda não têm listeners; reconhecer o tipo não o torna utilizável. Valide falhas de autenticação, half-close, cancelamento, orçamentos e interoperabilidade com servidores de destino. Compilar com sucesso não demonstra compatibilidade completa."
+        }
+      ],
+      "it": [
+        {
+          "heading": "Funzione",
+          "body": "Corduit è una libreria motore, non un client con abbonamenti inclusi. Modello di configurazione, router, selezione dell'uscita e stack di rete in spazio utente cooperano. HTTP / TLS riusano Courierust, mentre DNS usa RecurseX. Il nucleo compila con no_std + alloc; rete del sistema operativo e thread appartengono al livello std."
+        },
+        {
+          "heading": "Flusso di elaborazione",
+          "body": "Le connessioni entrano da listener o punti TUN delle piattaforme. Il router sceglie l'uscita in base a destinazione e regole, poi seguono handshake e inoltro bidirezionale. I compiti brevi usano un pool con work stealing; le connessioni lunghe impiegano un thread di connessione e uno di copia, limitati da un budget. Sono disponibili ricaricamento a caldo e conteggio del traffico; la sincronia non elimina il costo per connessione."
+        },
+        {
+          "heading": "Limiti e verifica",
+          "body": "La disponibilità dipende dalle feature Cargo e dall'implementazione. L'assenza di una feature necessaria causa un errore di configurazione. redir, tproxy e tun in inbounds non hanno ancora listener: riconoscere il tipo non lo rende utilizzabile. Verificare errori di autenticazione, half-close, annullamento, budget e interoperabilità con i server previsti. La compilazione non dimostra compatibilità completa."
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · d479373",
+        "url": "https://github.com/blueokanna/Corduit/blob/d479373dc80ebafd3e324e2cad6450d5519eee3c/README.md"
+      },
+      {
+        "label": "Configuration validator",
+        "url": "https://github.com/blueokanna/Corduit/blob/d479373dc80ebafd3e324e2cad6450d5519eee3c/src/engine/config/validator.rs"
+      }
+    ]
+  },
+  {
+    "id": "courierust",
+    "name": "Courierust",
+    "repository": "https://github.com/blueokanna/Courierust",
+    "stack": [
+      "Rust",
+      "HTTP/2",
+      "HTTP/3",
+      "WebSocket",
+      "gRPC"
+    ],
+    "variant": 4,
+    "description": {
+      "zh-CN": "从帧编解码到连接调度自行实现的 Rust 网络协议栈，覆盖 HTTP、WebSocket 与 gRPC。",
+      "zh-TW": "從影格編解碼到連線排程自行實作的 Rust 網路協定堆疊，涵蓋 HTTP、WebSocket 與 gRPC。",
+      "en": "A Rust networking stack implementing frame codecs and connection scheduling for HTTP, WebSocket and gRPC.",
+      "ja": "HTTP、WebSocket、gRPC 向けにフレームコーデックと接続スケジューリングを実装した Rust ネットワークスタックです。",
+      "de": "Ein Rust-Netzwerkstack mit eigenen Frame-Codecs und Verbindungsplanung für HTTP, WebSocket und gRPC.",
+      "fr": "Une pile réseau Rust avec ses propres codecs de trames et son ordonnanceur de connexions pour HTTP, WebSocket et gRPC.",
+      "es": "Una pila de red Rust con códecs de tramas y planificación de conexiones propios para HTTP, WebSocket y gRPC.",
+      "ru": "Сетевой стек Rust с собственными кодеками кадров и планированием соединений для HTTP, WebSocket и gRPC.",
+      "pt": "Uma pilha de rede Rust com codecs de quadros e agendamento de conexões próprios para HTTP, WebSocket e gRPC.",
+      "it": "Uno stack di rete Rust con codec dei frame e pianificazione delle connessioni propri per HTTP, WebSocket e gRPC."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "负责什么",
+          "body": "Courierust 将协议核心与操作系统网络分开。HTTP 消息、HTTP/1.1、HTTP/2、HPACK、HTTP/3、QUIC 编解码等核心模块支持 no_std + alloc，且不依赖第三方包；启用 std 后提供线程池、客户端、服务端及自有 TLS 实现。零第三方依赖描述的是依赖结构，不代表协议实现天然没有安全风险。"
+        },
+        {
+          "heading": "处理链路",
+          "body": "客户端按 authority 复用连接，HTTP/2 由每条连接的驱动复用多个流。服务端事件调度器将空闲普通 HTTP 连接停放在就绪轮询器上，TLS 和 HTTP/2 路径使用阻塞工作池。gRPC 负责消息分帧、状态和流式调用，Protobuf 消息的编码与解码由调用者提供或使用原始字节接口。"
+        },
+        {
+          "heading": "边界与验证",
+          "body": "理解性能必须区分连接数、流数和工作线程：单条 HTTP/2 连接并不因为调用线程增多就线性扩展。接入时应验证消息长度限制、超时、证书及主机名校验、流控与异常关闭；自研 TLS 需要严肃的独立审查。仓库中的测试向量或基准是特定条件下的证据，不能转换成对所有部署的速度或安全保证。"
+        }
+      ],
+      "zh-TW": [
+        {
+          "heading": "負責什麼",
+          "body": "Courierust 將協定核心與作業系統網路分離。HTTP 訊息、HTTP/1.1、HTTP/2、HPACK、HTTP/3、QUIC 編解碼等核心模組支援 no_std + alloc，且不依賴第三方套件；啟用 std 後提供執行緒池、用戶端、伺服器及自有 TLS 實作。零第三方依賴描述的是依賴結構，不代表實作自然沒有安全風險。"
+        },
+        {
+          "heading": "處理流程",
+          "body": "用戶端依 authority 重用連線，HTTP/2 由每條連線的驅動多工處理串流。伺服器事件排程器把閒置的一般 HTTP 連線放入就緒輪詢器，TLS 和 HTTP/2 路徑使用阻塞工作池。gRPC 負責訊息分框、狀態與串流呼叫，Protobuf 訊息的編碼和解碼由呼叫者提供，或使用原始位元組介面。"
+        },
+        {
+          "heading": "限制與驗證",
+          "body": "分析效能要區分連線數、串流數與工作執行緒：單一 HTTP/2 連線不會因呼叫執行緒增加而線性擴展。整合時應驗證訊息長度限制、逾時、憑證和主機名稱驗證、流量控制及異常關閉；自製 TLS 需要嚴謹的獨立審查。測試向量或基準只是在特定條件下的證據，不是所有部署的速度或安全保證。"
+        }
+      ],
+      "en": [
+        {
+          "heading": "Responsibility",
+          "body": "Courierust separates protocol machinery from operating-system networking. Core HTTP messages, HTTP/1.1, HTTP/2, HPACK, HTTP/3 and QUIC codecs support no_std + alloc without third-party packages. Enabling std adds pools, clients, servers and its own TLS implementation. Zero third-party dependencies describes the dependency structure; it does not establish that the implementation is free of security risks."
+        },
+        {
+          "heading": "Processing path",
+          "body": "The client reuses connections by authority, with a per-connection HTTP/2 driver multiplexing streams. The server's event scheduler parks idle plain-HTTP connections on a readiness poller; TLS and HTTP/2 use a blocking worker pool. gRPC supplies message framing, status and streaming calls. Callers provide Protobuf encoding and decoding or use the raw-bytes interface."
+        },
+        {
+          "heading": "Limits and validation",
+          "body": "Distinguish connections, streams and workers when reading performance claims: one HTTP/2 connection does not scale linearly simply because more caller threads exist. Validate size limits, timeouts, certificate and hostname checks, flow control and abnormal closure. Custom TLS deserves independent review. Repository test vectors and benchmarks are evidence under stated conditions, not universal speed or security guarantees."
+        }
+      ],
+      "ja": [
+        {
+          "heading": "役割",
+          "body": "Courierust はプロトコル処理を OS のネットワーク機能から分離します。HTTP メッセージ、HTTP/1.1、HTTP/2、HPACK、HTTP/3、QUIC コーデックなどのコアは、第三者パッケージなしで no_std + alloc に対応します。std を有効にするとプール、クライアント、サーバー、独自 TLS が加わります。依存ゼロは依存構造の説明であり、安全性の証明ではありません。"
+        },
+        {
+          "heading": "処理の流れ",
+          "body": "クライアントは authority ごとに接続を再利用し、HTTP/2 は接続単位のドライバーで複数ストリームを扱います。サーバーのイベントスケジューラーはアイドル状態の通常 HTTP 接続を readiness poller に待機させ、TLS と HTTP/2 はブロッキングワーカープールを使います。gRPC はフレーミング、状態、ストリーミングを提供し、Protobuf の符号化・復号は利用者が実装するか、生バイト API を使います。"
+        },
+        {
+          "heading": "制約と検証",
+          "body": "性能を見る際は接続数、ストリーム数、ワーカー数を区別します。呼び出しスレッドを増やしても単一 HTTP/2 接続が線形に速くなるわけではありません。長さ制限、タイムアウト、証明書とホスト名の検証、フロー制御、異常切断を確認し、独自 TLS には独立したレビューが必要です。テストベクトルやベンチマークは条件付きの証拠で、あらゆる環境の速度・安全性を保証しません。"
+        }
+      ],
+      "de": [
+        {
+          "heading": "Aufgabe",
+          "body": "Courierust trennt Protokolllogik vom Betriebssystemnetzwerk. Die Kernmodule für HTTP-Nachrichten, HTTP/1.1, HTTP/2, HPACK, HTTP/3 und QUIC-Codecs unterstützen no_std + alloc ohne Drittanbieterpakete. std ergänzt Pools, Clients, Server und eine eigene TLS-Implementierung. Keine Drittanbieterabhängigkeiten beschreibt den Abhängigkeitsbaum, nicht die Abwesenheit von Sicherheitsrisiken."
+        },
+        {
+          "heading": "Verarbeitung",
+          "body": "Der Client verwendet Verbindungen nach Authority wieder; ein HTTP/2-Treiber je Verbindung multiplexiert Streams. Der Ereignisplaner des Servers parkt unbeschäftigte einfache HTTP-Verbindungen in einem Bereitschaftspoller; TLS und HTTP/2 nutzen einen blockierenden Worker-Pool. gRPC liefert Nachrichtenrahmung, Status und Streaming-Aufrufe. Protobuf-Kodierung und -Dekodierung implementieren Aufrufer selbst oder sie nutzen die Byte-Schnittstelle."
+        },
+        {
+          "heading": "Grenzen und Prüfung",
+          "body": "Bei Leistungsangaben sind Verbindungen, Streams und Worker zu unterscheiden: Mehr aufrufende Threads machen eine einzelne HTTP/2-Verbindung nicht linear schneller. Größenlimits, Timeouts, Zertifikats- und Hostnamenprüfung, Flusskontrolle und fehlerhafte Schließvorgänge müssen geprüft werden. Eigenes TLS verlangt unabhängige Begutachtung. Testvektoren und Benchmarks gelten unter ihren Bedingungen, nicht als allgemeine Geschwindigkeits- oder Sicherheitsgarantie."
+        }
+      ],
+      "fr": [
+        {
+          "heading": "Rôle",
+          "body": "Courierust sépare la logique des protocoles du réseau du système. Les modules centraux HTTP, HTTP/1.1, HTTP/2, HPACK, HTTP/3 et les codecs QUIC prennent en charge no_std + alloc sans paquet tiers. std ajoute pools, clients, serveurs et implémentation TLS interne. L'absence de dépendances tierces décrit l'architecture, pas une absence de risques de sécurité."
+        },
+        {
+          "heading": "Chemin de traitement",
+          "body": "Le client réutilise les connexions par authority ; un pilote HTTP/2 par connexion multiplexe les flux. Le planificateur événementiel du serveur place les connexions HTTP simples inactives dans un poller de disponibilité ; TLS et HTTP/2 utilisent un pool bloquant. gRPC fournit cadrage, statuts et appels en flux. L'appelant fournit l'encodage et le décodage Protobuf ou utilise l'interface d'octets bruts."
+        },
+        {
+          "heading": "Limites et validation",
+          "body": "Il faut distinguer connexions, flux et workers : multiplier les threads appelants ne fait pas évoluer linéairement une seule connexion HTTP/2. Vérifier limites de taille, délais, certificats, noms d'hôtes, contrôle de flux et fermetures anormales. Un TLS interne mérite un audit indépendant. Vecteurs de test et benchmarks prouvent des résultats dans leurs conditions, pas une vitesse ou une sécurité universelle."
+        }
+      ],
+      "es": [
+        {
+          "heading": "Función",
+          "body": "Courierust separa la lógica de protocolos de la red del sistema operativo. Los módulos centrales de HTTP, HTTP/1.1, HTTP/2, HPACK, HTTP/3 y los códecs QUIC admiten no_std + alloc sin paquetes externos. std añade pools, clientes, servidores y una implementación TLS propia. No depender de terceros describe la estructura, no demuestra ausencia de riesgos de seguridad."
+        },
+        {
+          "heading": "Flujo de procesamiento",
+          "body": "El cliente reutiliza conexiones por authority, y un controlador HTTP/2 por conexión multiplexa los flujos. El planificador de eventos del servidor aparca conexiones HTTP simples inactivas en un sondeador de disponibilidad; TLS y HTTP/2 usan un pool bloqueante. gRPC aporta tramas de mensajes, estados y llamadas en streaming. El usuario proporciona la codificación Protobuf o utiliza la interfaz de bytes."
+        },
+        {
+          "heading": "Límites y validación",
+          "body": "Hay que distinguir conexiones, flujos e hilos de trabajo: más hilos llamantes no hacen escalar linealmente una conexión HTTP/2. Valide límites de tamaño, tiempos de espera, certificados, nombres de host, control de flujo y cierres anómalos. Un TLS propio requiere revisión independiente. Los vectores de prueba y benchmarks son evidencia bajo condiciones concretas, no garantías universales de velocidad o seguridad."
+        }
+      ],
+      "ru": [
+        {
+          "heading": "Назначение",
+          "body": "Courierust отделяет протокольную логику от системной сети. Основные модули HTTP, HTTP/1.1, HTTP/2, HPACK, HTTP/3 и кодеки QUIC поддерживают no_std + alloc без сторонних пакетов. std добавляет пулы, клиенты, серверы и собственный TLS. Отсутствие сторонних зависимостей описывает структуру проекта, но не доказывает отсутствие рисков безопасности."
+        },
+        {
+          "heading": "Путь обработки",
+          "body": "Клиент повторно использует соединения по authority; драйвер каждой HTTP/2-связи мультиплексирует потоки. Событийный планировщик сервера помещает простаивающие обычные HTTP-соединения в механизм ожидания готовности; TLS и HTTP/2 используют блокирующий пул. gRPC предоставляет фрейминг сообщений, статусы и потоковые вызовы. Кодирование Protobuf реализует вызывающая сторона либо используется интерфейс сырых байтов."
+        },
+        {
+          "heading": "Ограничения и проверка",
+          "body": "При оценке производительности различайте соединения, потоки протокола и рабочие потоки: увеличение числа вызывающих потоков не даёт линейного ускорения одной HTTP/2-связи. Проверяйте ограничения размеров, тайм-ауты, сертификаты и имена узлов, управление потоком и аварийное закрытие. Собственному TLS нужен независимый анализ. Тестовые векторы и замеры — условные свидетельства, а не универсальные гарантии скорости или безопасности."
+        }
+      ],
+      "pt": [
+        {
+          "heading": "Responsabilidade",
+          "body": "O Courierust separa a lógica dos protocolos da rede do sistema. Os módulos centrais de HTTP, HTTP/1.1, HTTP/2, HPACK, HTTP/3 e codecs QUIC suportam no_std + alloc sem pacotes de terceiros. std acrescenta pools, clientes, servidores e TLS próprio. A ausência de dependências externas descreve a estrutura do projeto, não a ausência de riscos de segurança."
+        },
+        {
+          "heading": "Fluxo de processamento",
+          "body": "O cliente reutiliza conexões por authority, com um driver HTTP/2 por conexão multiplexando fluxos. O agendador de eventos do servidor estaciona conexões HTTP simples ociosas em um mecanismo de espera por prontidão; TLS e HTTP/2 usam um pool bloqueante. O gRPC fornece enquadramento, status e chamadas em streaming. A aplicação implementa a codificação Protobuf ou usa a interface de bytes brutos."
+        },
+        {
+          "heading": "Limites e validação",
+          "body": "Ao avaliar desempenho, diferencie conexões, fluxos e workers: mais threads chamadoras não fazem uma conexão HTTP/2 escalar linearmente. Valide limites de tamanho, timeouts, certificados, nomes de host, controle de fluxo e encerramentos anormais. TLS próprio exige revisão independente. Vetores de teste e benchmarks são evidências sob condições específicas, não garantias universais de velocidade ou segurança."
+        }
+      ],
+      "it": [
+        {
+          "heading": "Funzione",
+          "body": "Courierust separa la logica dei protocolli dalla rete del sistema operativo. I moduli centrali HTTP, HTTP/1.1, HTTP/2, HPACK, HTTP/3 e i codec QUIC supportano no_std + alloc senza pacchetti esterni. std aggiunge pool, client, server e un'implementazione TLS propria. Zero dipendenze di terze parti descrive la struttura, non dimostra l'assenza di rischi di sicurezza."
+        },
+        {
+          "heading": "Flusso di elaborazione",
+          "body": "Il client riusa connessioni per authority, con un driver HTTP/2 per connessione che multiplexa i flussi. Lo scheduler a eventi del server mette le connessioni HTTP semplici inattive in un poller di disponibilità; TLS e HTTP/2 usano un pool bloccante. gRPC fornisce framing, stati e chiamate in streaming. La codifica Protobuf spetta all'applicazione, oppure si usa l'interfaccia di byte grezzi."
+        },
+        {
+          "heading": "Limiti e verifica",
+          "body": "Nelle misure distinguere connessioni, flussi e worker: più thread chiamanti non rendono linearmente più veloce una singola connessione HTTP/2. Verificare limiti di dimensione, timeout, certificati, nomi host, controllo di flusso e chiusure anomale. Un TLS proprio richiede revisione indipendente. Vettori di prova e benchmark sono evidenze nelle condizioni dichiarate, non garanzie universali di velocità o sicurezza."
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 3853d1d",
+        "url": "https://github.com/blueokanna/Courierust/blob/3853d1dabbcb9ef3c23de76960fa0fcb5c0026a8/README.md"
+      },
+      {
+        "label": "Protocol and runtime modules",
+        "url": "https://github.com/blueokanna/Courierust/blob/3853d1dabbcb9ef3c23de76960fa0fcb5c0026a8/src/lib.rs"
+      }
+    ]
+  },
+  {
+    "id": "pulselink",
+    "name": "PulseLink",
+    "repository": "https://github.com/blueokanna/blueokanna.github.io",
+    "stack": [
+      "Flutter Web",
+      "Material 3",
+      "GitHub Pages",
+      "giscus"
+    ],
+    "variant": 5,
+    "description": {
+      "zh-CN": "本站本身也是一个开源项目：用 Flutter Web 在 GitHub Pages 上组织文章、项目和讨论。",
+      "zh-TW": "本站本身也是開源專案：以 Flutter Web 在 GitHub Pages 上組織文章、專案與討論。",
+      "en": "This blog is also an open-source project: Flutter Web organizes articles, projects and conversations on GitHub Pages.",
+      "ja": "このブログ自体もオープンソースです。Flutter Web を使い、GitHub Pages 上で記事・プロジェクト・対話をまとめています。",
+      "de": "Auch dieser Blog ist ein Open-Source-Projekt: Flutter Web organisiert Artikel, Projekte und Diskussionen auf GitHub Pages.",
+      "fr": "Ce blog est lui-même un projet open source : Flutter Web organise articles, projets et discussions sur GitHub Pages.",
+      "es": "Este blog también es un proyecto abierto: Flutter Web organiza artículos, proyectos y conversaciones en GitHub Pages.",
+      "ru": "Этот блог тоже является открытым проектом: Flutter Web размещает статьи, проекты и обсуждения на GitHub Pages.",
+      "pt": "Este blog também é um projeto aberto: o Flutter Web organiza artigos, projetos e conversas no GitHub Pages.",
+      "it": "Anche questo blog è un progetto open source: Flutter Web organizza articoli, progetti e conversazioni su GitHub Pages."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "负责什么",
+          "body": "PulseLink 将内容资产、语言模型、路由、主题与平台桥接分开。文章随构建发布，不等待在线生成；Google Sans 与 Noto 字体以本地子集提供。页面通过 Material 3 语义颜色保持主题一致，装饰图形由共享时钟驱动，CustomPainter 和重绘边界承担局部绘制，而非每帧重建整个页面。"
+        },
+        {
+          "heading": "处理链路",
+          "body": "GitHub Actions 根据锁文件获取依赖，准备字体后执行格式、静态分析、测试与 Web 构建，再发布 build/web。语言和文章路径放在 hash URL 中，GitHub Pages 无需处理服务端路由重写。评论按需载入 giscus，数据存放于 GitHub Discussions；第三方 iframe 的尺寸消息检查来源与发送窗口。"
+        },
+        {
+          "heading": "边界与验证",
+          "body": "GitHub Pages 负责静态托管，不能在浏览器构建产物中保管服务端密钥。Hash 路由可直接打开和刷新，但不等于每篇文章都有独立预渲染 HTML。共享动画是应用层设计，没有修改 Flutter 引擎；流畅度仍需真实浏览器和设备测量，测试截图只能证明对应帧的排版，不能替代性能数据。"
+        }
+      ],
+      "zh-TW": [
+        {
+          "heading": "負責什麼",
+          "body": "PulseLink 將內容資產、語言模型、路由、主題及平台橋接分離。文章隨建置發布，不等待線上生成；Google Sans 與 Noto 字型以本機子集提供。頁面使用 Material 3 語意色維持主題一致，裝飾圖形由共享時鐘驅動，CustomPainter 和重繪邊界負責局部繪製，不必每幀重建整個頁面。"
+        },
+        {
+          "heading": "處理流程",
+          "body": "GitHub Actions 依鎖定檔取得相依套件，準備字型後執行格式檢查、靜態分析、測試與 Web 建置，再發布 build/web。語言和文章路徑放在 hash URL 中，GitHub Pages 不需伺服器路由重寫。留言按需載入 giscus，資料保存在 GitHub Discussions；第三方 iframe 的尺寸訊息會檢查來源和傳送視窗。"
+        },
+        {
+          "heading": "限制與驗證",
+          "body": "GitHub Pages 提供靜態託管，不能在瀏覽器建置產物中保存伺服器密鑰。Hash 路由可直接開啟與重新整理，但不等於每篇文章都有獨立預先渲染 HTML。共享動畫屬於應用層設計，沒有修改 Flutter 引擎；流暢度仍需真實瀏覽器和裝置量測，測試截圖不能取代效能數據。"
+        }
+      ],
+      "en": [
+        {
+          "heading": "Responsibility",
+          "body": "PulseLink separates content assets, localization models, routing, themes and platform bridges. Articles ship with the build rather than waiting for online generation; Google Sans and Noto are bundled as local font subsets. Material 3 semantic colors keep themes coherent. A shared clock drives decorative painters and repaint boundaries isolate drawing instead of rebuilding the page every frame."
+        },
+        {
+          "heading": "Processing path",
+          "body": "GitHub Actions resolves locked dependencies, prepares fonts, checks formatting, runs analysis and tests, and builds the web output before publishing build/web. Language and article paths live in hash URLs, avoiding server-side route rewriting on Pages. Comments load giscus on demand and store data in GitHub Discussions. Iframe size messages are checked against their origin and sending window."
+        },
+        {
+          "heading": "Limits and validation",
+          "body": "GitHub Pages provides static hosting; browser bundles cannot keep server secrets. Hash routes support direct opening and refresh but do not provide separately prerendered HTML for every article. Shared animation is an application-layer design, not a modified Flutter engine. Smoothness still requires measurement in real browsers and devices; layout captures are not performance measurements."
+        }
+      ],
+      "ja": [
+        {
+          "heading": "役割",
+          "body": "PulseLink はコンテンツ資産、翻訳モデル、ルーティング、テーマ、プラットフォーム連携を分離します。記事はビルドに含まれ、オンライン生成を待ちません。Google Sans と Noto はローカルのフォントサブセットです。Material 3 の意味に基づく色を使い、共有時計が装飾の描画を駆動します。CustomPainter と再描画境界により、毎フレームのページ全体再構築を避けます。"
+        },
+        {
+          "heading": "処理の流れ",
+          "body": "GitHub Actions がロック済み依存関係を取得し、フォント準備、整形確認、静的解析、テスト、Web ビルドを行い、build/web を公開します。言語と記事のパスは hash URL に入り、Pages のサーバー側書き換えは不要です。コメントは必要時に giscus を読み込み、GitHub Discussions に保存します。iframe のサイズ通知では送信元とウィンドウを確認します。"
+        },
+        {
+          "heading": "制約と検証",
+          "body": "GitHub Pages は静的ホスティングであり、ブラウザーの配布物にサーバー秘密鍵を保持できません。hash ルートは直接アクセスと再読み込みに対応しますが、記事ごとの事前描画 HTML ではありません。共有アニメーションはアプリ層の設計で、Flutter エンジンの改造ではありません。滑らかさは実際のブラウザー・端末で測定する必要があり、レイアウト画像は性能測定の代わりにはなりません。"
+        }
+      ],
+      "de": [
+        {
+          "heading": "Aufgabe",
+          "body": "PulseLink trennt Inhaltsdateien, Sprachmodelle, Routing, Themes und Plattformanbindung. Artikel werden mit dem Build ausgeliefert, nicht online erzeugt; Google Sans und Noto liegen als lokale Font-Subsets vor. Semantische Material-3-Farben sorgen für konsistente Themes. Eine gemeinsame Uhr steuert dekorative Painter, während Repaint-Grenzen das Zeichnen isolieren, statt pro Frame die ganze Seite neu aufzubauen."
+        },
+        {
+          "heading": "Verarbeitung",
+          "body": "GitHub Actions löst gesperrte Abhängigkeiten auf, bereitet Fonts vor, prüft Formatierung, analysiert und testet den Code und erstellt den Web-Build. Veröffentlicht wird build/web. Sprach- und Artikelpfade liegen in Hash-URLs, ohne serverseitiges Umschreiben auf Pages. Kommentare laden giscus bei Bedarf und speichern in GitHub Discussions. Größenmeldungen des Iframes werden auf Herkunft und sendendes Fenster geprüft."
+        },
+        {
+          "heading": "Grenzen und Prüfung",
+          "body": "GitHub Pages bietet statisches Hosting; Browserdateien können keine Servergeheimnisse bewahren. Hash-Routen erlauben direktes Öffnen und Neuladen, liefern aber nicht für jeden Artikel eigenes vorgerendertes HTML. Die gemeinsame Animation ist Anwendungsarchitektur, keine Änderung der Flutter-Engine. Flüssigkeit erfordert Messungen in echten Browsern und Geräten; Layoutaufnahmen sind keine Leistungsdaten."
+        }
+      ],
+      "fr": [
+        {
+          "heading": "Rôle",
+          "body": "PulseLink sépare contenus, modèles de traduction, routage, thèmes et interfaces de plateforme. Les articles accompagnent le build, sans génération en ligne ; Google Sans et Noto sont fournis en sous-ensembles locaux. Les couleurs sémantiques Material 3 unifient les thèmes. Une horloge commune anime les dessins décoratifs, et les frontières de repeinture isolent le travail sans reconstruire toute la page à chaque image."
+        },
+        {
+          "heading": "Chemin de traitement",
+          "body": "GitHub Actions résout les dépendances verrouillées, prépare les polices, vérifie le format, analyse, teste et construit la sortie web avant de publier build/web. Langue et article figurent dans les URL à fragment, sans réécriture serveur sur Pages. Les commentaires chargent giscus à la demande et restent dans GitHub Discussions. Les messages de taille d'iframe sont contrôlés selon leur origine et leur fenêtre source."
+        },
+        {
+          "heading": "Limites et validation",
+          "body": "GitHub Pages héberge du statique ; les fichiers du navigateur ne peuvent protéger des secrets serveur. Les routes à fragment acceptent liens directs et rechargements, sans fournir un HTML prérendu distinct par article. L'animation partagée appartient à l'application, pas à une modification du moteur Flutter. La fluidité exige des mesures sur navigateur et appareil réels ; les captures de mise en page ne mesurent pas les performances."
+        }
+      ],
+      "es": [
+        {
+          "heading": "Función",
+          "body": "PulseLink separa contenido, modelos de traducción, rutas, temas e integración de plataforma. Los artículos se publican con el build, sin generación en línea; Google Sans y Noto se incluyen como subconjuntos locales. Los colores semánticos de Material 3 mantienen los temas coherentes. Un reloj compartido anima los dibujos decorativos y los límites de repintado aíslan el trabajo sin reconstruir toda la página en cada fotograma."
+        },
+        {
+          "heading": "Flujo de procesamiento",
+          "body": "GitHub Actions resuelve dependencias bloqueadas, prepara fuentes, comprueba formato, analiza, ejecuta pruebas y construye la web antes de publicar build/web. Idioma y artículo viven en URL con fragmento, sin reescritura de rutas en el servidor. Los comentarios cargan giscus cuando se solicita y se guardan en GitHub Discussions. Los mensajes de tamaño del iframe validan origen y ventana emisora."
+        },
+        {
+          "heading": "Límites y validación",
+          "body": "GitHub Pages ofrece alojamiento estático; los archivos del navegador no pueden custodiar secretos del servidor. Las rutas con fragmento permiten enlaces directos y recarga, pero no generan HTML prerenderizado independiente para cada artículo. La animación compartida es diseño de aplicación, no una modificación del motor Flutter. La fluidez requiere mediciones en navegadores y dispositivos reales; las capturas de diseño no son datos de rendimiento."
+        }
+      ],
+      "ru": [
+        {
+          "heading": "Назначение",
+          "body": "PulseLink разделяет контент, модели локализации, маршрутизацию, темы и платформенные адаптеры. Статьи входят в сборку, а не генерируются онлайн; Google Sans и Noto поставляются локальными подмножествами шрифтов. Семантические цвета Material 3 согласуют темы. Общие часы приводят декоративные отрисовщики, а границы перерисовки изолируют работу без пересоздания всей страницы каждый кадр."
+        },
+        {
+          "heading": "Путь обработки",
+          "body": "GitHub Actions устанавливает зафиксированные зависимости, готовит шрифты, проверяет формат, анализирует, тестирует и собирает веб-версию, затем публикует build/web. Язык и путь статьи находятся во фрагменте URL, поэтому Pages не требует серверного переписывания маршрутов. Комментарии загружают giscus по запросу и хранятся в GitHub Discussions. Сообщения о размере iframe проверяются по источнику и отправившему окну."
+        },
+        {
+          "heading": "Ограничения и проверка",
+          "body": "GitHub Pages предоставляет статический хостинг; браузерная сборка не может хранить серверные секреты. Hash-маршруты допускают прямой переход и обновление, но не дают отдельный предварительно отрисованный HTML каждой статьи. Общая анимация — решение уровня приложения, а не изменение движка Flutter. Плавность требует измерений в реальных браузерах и устройствах; снимки вёрстки не являются замерами производительности."
+        }
+      ],
+      "pt": [
+        {
+          "heading": "Responsabilidade",
+          "body": "O PulseLink separa conteúdo, modelos de tradução, rotas, temas e integração de plataforma. Os artigos acompanham o build, sem geração online; Google Sans e Noto são fornecidos como subconjuntos locais. As cores semânticas do Material 3 mantêm os temas coerentes. Um relógio compartilhado anima os desenhos decorativos, e limites de repintura isolam o trabalho sem reconstruir toda a página a cada quadro."
+        },
+        {
+          "heading": "Fluxo de processamento",
+          "body": "O GitHub Actions resolve dependências travadas, prepara fontes, verifica formatação, analisa, testa e gera a versão web antes de publicar build/web. Idioma e artigo ficam em URLs com fragmento, sem reescrita de rotas no servidor. Os comentários carregam giscus sob demanda e ficam no GitHub Discussions. Mensagens de tamanho do iframe são verificadas pela origem e pela janela remetente."
+        },
+        {
+          "heading": "Limites e validação",
+          "body": "O GitHub Pages oferece hospedagem estática; arquivos do navegador não podem guardar segredos de servidor. Rotas com fragmento aceitam abertura direta e recarga, mas não oferecem HTML pré-renderizado separado por artigo. A animação compartilhada é uma decisão da aplicação, não uma alteração no motor Flutter. A fluidez precisa ser medida em navegadores e dispositivos reais; capturas de layout não medem desempenho."
+        }
+      ],
+      "it": [
+        {
+          "heading": "Funzione",
+          "body": "PulseLink separa contenuti, modelli di localizzazione, routing, temi e integrazioni di piattaforma. Gli articoli sono inclusi nel build, senza generazione online; Google Sans e Noto vengono distribuiti come sottoinsiemi locali. I colori semantici Material 3 rendono coerenti i temi. Un orologio condiviso anima i disegni decorativi e i confini di ridisegno isolano il lavoro senza ricostruire ogni pagina a ogni frame."
+        },
+        {
+          "heading": "Flusso di elaborazione",
+          "body": "GitHub Actions risolve dipendenze bloccate, prepara i font, controlla la formattazione, analizza, testa e costruisce la versione web, quindi pubblica build/web. Lingua e articolo sono nei frammenti URL, senza riscrittura delle rotte sul server. I commenti caricano giscus su richiesta e risiedono in GitHub Discussions. I messaggi sulle dimensioni dell'iframe vengono verificati per origine e finestra mittente."
+        },
+        {
+          "heading": "Limiti e verifica",
+          "body": "GitHub Pages offre hosting statico; i file del browser non possono custodire segreti server. Le rotte hash permettono accesso diretto e ricaricamento, ma non forniscono HTML prerenderizzato distinto per ogni articolo. L'animazione condivisa è una scelta applicativa, non una modifica al motore Flutter. La fluidità richiede misure su browser e dispositivi reali; le immagini del layout non misurano le prestazioni."
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "Application architecture · 4bd6b83",
+        "url": "https://github.com/blueokanna/blueokanna.github.io/blob/4bd6b83e8859475cd0b24a1056cd45878540dda9/lib/app.dart"
+      },
+      {
+        "label": "Shared animation clock",
+        "url": "https://github.com/blueokanna/blueokanna.github.io/blob/4bd6b83e8859475cd0b24a1056cd45878540dda9/lib/motion.dart"
+      },
+      {
+        "label": "Build and deployment workflow",
+        "url": "https://github.com/blueokanna/blueokanna.github.io/blob/4bd6b83e8859475cd0b24a1056cd45878540dda9/.github/workflows/build-and-deploy.yml"
+      }
+    ]
+  }
+]

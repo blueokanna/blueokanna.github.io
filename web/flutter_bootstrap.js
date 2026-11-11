@@ -5,8 +5,8 @@ _flutter.loader.load({
     try {
       const appRunner = await engineInitializer.initializeEngine();
       await appRunner.runApp();
-      clearTimeout(window.pulseBootTimer);
-      document.getElementById('boot')?.remove();
+      // The Dart bootstrap signals readiness after content and preferences
+      // have loaded and the first actual page has been painted.
     } catch (error) {
       const message = document.getElementById('boot-message');
       if (message) message.textContent = '启动失败，请重新加载。';

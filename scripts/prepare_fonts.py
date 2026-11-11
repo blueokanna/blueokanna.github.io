@@ -18,8 +18,9 @@ from fontTools.ttLib import TTFont
 def main():
     cache = ROOT / '.font-cache'
     cache.mkdir(exist_ok=True)
-    text = ''.join(p.read_text(encoding='utf-8') for p in (ROOT / 'assets/i18n').glob('*.json'))
+    text = ''.join(p.read_text(encoding='utf-8') for p in (ROOT / 'assets').rglob('*.json'))
     text += ''.join(p.read_text(encoding='utf-8') for p in (ROOT / 'lib').rglob('*.dart'))
+    text += ''.join(p.read_text(encoding='utf-8') for p in (ROOT / 'content').rglob('*.mmd'))
     # Include Latin/Cyrillic alphabets, numbers, punctuation and Japanese kana,
     # as well as all characters in the maintained site content.
     characters = set(map(ord, text)) | set(range(0x20, 0x530)) | set(range(0x2000, 0x2070)) | set(range(0x3000, 0x3100))

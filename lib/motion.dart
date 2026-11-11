@@ -6,9 +6,12 @@ import 'package:material_ui/material_ui.dart'
 
 abstract final class Motion {
   static const duration = Duration(milliseconds: 520);
+  static const pageDuration = Duration(milliseconds: 320);
   static const curve = Curves.easeInOutCubicEmphasized;
   static Duration of(BuildContext context) =>
       MediaQuery.disableAnimationsOf(context) ? Duration.zero : duration;
+  static Duration pageOf(BuildContext context) =>
+      MediaQuery.disableAnimationsOf(context) ? Duration.zero : pageDuration;
 }
 
 /// One clock for decorative motion. Paint listeners never rebuild the page.
@@ -24,7 +27,7 @@ class _AuroraState extends State<Aurora>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController _clock = AnimationController(
     vsync: this,
-    duration: const Duration(seconds: 24),
+    duration: const Duration(seconds: 12),
   );
   bool _foreground = true;
   @override
@@ -121,7 +124,7 @@ class AuroraArt extends CustomPainter {
     final radius = size.shortestSide * .32;
     // All satellites share the same clock and repaint boundary as the bloom.
     for (var i = 0; i < 6; i++) {
-      final angle = i * math.pi / 3 + .12 * math.sin(t);
+      final angle = i * math.pi / 3 + t;
       final orbit = size.shortestSide * .44;
       final position =
           center + Offset(math.cos(angle) * orbit, math.sin(angle) * orbit);
@@ -146,12 +149,12 @@ class AuroraArt extends CustomPainter {
     canvas.save();
     canvas.translate(center.dx, center.dy);
     // Periodic rotation keeps the last frame continuous with the next cycle.
-    canvas.rotate(math.sin(t) * .15);
+    canvas.rotate(t);
     final index = variant % _borders.length;
     final border = ShapeBorder.lerp(
       _borders[index],
       _borders[(index + 1) % _borders.length],
-      (1 - math.cos(t)) / 2,
+      (1 - math.cos(t * 2)) / 2,
     )!;
     final path = border.getOuterPath(
       Rect.fromCircle(center: Offset.zero, radius: radius),

@@ -1,0 +1,58 @@
+/* Generated from lib/preferences.dart. */
+@import url('https://giscus.app/themes/light.css');
+@font-face{font-family:Google Sans;src:url('../assets/assets/fonts/googlesans.ttf') format('truetype');font-weight:100 900;font-display:swap}
+@font-face{font-family:Noto Sans SC;src:url('../assets/assets/fonts/notosanssc.ttf') format('truetype');font-weight:100 900;font-display:swap}
+@font-face{font-family:Noto Sans TC;src:url('../assets/assets/fonts/notosanstc.ttf') format('truetype');font-weight:100 900;font-display:swap}
+@font-face{font-family:Noto Sans JP;src:url('../assets/assets/fonts/notosansjp.ttf') format('truetype');font-weight:100 900;font-display:swap}
+main{
+--color-fg-default:#151d20;
+--color-fg-muted:#3a494e;
+--color-fg-subtle:#3a494e;
+--color-canvas-overlay:#e1eaed;
+--color-canvas-inset:#ecf5f9;
+--color-canvas-subtle:#e7eff3;
+--color-border-default:#b9c9cf;
+--color-border-muted:#b9c9cf;
+--color-neutral-muted:#e1eaed;
+--color-accent-fg:#006970;
+--color-accent-emphasis:#006970;
+--color-accent-muted:#9df0f8;
+--color-accent-subtle:#9df0f8;
+--color-btn-text:#484264;
+--color-btn-bg:#e6deff;
+--color-btn-border:#b9c9cf;
+--color-btn-hover-bg:#dbe4e7;
+--color-btn-hover-border:#006970;
+--color-btn-active-bg:#9df0f8;
+--color-btn-active-border:#006970;
+--color-btn-selected-bg:#9df0f8;
+--color-btn-primary-text:#ffffff;
+--color-btn-primary-bg:#006970;
+--color-btn-primary-border:#006970;
+--color-btn-primary-hover-bg:#006970;
+--color-btn-primary-hover-border:#151d20;
+--color-btn-primary-selected-bg:#006970;
+--color-btn-primary-disabled-text:#3a494e;
+--color-btn-primary-disabled-bg:#dbe4e7;
+--color-btn-primary-disabled-border:#b9c9cf;
+--color-segmented-control-bg:#e1eaed;
+--color-segmented-control-button-bg:#e7eff3;
+--color-segmented-control-button-selected-border:#006970;
+--color-danger-fg:#ba1a1a;
+--color-danger-subtle:#ffdad6;
+--color-canvas-default:transparent;
+--color-primer-shadow-inset:none;
+--color-btn-shadow:none;
+--color-btn-inset-shadow:none;
+--color-btn-primary-shadow:none;
+--color-btn-primary-inset-shadow:none;
+}
+html,body,main,.gsc-main,.gsc-homepage-bg{background:transparent!important}
+body,main,.markdown-body,.btn,textarea,input{font-family:'Google Sans','Noto Sans SC',sans-serif;line-height:1.75}
+:lang(ja) body,:lang(ja) main,:lang(ja) textarea{font-family:'Google Sans','Noto Sans JP',sans-serif}
+:lang(zh-TW) body,:lang(zh-TW) main,:lang(zh-TW) textarea{font-family:'Google Sans','Noto Sans TC',sans-serif}
+.gsc-comment-box,.gsc-comment,.gsc-reply-box{border-radius:24px!important}
+.gsc-comment-box-textarea,textarea{border-radius:16px!important;font-size:16px!important}
+.btn{border-radius:999px!important;min-height:40px;padding-inline:18px}
+.gsc-comment-box-tabs{padding:8px 12px;border-radius:23px 23px 0 0}
+a:focus-visible,button:focus-visible,textarea:focus-visible{outline:2px solid #006970;outline-offset:3px}

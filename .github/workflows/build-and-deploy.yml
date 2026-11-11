@@ -30,14 +30,32 @@ jobs:
           python-version: '3.13'
       - run: python -m pip install -r scripts/requirements-fonts.txt
       - run: python scripts/prepare_fonts.py
-      - run: dart format --output=none --set-exit-if-changed lib test tool
-      - run: flutter analyze
-      - run: flutter test
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Prepare diagram renderer
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "PUPPETEER_EXECUTABLE_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          else
+            npx puppeteer browsers install chrome
+          fi
+      - run: npm run diagrams
+      - run: flutter test tool/export_comment_themes_test.dart
+      - run: dart format --output=none --set-exit-if-changed lib test tool
+      - run: flutter analyze
+      - run: flutter test
       - run: node --test test/comments_test.mjs
       - run: flutter build web --release --base-href / --no-web-resources-cdn
+      - run: npm run test:browser
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-check-screenshots
+          path: build/qa/browser
+          if-no-files-found: ignore
       - run: cp CNAME build/web/CNAME
       - uses: actions/upload-pages-artifact@v3
         with:

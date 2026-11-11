@@ -16,18 +16,39 @@
   <link rel="manifest" href="manifest.json">
   <title>Blue · PulseLink</title>
   <style>
-    body{margin:0;background:#f6f7ef;color:#243f34;font:16px/1.8 system-ui,sans-serif}
-    #boot{position:fixed;inset:0;display:grid;place-content:center;text-align:center;padding:24px}
-    h1{font-size:32px;letter-spacing:-1px}a{color:inherit}button{font:inherit;padding:10px 24px;border:1px solid #243f34;border-radius:28px;background:#d9f29d;cursor:pointer}
+    @font-face{font-family:Google Sans;src:url('assets/assets/fonts/googlesans.ttf') format('truetype');font-weight:100 900;font-display:swap}
+    :root{--boot-bg:#f6f7ef;--boot-fg:#243f34;--boot-accent:#d9f29d}
+    @media(prefers-color-scheme:dark){:root{--boot-bg:#101610;--boot-fg:#dce6da;--boot-accent:#a8d29c}}
+    body{margin:0;background:var(--boot-bg);color:var(--boot-fg);font:16px/1.8 'Google Sans',system-ui,sans-serif}
+    #boot{z-index:10000;background:radial-gradient(ellipse at 80% 20%,color-mix(in srgb,var(--boot-accent) 16%,transparent),transparent 65%),var(--boot-bg);transition:opacity .24s ease;position:fixed;inset:0;display:grid;place-content:center;text-align:center;padding:24px}
+    h1{font-size:32px;letter-spacing:-1px}a{color:inherit}button{font:inherit;padding:10px 24px;border:1px solid currentColor;border-radius:28px;background:var(--boot-accent);cursor:pointer}
     .mark{position:relative;width:150px;height:150px;margin:auto;display:grid;place-items:center;font-size:64px;animation:breathe 4s ease-in-out infinite}.mark span{position:absolute;width:22px;height:22px;background:#a9cd9e;border-radius:7px;transform:rotate(calc(var(--i)*60deg)) translateX(64px);animation:petal 3s ease-in-out infinite;animation-delay:calc(var(--i)*-.35s)}.mark span:nth-child(even){border-radius:50% 20% 50% 20%;background:#91bfc0}@keyframes petal{50%{border-radius:50%;opacity:.55}}
     @keyframes breathe{50%{transform:rotate(45deg) scale(.9)}}
-    @media(prefers-reduced-motion:reduce){.mark,.mark span{animation:none}}
+    @media(prefers-reduced-motion:reduce){.mark,.mark span{animation:none}#boot{transition:none}}
   </style>
+  <script>
+    try {
+      const mode=JSON.parse(localStorage.getItem('flutter.mode')||'"system"');
+      if(mode==='dark'||mode==='light'){
+        document.documentElement.style.setProperty('--boot-bg',mode==='dark'?'#101610':'#f6f7ef');
+        document.documentElement.style.setProperty('--boot-fg',mode==='dark'?'#dce6da':'#243f34');
+      }
+      if(JSON.parse(localStorage.getItem('flutter.paused')||'false')) document.documentElement.dataset.paused='true';
+    } catch (_) {}
+  </script>
+  <style>[data-paused=true] .mark,[data-paused=true] .mark span{animation:none}</style>
 </head>
 <body>
   <main id="boot" role="status" aria-live="polite"><div class="mark" aria-hidden="true">✳<span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span><span style="--i:5"></span></div><h1>Blue · PulseLink</h1><p id="boot-message">正在打开数字花园…</p><button id="retry" hidden onclick="location.reload()">重新加载</button><p><a href="https://github.com/blueokanna">GitHub / blueokanna</a></p></main>
   <noscript>本站使用 Flutter Web，请启用 JavaScript。你也可以访问上面的 GitHub 主页。</noscript>
   <script>
+    window.addEventListener('pulselink-ready',function(){
+      clearTimeout(window.pulseBootTimer);
+      const boot=document.getElementById('boot');
+      if(!boot)return;
+      boot.style.opacity='0';boot.style.pointerEvents='none';
+      setTimeout(()=>boot.remove(),matchMedia('(prefers-reduced-motion: reduce)').matches?0:260);
+    },{once:true});
     window.pulseBootTimer=setTimeout(function(){var m=document.getElementById('boot-message');if(m){m.textContent='加载时间较长，请检查网络后重试。';document.getElementById('retry').hidden=false;}},25000);
   </script>
   <script src="flutter_bootstrap.js" async></script>

@@ -15,13 +15,27 @@ class ResponsiveColumns extends StatelessWidget {
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, box) {
       final count = ((box.maxWidth + 20) / (minWidth + 20)).floor().clamp(1, 3);
-      final width = (box.maxWidth - 20 * (count - 1)) / count;
-      return Wrap(
-        spacing: 20,
-        runSpacing: 20,
-        children: children
-            .map((child) => SizedBox(width: width, child: child))
-            .toList(),
+      return Column(
+        children: [
+          for (var start = 0; start < children.length; start += count) ...[
+            if (start > 0) const SizedBox(height: 24),
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var column = 0; column < count; column++) ...[
+                    if (column > 0) const SizedBox(width: 24),
+                    Expanded(
+                      child: start + column < children.length
+                          ? children[start + column]
+                          : const SizedBox(),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
       );
     },
   );

@@ -33,7 +33,8 @@ void main() {
         );
         for (final post in translation.posts) {
           expect(post.title, isNotEmpty);
-          expect(post.sections.length, 4);
+          expect(post.sections.length, greaterThanOrEqualTo(6));
+          expect(post.sources.length, greaterThanOrEqualTo(3));
           for (final section in post.sections) {
             expect(section.heading, isNotEmpty);
             expect(section.body.length, greaterThan(100));

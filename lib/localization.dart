@@ -3,6 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'models/project.dart';
+import 'models/article.dart';
+export 'models/article.dart';
+
 const languages = <String, String>{
   'zh-CN': '简体中文',
   'zh-TW': '繁體中文',
@@ -29,24 +33,6 @@ Locale localeFor(String tag) => switch (tag) {
   _ => Locale(tag),
 };
 
-class BlogSection {
-  const BlogSection(this.heading, this.body);
-  final String heading, body;
-}
-
-class BlogPost {
-  BlogPost(Map<String, dynamic> data)
-    : id = data['id'] as String,
-      category = data['category'] as String,
-      title = data['title'] as String,
-      summary = data['summary'] as String,
-      sections = (data['sections'] as List)
-          .map((s) => BlogSection(s['heading'] as String, s['body'] as String))
-          .toList();
-  final String id, category, title, summary;
-  final List<BlogSection> sections;
-}
-
 class BlogStrings {
   BlogStrings(this.tag, this.data)
     : posts = (data['articles'] as List)
@@ -59,8 +45,9 @@ class BlogStrings {
 }
 
 class BlogCatalog {
-  BlogCatalog(this.translations);
+  BlogCatalog(this.translations, this.projects);
   final Map<String, BlogStrings> translations;
+  final List<ProjectEntry> projects;
   static Future<BlogCatalog> load() async {
     final entries = await Future.wait(
       languages.keys.map((tag) async {
@@ -70,6 +57,13 @@ class BlogCatalog {
         return MapEntry(tag, BlogStrings(tag, data));
       }),
     );
-    return BlogCatalog(Map.fromEntries(entries));
+    final projects =
+        jsonDecode(await rootBundle.loadString('assets/projects.json')) as List;
+    return BlogCatalog(
+      Map.fromEntries(entries),
+      projects
+          .map((p) => ProjectEntry.fromJson(p as Map<String, dynamic>))
+          .toList(),
+    );
   }
 }

@@ -34,6 +34,8 @@ migrate_working_dir/
 /coverage/
 /.font-cache/
 /.font-tools/
+/node_modules/
+/.cache/
 
 # Symbolication related
 app.*.symbols

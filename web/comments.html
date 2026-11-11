@@ -1,33 +1,12 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="strict-origin-when-cross-origin"><style>body{margin:0;font:16px/1.7 system-ui,sans-serif;color:#34483c}a{color:inherit}#status{padding:24px}html{color-scheme:light dark}</style></head><body>
-<div id="status" role="status">GitHub Discussions · <a href="https://github.com/blueokanna/blueokanna.github.io/discussions" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div><div class="giscus"></div>
-<script>
-const params=new URLSearchParams(location.search);
-const allowed=['zh-CN','zh-TW','en','ja','de','fr','es','ru','pt','it'];
-const lang=allowed.includes(params.get('lang'))?params.get('lang'):'en';
-const post=params.get('post');
-const status=document.getElementById('status');
-const label=document.createElement('p');label.textContent=params.get('unavailable')||'GitHub Discussions';status.prepend(label);
-status.querySelector('a').textContent=params.get('linkLabel')||'GitHub ↗';
-document.documentElement.lang=lang;
-document.documentElement.style.colorScheme=params.get('theme')==='dark'?'dark':'light';
-const report=()=>parent.postMessage(JSON.stringify({type:'pulselink-comments',height:document.body.scrollHeight}),location.origin);
-new ResizeObserver(report).observe(document.body);
-window.addEventListener('message',event=>{
- const frame=document.querySelector('iframe.giscus-frame');
- if(event.origin!=='https://giscus.app'||event.source!==frame?.contentWindow) return;
- const height=event.data?.giscus?.resizeHeight;
- if(typeof height==='number'&&Number.isFinite(height)&&height>0){frame.style.height=Math.min(height,4800)+'px';status.hidden=true;report();}
-});
-(async()=>{
- try{
-  const response=await fetch('comments.json',{cache:'no-cache'});
-  if(!response.ok) return;
-  const c=await response.json();
-  if(!c.repoId||!c.categoryId||!c.category||!/^[-\w]+$/.test(post||'')) return;
-  const script=document.createElement('script');script.src='https://giscus.app/client.js';script.async=true;script.crossOrigin='anonymous';
-  const config={'repo':c.repo,'repo-id':c.repoId,'category':c.category,'category-id':c.categoryId,'mapping':post==='guestbook'?'number':'specific','term':post==='guestbook'?String(c.guestbookNumber):'pulselink/post/'+post,'strict':'1','reactions-enabled':'1','emit-metadata':'1','input-position':'top','theme':params.get('theme')==='dark'?'dark':'light','lang':lang};
-  for(const [key,value] of Object.entries(config)) script.setAttribute('data-'+key,value);
-  document.body.appendChild(script);
- }catch(error){report();}
-})();
-</script></body></html>
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<style>
+html,body{margin:0;background:transparent!important;overflow-wrap:anywhere}
+body{font:16px/1.75 'Google Sans',system-ui,sans-serif;color:inherit}
+a{color:inherit;text-underline-offset:4px}#status{padding:20px 0}
+.giscus,.giscus-frame{display:block;width:100%;border:0;background:transparent}
+</style></head><body>
+<div id="status" role="status"><p id="status-label">GitHub Discussions</p><a href="https://github.com/blueokanna/blueokanna.github.io/discussions" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div>
+<div class="giscus"></div><script src="comments.js"></script>
+</body></html>

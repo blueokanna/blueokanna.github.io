@@ -41,6 +41,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   material_ui: ^1.11.0
+  animations: ^3.0.0
+  flutter_markdown_plus: ^1.0.12
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +65,8 @@ flutter:
   assets:
     - assets/icon.png
     - assets/i18n/
+    - assets/projects.json
+    - assets/diagrams/
     - assets/fonts/googlesans-OFL.txt
     - assets/fonts/notosanssc-OFL.txt
     - assets/fonts/notosanstc-OFL.txt

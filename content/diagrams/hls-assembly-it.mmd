@@ -1,0 +1,8 @@
+flowchart TD
+  A("Playlist")
+  B("Risolvere URI / sequenza temporale")
+  C("Inizializzazione se necessaria + segmenti")
+  D("Assemblare per timestamp")
+  E("Multiplexare in un contenitore")
+  F("Controllare tracce / durata / sincronizzazione")
+  A --> B --> C --> D --> E --> F

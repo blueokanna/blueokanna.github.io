@@ -8,6 +8,7 @@ import 'motion.dart';
 import 'page_metadata.dart';
 import 'ui/shell.dart';
 import 'ui/pages.dart';
+import 'ui/page_transition.dart';
 
 class PulseLinkApp extends StatefulWidget {
   const PulseLinkApp({
@@ -45,7 +46,7 @@ class _PulseLinkAppState extends State<PulseLinkApp> {
             '/posts',
             '/posts/:slug',
             '/projects',
-            '/projects/segmeris',
+            '/projects/:slug',
             '/friends',
             '/about',
           ])
@@ -55,13 +56,13 @@ class _PulseLinkAppState extends State<PulseLinkApp> {
                 final strings =
                     widget.catalog.translations[state.pathParameters['lang']]!;
                 return CustomTransitionPage<void>(
-                  key: state.pageKey,
+                  key: ValueKey('${state.pageKey.value}:${state.uri.path}'),
                   transitionDuration: widget.preferences.paused
                       ? Duration.zero
-                      : Motion.of(context),
+                      : Motion.pageOf(context),
                   reverseTransitionDuration: widget.preferences.paused
                       ? Duration.zero
-                      : Motion.of(context),
+                      : Motion.pageOf(context),
                   child: BlogPage(
                     key: ValueKey(
                       '${strings.tag}:$route:${state.pathParameters['slug']}',
@@ -69,21 +70,13 @@ class _PulseLinkAppState extends State<PulseLinkApp> {
                     page: route,
                     slug: state.pathParameters['slug'],
                     strings: strings,
+                    projects: widget.catalog.projects,
                   ),
                   transitionsBuilder: (context, animation, secondary, child) =>
-                      FadeTransition(
-                        opacity: animation.drive(
-                          CurveTween(curve: Motion.curve),
-                        ),
-                        child: SlideTransition(
-                          position: animation.drive(
-                            Tween(
-                              begin: const Offset(0, .025),
-                              end: Offset.zero,
-                            ).chain(CurveTween(curve: Motion.curve)),
-                          ),
-                          child: child,
-                        ),
+                      BlogPageTransition(
+                        animation: animation,
+                        secondaryAnimation: secondary,
+                        child: child,
                       ),
                 );
               },

@@ -224,6 +224,19 @@ class BlogShell extends StatelessWidget {
                                         )
                                         .toList(),
                                   ),
+                                  IconButton(
+                                    tooltip: strings.text('motion'),
+                                    isSelected: !preferences.paused,
+                                    onPressed: () => preferences.update(
+                                      pause: !preferences.paused,
+                                    ),
+                                    icon: const Icon(
+                                      Icons.motion_photos_off_outlined,
+                                    ),
+                                    selectedIcon: const Icon(
+                                      Icons.motion_photos_on,
+                                    ),
+                                  ),
                                   IconButton.filledTonal(
                                     tooltip: strings.text('appearance'),
                                     onPressed: () => _appearance(context),
@@ -243,7 +256,9 @@ class BlogShell extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: MotionClock(clock: clock, child: child),
+                    child: ClipRect(
+                      child: MotionClock(clock: clock, child: child),
+                    ),
                   ),
                 ],
               ),

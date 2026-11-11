@@ -59,19 +59,54 @@
       "sections": [
         {
           "heading": "Inizia analizzando il link",
-          "body": "Una pagina video e un file multimediale non sono la stessa cosa. Incolla in Segmeris l’URL di una pagina supportata e scegli prima l’analisi. I risultati consentono di esaminare i flussi resi disponibili dalla sorgente, comprese le opzioni di qualità e codec. Una qualità superiore può richiedere un account autorizzato; accedere non attribuisce all’account permessi che non possiede.\n\nPer un URL multimediale diretto o una playlist HLS, la sorgente identifica già l’ingresso. Controlla comunque la destinazione e il nome del file prima di iniziare. Gli URL firmati possono scadere: un link che funzionava ieri non garantisce che la richiesta attuale riesca."
+          "body": "Una pagina video e un file multimediale non sono la stessa cosa. Incolla in Segmeris l’URL di una pagina supportata e scegli prima l’analisi. I risultati consentono di esaminare i flussi resi disponibili dalla sorgente, comprese le opzioni di qualità e codec. Una qualità superiore può richiedere un account autorizzato; accedere non attribuisce all’account permessi che non possiede.\n\nPer un URL multimediale diretto o una playlist HLS, la sorgente identifica già l’ingresso. Controlla comunque la destinazione e il nome del file prima di iniziare. Gli URL firmati possono scadere: un link che funzionava ieri non garantisce che la richiesta attuale riesca.\n\nUn’analisi riuscita non garantisce la futura validità di un collegamento temporaneo. Copiare un URL non trasferisce le autorizzazioni dell’account."
+        },
+        {
+          "heading": "Definire quando ogni fase è davvero conclusa",
+          "body": "Una sola percentuale nasconde stati diversi: il trasferimento può essere finito mentre il contenitore è ancora in scrittura; un file può esistere senza essere stato pubblicato nell’archivio condiviso. Il diagramma descrive responsabilità, non tempi o quantità di thread misurati.\n\n| Fase | Risultato | Verifica |\n| --- | --- | --- |\n| Analisi | Flussi disponibili | Fonte, autorizzazioni, qualità e audio |\n| Trasferimento | Dati locali | Risposta, intervallo di byte e lunghezza |\n| Elaborazione | Contenitore finale | Compatibilità e linea temporale |\n| Esportazione | Destinazione definitiva | Scrittura o pubblicazione riuscita |\n\nRust gestisce analisi, rete e coordinamento. Su desktop il trattamento usa FFmpeg, su Android MediaCodec / MediaMuxer e su iOS AVFoundation / VideoToolbox. L’interfaccia web affida i lavori a un server API: i file rimangono sul server, non vengono scaricati direttamente nel browser.\n\nSe fallisce l’analisi, controllare prima la fonte. Se fallisce solo l’esportazione, conservare file di lavoro ed errore prima di ripetere l’intero trasferimento.",
+          "diagram": "media-pipeline"
         },
         {
           "heading": "Scegli consapevolmente tra copia e codifica",
-          "body": "Un bitrate pari a 0 richiede la copia dei flussi. I campioni compressi vengono conservati quando il contenitore di uscita può accettarli; i formati incompatibili possono comunque richiedere una codifica. Scegliere un bitrate inferiore significa richiedere un’elaborazione del contenuto, non accelerare il download HTTP.\n\nSu desktop, FFmpeg e ffprobe devono essere disponibili nel PATH. Android usa invece MediaCodec e MediaMuxer. La disponibilità dell’accelerazione hardware dipende dal dispositivo e dal codec: la presenza di una GPU non garantisce che ogni conversione possa sfruttarla."
+          "body": "Un bitrate pari a 0 richiede la copia dei flussi. I campioni compressi vengono conservati quando il contenitore di uscita può accettarli; i formati incompatibili possono comunque richiedere una codifica. Scegliere un bitrate inferiore significa richiedere un’elaborazione del contenuto, non accelerare il download HTTP.\n\nSu desktop, FFmpeg e ffprobe devono essere disponibili nel PATH. Android usa invece MediaCodec e MediaMuxer. La disponibilità dell’accelerazione hardware dipende dal dispositivo e dal codec: la presenza di una GPU non garantisce che ogni conversione possa sfruttarla.\n\nConservare la codifica e conservare tutte le tracce sono requisiti distinti. Verificare audio, sottotitoli, contenitore e lettore."
+        },
+        {
+          "heading": "Verificare l’ambiente prima delle prestazioni",
+          "body": "Su desktop questi comandi mostrano soltanto le versioni: non scaricano né modificano contenuti. Eseguirli nell’ambiente che avvia l’applicazione; un lanciatore grafico può ereditare un PATH diverso dal terminale.\n\n```sh\nffmpeg -version\nffprobe -version\n```\n\nVersione e configurazione di compilazione aiutano a distinguere un encoder assente da uno che il driver non riesce a inizializzare. Android usa componenti di sistema: installare FFmpeg per desktop non risolve i suoi errori multimediali. Anche iOS esporta attraverso framework nativi.\n\nIniziare con un contenuto breve e riproducibile che si è autorizzati a salvare, impostazioni predefinite e conservazione della codifica originale. Cambiare poi una variabile alla volta. Video lunghi, alta concorrenza e codifica hardware insieme rendono difficile isolare le cause. Un test delle capacità riuscito vale per le sue condizioni; risoluzione, formato dei pixel, HDR e stato del driver possono cambiare con il file reale."
         },
         {
           "heading": "Segui l’attività fino all’esportazione",
-          "body": "Pausa e ripresa si applicano al trasferimento, non alla conversione o all’esportazione. Prima che la pausa abbia effetto, una lettura di rete in corso potrebbe dover terminare o raggiungere il timeout. I segmenti verificati e i dati che possono essere ripresi in sicurezza sono riutilizzabili, ma un server senza un adeguato supporto agli intervalli di byte può richiedere un nuovo trasferimento.\n\nAndroid esporta i file completati nella cartella pubblica Downloads. Su desktop viene usato il percorso selezionato. I sottotitoli sono file SRT separati con lo stesso nome di base. Attendi che l’esportazione riesca prima di considerare un file temporaneo come il risultato finale."
+          "body": "Pausa e ripresa si applicano al trasferimento, non alla conversione o all’esportazione. Prima che la pausa abbia effetto, una lettura di rete in corso potrebbe dover terminare o raggiungere il timeout. I segmenti verificati e i dati che possono essere ripresi in sicurezza sono riutilizzabili, ma un server senza un adeguato supporto agli intervalli di byte può richiedere un nuovo trasferimento.\n\nAndroid esporta i file completati nella cartella pubblica Downloads. Su desktop viene usato il percorso selezionato. I sottotitoli sono file SRT separati con lo stesso nome di base. Attendi che l’esportazione riesca prima di considerare un file temporaneo come il risultato finale.\n\nLa ripresa deve confermare l’identità della risorsa. Il codice verifica ETag o Last-Modified; ricominciare è più sicuro che unire versioni diverse senza garanzie."
+        },
+        {
+          "heading": "Verificare il risultato su più livelli",
+          "body": "Sostituire il nome dimostrativo `output.mp4` con il percorso effettivo. Leggere prima i metadati del contenitore e dei flussi:\n\n```sh\nffprobe -v error -show_entries format=duration,size:stream=index,codec_type,codec_name,width,height -of json \"output.mp4\"\n```\n\nControllare tracce previste, codec, dimensioni e durata rispetto alla fonte. Un campo mancante non equivale a zero; una durata corretta non prova che tutti i fotogrammi siano presenti. I sottotitoli possono essere in un SRT separato.\n\nSu desktop, decodificare il primo video e il primo audio facoltativo verso un’uscita scartata può rivelare errori:\n\n```sh\nffmpeg -v error -xerror -i \"output.mp4\" -map 0:v:0 -map \"0:a:0?\" -f null -\n```\n\n`-f null -` non crea un nuovo file; `-xerror` richiede l’uscita in caso di errore. Il controllo legge comunque il contenuto e richiede calcolo. È una verifica indipendente, non la trascrizione di comandi interni di Segmeris. Controllare inoltre inizio, metà e fine nel lettore previsto: sincronizzazione, orientamento e colori. Nessuna verifica isolata garantisce tutti i dispositivi."
         },
         {
           "heading": "Prepara una segnalazione utile",
-          "body": "Indica la piattaforma, la modalità di elaborazione, la fase che fallisce e un esempio pubblico che riproduca il problema. Una richiesta di playlist fallita, un codificatore non disponibile e un file di uscita non valido sono errori diversi. Conserva il messaggio di errore invece di sostituirlo con «download non riuscito».\n\nRimuovi dai log cookie, SESSDATA, token API e URL firmati privati. Fai riferimento alle versioni e alla documentazione attuali del repository. La registrazione in diretta e gli ingressi protetti da DRM non rientrano nelle funzionalità implementate."
+          "body": "Indica la piattaforma, la modalità di elaborazione, la fase che fallisce e un esempio pubblico che riproduca il problema. Una richiesta di playlist fallita, un codificatore non disponibile e un file di uscita non valido sono errori diversi. Conserva il messaggio di errore invece di sostituirlo con «download non riuscito».\n\nRimuovi dai log cookie, SESSDATA, token API e URL firmati privati. Fai riferimento alle versioni e alla documentazione attuali del repository. La registrazione in diretta e gli ingressi protetti da DRM non rientrano nelle funzionalità implementate.\n\nIndicare versione, ingresso, fase e differenza tra atteso e osservato. Allegare codice d’uscita ed errore originale senza credenziali. È un’analisi delle fonti, non una certificazione di tutti i dispositivi."
+        }
+      ],
+      "sources": [
+        {
+          "label": "Segmeris · README",
+          "url": "https://github.com/blueokanna/Segmeris/blob/fe69043aa9d9f9b9be473dab429130122b0a0e4f/README.md"
+        },
+        {
+          "label": "Segmeris · transfer.rs",
+          "url": "https://github.com/blueokanna/Segmeris/blob/fe69043aa9d9f9b9be473dab429130122b0a0e4f/rust/src/api/downloader/transfer.rs"
+        },
+        {
+          "label": "FFmpeg · Streamcopy",
+          "url": "https://ffmpeg.org/ffmpeg.html#Streamcopy"
+        },
+        {
+          "label": "ffprobe · Options",
+          "url": "https://ffmpeg.org/ffprobe.html#Options"
+        },
+        {
+          "label": "RFC 8216 · HTTP Live Streaming",
+          "url": "https://www.rfc-editor.org/rfc/rfc8216.html"
         }
       ]
     },
@@ -83,21 +118,59 @@
       "sections": [
         {
           "heading": "Scaricare significa trasferire byte",
-          "body": "Il download trasferisce dati da un server. La velocità dipende dalla rete, dal server e dal modo in cui vengono effettuate le richieste. Aumentare le richieste simultanee può aiutare quando le singole richieste sono limitate, ma può anche attivare limitazioni di velocità o sovraccaricare la connessione. Parti dalle impostazioni predefinite ed esamina l’errore effettivo prima di aumentare il numero di tentativi.\n\nUn HTTP 404 indica che la risorsa richiesta non è disponibile a quell’indirizzo. Un errore TLS si verifica prima di ottenere una risposta utilizzabile. Nessuno dei due problemi si risolve scegliendo un codificatore hardware."
+          "body": "Il download trasferisce dati da un server. La velocità dipende dalla rete, dal server e dal modo in cui vengono effettuate le richieste. Aumentare le richieste simultanee può aiutare quando le singole richieste sono limitate, ma può anche attivare limitazioni di velocità o sovraccaricare la connessione. Parti dalle impostazioni predefinite ed esamina l’errore effettivo prima di aumentare il numero di tentativi.\n\nUn HTTP 404 indica che la risorsa richiesta non è disponibile a quell’indirizzo. Un errore TLS si verifica prima di ottenere una risposta utilizzabile. Nessuno dei due problemi si risolve scegliendo un codificatore hardware.\n\nUna definizione utile è byte multimediali scritti correttamente divisi per tempo di trasferimento. Precisare se sono inclusi analisi, tentativi ripetuti ed elaborazione."
+        },
+        {
+          "heading": "Una playlist HLS descrive un assemblaggio",
+          "body": "La playlist principale descrive varianti, quella multimediale elenca segmenti. Ottenere il primo `.m3u8` non identifica necessariamente tutte le risorse: l’audio può avere un’altra lista e i segmenti possono dipendere da dati iniziali.\n\n| Tag | Significato da mantenere |\n| --- | --- |\n| `EXT-X-MAP` | Inizializzazione dei segmenti successivi |\n| `EXT-X-BYTERANGE` | Intervallo di byte della risorsa |\n| `EXT-X-DISCONTINUITY` | Possibile confine temporale o di parametri |\n| `EXT-X-ENDLIST` | Non verranno aggiunti altri segmenti |\n\nIl diagramma rappresenta dipendenze logiche. Le richieste possono essere parallele, ma cache, decifratura e assemblaggio devono mantenere identità e ordine. Una lunghezza corretta non prova la corretta versione della risorsa.\n\nSegmeris documenta controlli su intervalli e lunghezze, inizializzazione e discontinuità. Attualmente rifiuta playlist live/EVENT non concluse e non supporta SAMPLE-AES / DRM. Le possibilità del protocollo non coincidono con quelle di ogni client.",
+          "diagram": "hls-assembly"
         },
         {
           "heading": "Rimultiplexare significa ricostruire il contenitore",
-          "body": "Un contenitore descrive come vengono organizzati, marcati temporalmente e indicizzati audio e video compressi. La rimultiplexazione copia questi campioni in un altro contenitore senza ricodificarli. Di solito richiede molto meno lavoro della codifica, ma i flussi devono essere compatibili con il contenitore di destinazione.\n\nHLS può fare riferimento a sezioni di inizializzazione, intervalli di byte e discontinuità. Concatenare semplicemente i frammenti MP4 scaricati non produce necessariamente un filmato completo con una durata valida. L’uscita deve essere assemblata e verificata, non soltanto rinominata."
+          "body": "Un contenitore descrive come vengono organizzati, marcati temporalmente e indicizzati audio e video compressi. La rimultiplexazione copia questi campioni in un altro contenitore senza ricodificarli. Di solito richiede molto meno lavoro della codifica, ma i flussi devono essere compatibili con il contenitore di destinazione.\n\nHLS può fare riferimento a sezioni di inizializzazione, intervalli di byte e discontinuità. Concatenare semplicemente i frammenti MP4 scaricati non produce necessariamente un filmato completo con una durata valida. L’uscita deve essere assemblata e verificata, non soltanto rinominata.\n\nLa copia evita decodifica, filtri e codifica, ma richiede ancora demultiplexing e multiplexing. Ridimensionare richiede immagini grezze ed è incompatibile con `-c copy` per quello stesso video."
         },
         {
           "heading": "La codifica cambia la rappresentazione del contenuto",
-          "body": "Modificare il codec, la risoluzione o il bitrate di un video richiede generalmente decodifica e codifica. Questo consuma risorse di calcolo e può cambiare la qualità. Un codificatore hardware può accelerare le operazioni di codifica supportate; non fa arrivare i byte dal server più velocemente.\n\nIl supporto dipende dal sistema operativo, dal driver, dal codec e dalle dimensioni dell’immagine. In Segmeris, una verifica riuscita del codificatore dimostra che un piccolo test ha funzionato. Non sostituisce il controllo del video realmente esportato sul dispositivo previsto."
+          "body": "Modificare il codec, la risoluzione o il bitrate di un video richiede generalmente decodifica e codifica. Questo consuma risorse di calcolo e può cambiare la qualità. Un codificatore hardware può accelerare le operazioni di codifica supportate; non fa arrivare i byte dal server più velocemente.\n\nIl supporto dipende dal sistema operativo, dal driver, dal codec e dalle dimensioni dell’immagine. In Segmeris, una verifica riuscita del codificatore dimostra che un piccolo test ha funzionato. Non sostituisce il controllo del video realmente esportato sul dispositivo previsto.\n\nIl nome di un encoder non ne descrive tutte le capacità. Contano formato dei pixel, risoluzione, driver e obiettivi di qualità."
+        },
+        {
+          "heading": "Impostare un confronto locale interpretabile",
+          "body": "Usare un breve video che si può elaborare e sostituire `input.mp4`. Sono prove diagnostiche indipendenti, non benchmark di Segmeris. `-n` impedisce la sovrascrittura; il mapping sceglie il primo video e il primo audio facoltativo, non tutte le tracce.\n\nPrima copiare i flussi:\n\n```sh\nffmpeg -n -i \"input.mp4\" -map 0:v:0 -map \"0:a:0?\" -c copy \"remuxed.mp4\"\n```\n\nPoi codificare in H.264 / AAC con una build di FFmpeg che includa `libx264`:\n\n```sh\nffmpeg -n -i \"input.mp4\" -map 0:v:0 -map \"0:a:0?\" -c:v libx264 -crf 23 -preset medium -c:a aac \"encoded.mp4\"\n```\n\nCRF 23 è il parametro scelto per questa prova, non un voto alla qualità né una dimensione garantita. Lo stesso numero non è direttamente confrontabile tra encoder diversi. Conservare ingresso, versione, comando, codice d’uscita, tempo e dimensione, confrontando gli stessi passaggi.\n\n| Domanda | Evidenza richiesta |\n| --- | --- |\n| Ricodificato? | Mapping, log e codec risultante |\n| Più piccolo? | Byte effettivi con lo stesso ingresso |\n| Più veloce? | Tempi in condizioni equivalenti |\n| Accettabile? | Qualità e lettura sulla destinazione |\n\nSenza esecuzione non esistono misurazioni da pubblicare."
+        },
+        {
+          "heading": "Contenitore valido e contenuto corretto sono cose diverse",
+          "body": "L’estensione non identifica con certezza il codec. Esaminare i dati effettivi:\n\n```sh\nffprobe -v error -show_entries format=duration,size:stream=index,codec_type,codec_name,width,height -of json \"output.mp4\"\n```\n\n`output.mp4` è un percorso dimostrativo. Durata del contenitore e delle tracce possono differire per offset iniziali o ritardi del codec. Interpretare le differenze rispetto alla fonte, ai segmenti mancanti e alla sincronizzazione, senza imporre una tolleranza universale ingiustificata.\n\nSe necessario, decodificare senza salvare un’uscita:\n\n```sh\nffmpeg -v error -xerror -i \"output.mp4\" -map 0:v:0 -map \"0:a:0?\" -f null -\n```\n\nL’esito positivo dimostra che quel decoder legge le tracce selezionate, non che sottotitoli, HDR e tutti i lettori siano corretti. La copia ricostruisce i metadati: un hash diverso non prova una codifica con perdita. Immagini apparentemente normali possono nascondere una traccia o un finale mancante.\n\nAudio assente: verificare selezione. Durata troncata: inizializzazione e assemblaggio. Nessun trasferimento: richiesta. Inizializzazione hardware fallita: driver e capacità."
         },
         {
           "heading": "Diagnostica seguendo l’ordine delle fasi",
-          "body": "Verifica prima che la sorgente sia accessibile. Conferma poi i flussi scelti e i relativi permessi. Esamina quindi gli errori di trasferimento e la possibilità di ripresa. Infine verifica l’elaborazione e l’esportazione. Questa sequenza evita di modificare impostazioni non pertinenti.\n\nSe un download termina ma produce un file danneggiato, esamina la durata del contenitore, la sincronizzazione audio/video e il log di elaborazione. Se una richiesta non parte mai, controlla prima l’errore HTTP o TLS. Un’osservazione precisa è più utile che cambiare ripetutamente tutte le opzioni."
+          "body": "Verifica prima che la sorgente sia accessibile. Conferma poi i flussi scelti e i relativi permessi. Esamina quindi gli errori di trasferimento e la possibilità di ripresa. Infine verifica l’elaborazione e l’esportazione. Questa sequenza evita di modificare impostazioni non pertinenti.\n\nSe un download termina ma produce un file danneggiato, esamina la durata del contenitore, la sincronizzazione audio/video e il log di elaborazione. Se una richiesta non parte mai, controlla prima l’errore HTTP o TLS. Un’osservazione precisa è più utile che cambiare ripetutamente tutte le opzioni.\n\nConservare un ingresso di controllo funzionante, cambiare una condizione alla volta e registrare trasferimento ed elaborazione separatamente. Le cifre devono provenire da misurazioni reali."
+        }
+      ],
+      "sources": [
+        {
+          "label": "Segmeris · README",
+          "url": "https://github.com/blueokanna/Segmeris/blob/fe69043aa9d9f9b9be473dab429130122b0a0e4f/README.md"
+        },
+        {
+          "label": "Segmeris · transfer.rs",
+          "url": "https://github.com/blueokanna/Segmeris/blob/fe69043aa9d9f9b9be473dab429130122b0a0e4f/rust/src/api/downloader/transfer.rs"
+        },
+        {
+          "label": "FFmpeg · Streamcopy",
+          "url": "https://ffmpeg.org/ffmpeg.html#Streamcopy"
+        },
+        {
+          "label": "ffprobe · Options",
+          "url": "https://ffmpeg.org/ffprobe.html#Options"
+        },
+        {
+          "label": "RFC 8216 · HTTP Live Streaming",
+          "url": "https://www.rfc-editor.org/rfc/rfc8216.html"
         }
       ]
     }
-  ]
+  ],
+  "references": "Riferimenti",
+  "expandDiagram": "Ingrandisci diagramma",
+  "readingProgress": "Avanzamento della lettura"
 }

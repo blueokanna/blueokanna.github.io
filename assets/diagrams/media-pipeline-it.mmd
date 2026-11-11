@@ -1,0 +1,13 @@
+flowchart TD
+  A("Richiedere il contenuto")
+  B("Trasferire byte")
+  C("Pacchetti audio/video compressi")
+  D("Copia del flusso")
+  E("Decodificare")
+  F("Codificare")
+  G("Rimultiplexare")
+  H("Verificare il file esportato")
+  A --> B --> C
+  C --> D --> G
+  C --> E --> F --> G
+  G --> H

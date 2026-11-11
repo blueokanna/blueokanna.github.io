@@ -100,8 +100,8 @@ ThemeData blogTheme(Brightness brightness, Color seed, String language) {
       ),
       bodyLarge: base.textTheme.bodyLarge?.copyWith(fontSize: 18, height: 1.9),
       bodyMedium: base.textTheme.bodyMedium?.copyWith(
-        fontSize: 15,
-        height: 1.7,
+        fontSize: 16,
+        height: 1.8,
       ),
     ),
     cardTheme: CardThemeData(
@@ -115,5 +115,20 @@ ThemeData blogTheme(Brightness brightness, Color seed, String language) {
       ),
     ),
     chipTheme: base.chipTheme.copyWith(shape: const StadiumBorder()),
+    searchBarTheme: SearchBarThemeData(
+      elevation: const WidgetStatePropertyAll(0),
+      backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainerHigh),
+      side: WidgetStatePropertyAll(BorderSide(color: scheme.outlineVariant)),
+      padding: const WidgetStatePropertyAll(
+        EdgeInsets.symmetric(horizontal: 24),
+      ),
+    ),
+    dividerTheme: DividerThemeData(
+      color: scheme.outlineVariant.withValues(alpha: .55),
+      space: 1,
+    ),
+    tooltipTheme: const TooltipThemeData(
+      waitDuration: Duration(milliseconds: 400),
+    ),
   );
 }

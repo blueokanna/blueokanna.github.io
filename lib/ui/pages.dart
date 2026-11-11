@@ -7,7 +7,10 @@ import '../comments.dart';
 import '../content.dart';
 import '../localization.dart';
 import '../motion.dart';
-import '../services.dart';
+import '../models/project.dart';
+import 'expressive.dart';
+import 'project_views.dart';
+import 'rich_content.dart';
 import 'clock_scope.dart';
 import 'components.dart';
 
@@ -16,8 +19,10 @@ class BlogPage extends StatefulWidget {
     super.key,
     required this.page,
     required this.strings,
+    required this.projects,
     this.slug,
   });
+  final List<ProjectEntry> projects;
   final String page;
   final String? slug;
   final BlogStrings strings;
@@ -28,24 +33,15 @@ class BlogPage extends StatefulWidget {
 class _BlogPageState extends State<BlogPage> {
   final _scroll = ScrollController();
   final _search = TextEditingController();
-  final _service = RepositoryService();
-  Future<List<Repository>>? _repos;
   final _sectionKeys = <int, GlobalKey>{};
   bool _comments = false;
   BlogStrings get s => widget.strings;
   ColorScheme get c => Theme.of(context).colorScheme;
   TextTheme get t => Theme.of(context).textTheme;
   @override
-  void initState() {
-    super.initState();
-    if (widget.page == '/projects') _repos = _service.load();
-  }
-
-  @override
   void dispose() {
     _scroll.dispose();
     _search.dispose();
-    _service.dispose();
     super.dispose();
   }
 
@@ -67,7 +63,32 @@ class _BlogPageState extends State<BlogPage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scrollbar(
+  Widget build(BuildContext context) => Column(
+    children: [
+      if (widget.page == '/posts/:slug')
+        AnimatedBuilder(
+          animation: _scroll,
+          builder: (context, _) {
+            final value =
+                !_scroll.hasClients || _scroll.position.maxScrollExtent <= 0
+                ? 0.0
+                : (_scroll.offset / _scroll.position.maxScrollExtent).clamp(
+                    0.0,
+                    1.0,
+                  );
+            return LinearProgressIndicator(
+              value: value,
+              minHeight: 2,
+              backgroundColor: Colors.transparent,
+              semanticsLabel: s.text('readingProgress'),
+            );
+          },
+        ),
+      Expanded(child: _scrollingContent(context)),
+    ],
+  );
+
+  Widget _scrollingContent(BuildContext context) => Scrollbar(
     controller: _scroll,
     child: SingleChildScrollView(
       controller: _scroll,
@@ -76,7 +97,7 @@ class _BlogPageState extends State<BlogPage> {
           constraints: const BoxConstraints(maxWidth: 1200),
           child: Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: MediaQuery.sizeOf(context).width < 600 ? 20 : 48,
+              horizontal: LayoutSpace.gutter(MediaQuery.sizeOf(context).width),
               vertical: 28,
             ),
             child: Column(
@@ -87,7 +108,7 @@ class _BlogPageState extends State<BlogPage> {
                   '/posts' => _posts(),
                   '/posts/:slug' => _article(),
                   '/projects' => _projects(),
-                  '/projects/segmeris' => _projectDetail(),
+                  '/projects/:slug' => _projectDetail(),
                   '/friends' => _friends(),
                   _ => _about(),
                 },
@@ -210,47 +231,74 @@ class _BlogPageState extends State<BlogPage> {
       ),
       const SizedBox(height: 24),
       _postCards(s.posts),
-      const SizedBox(height: 36),
-      _featured(),
+      const SizedBox(height: LayoutSpace.section),
+      Row(
+        children: [
+          Expanded(child: Text(s.text('projects'), style: t.headlineLarge)),
+          IconButton.filledTonal(
+            tooltip: s.text('projects'),
+            onPressed: () => go('/projects'),
+            icon: const Icon(Icons.arrow_forward),
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      Text(s.text('projectIntro'), style: t.bodyLarge),
+      const SizedBox(height: 28),
+      ProjectCollection(projects: widget.projects, strings: s, compact: true),
     ],
   );
   Widget _postCards(List<BlogPost> posts) => ResponsiveColumns(
-    minWidth: 380,
+    minWidth: 420,
     children: posts.asMap().entries.map((entry) {
       final post = entry.value;
-      return Card.filled(
-        color: entry.key.isEven ? c.primaryContainer : c.tertiaryContainer,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => go('/posts/${post.id}'),
-          child: Padding(
-            padding: const EdgeInsets.all(28),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        post.category.toUpperCase(),
-                        style: t.labelLarge,
-                      ),
+      return ExpressiveCard(
+        variant: entry.key,
+        onTap: () => go('/posts/${post.id}'),
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  ShapeEmblem(
+                    variant: entry.key + 1,
+                    icon: entry.key.isEven
+                        ? Icons.play_circle_outline
+                        : Icons.layers_outlined,
+                    size: 80,
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Text(
+                      post.category.toUpperCase(),
+                      style: t.labelLarge?.copyWith(color: c.primary),
                     ),
-                    const Icon(Icons.north_east),
-                  ],
-                ),
-                SizedBox(
-                  height: 110,
-                  child: _art(height: 110, variant: entry.key + 1),
-                ),
-                const SizedBox(height: 20),
-                Text(post.title, style: t.titleLarge),
-                const SizedBox(height: 16),
-                Text(post.summary),
-                const SizedBox(height: 26),
-                Text(s.text('read'), style: t.labelLarge),
-              ],
-            ),
+                  ),
+                  const Icon(Icons.north_east),
+                ],
+              ),
+              const SizedBox(height: 28),
+              Text(
+                post.title,
+                style: t.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 18),
+              Text(post.summary, style: t.bodyMedium),
+              const SizedBox(height: 32),
+              const Spacer(),
+              Row(
+                children: [
+                  Text(
+                    s.text('read'),
+                    style: t.labelLarge?.copyWith(color: c.primary),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.arrow_forward, size: 18, color: c.primary),
+                ],
+              ),
+            ],
           ),
         ),
       );
@@ -316,27 +364,16 @@ class _BlogPageState extends State<BlogPage> {
           ],
         ),
         const SizedBox(height: 30),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(32),
-          child: ColoredBox(
-            color: c.primaryContainer,
-            child: _art(
-              height: 240,
-              variant: post.id == 'segmeris-guide' ? 1 : 2,
-            ),
-          ),
-        ),
-        const SizedBox(height: 32),
         Card.outlined(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(s.text('contents'), style: t.titleMedium),
-                const SizedBox(height: 8),
-                for (var i = 0; i < post.sections.length; i++)
-                  TextButton(
+          child: ExpansionTile(
+            initiallyExpanded: MediaQuery.sizeOf(context).width >= 800,
+            title: Text(s.text('contents'), style: t.titleMedium),
+            childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+            children: [
+              for (var i = 0; i < post.sections.length; i++)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
                     onPressed: () {
                       final ctx = _sectionKeys[i]?.currentContext;
                       if (ctx != null) {
@@ -349,8 +386,8 @@ class _BlogPageState extends State<BlogPage> {
                     },
                     child: Text('${i + 1}. ${post.sections[i].heading}'),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
         const SizedBox(height: 36),
@@ -365,7 +402,14 @@ class _BlogPageState extends State<BlogPage> {
                   style: t.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 18),
-                Text(post.sections[i].body, style: t.bodyLarge),
+                RichContent(data: post.sections[i].body),
+                if (post.sections[i].diagram case final String diagram)
+                  DiagramFigure(
+                    id: diagram,
+                    language: s.tag,
+                    caption: post.sections[i].heading,
+                    expandLabel: s.text('expandDiagram'),
+                  ),
                 const SizedBox(height: 40),
               ],
             ],
@@ -377,11 +421,11 @@ class _BlogPageState extends State<BlogPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(s.text('references'), style: t.titleMedium),
+                const SizedBox(height: 12),
                 Text(s.text('sourceNote')),
-                ExternalLink(
-                  url: 'https://github.com/blueokanna/Segmeris#readme',
-                  label: 'Segmeris / ${s.text('source')} ↗',
-                ),
+                for (final source in post.sources)
+                  ExternalLink(url: source.url, label: source.label),
               ],
             ),
           ),
@@ -439,127 +483,27 @@ class _BlogPageState extends State<BlogPage> {
     );
   }
 
-  Widget _featured() => Card.filled(
-    color: c.secondaryContainer,
-    child: Padding(
-      padding: const EdgeInsets.all(30),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('FLUTTER × RUST', style: t.labelLarge),
-          const SizedBox(height: 16),
-          Text('Segmeris', style: t.headlineLarge),
-          const SizedBox(height: 12),
-          Text(s.text('projectSummary'), style: t.bodyLarge),
-          const SizedBox(height: 20),
-          FilledButton.tonalIcon(
-            onPressed: () => go('/projects/segmeris'),
-            icon: const Icon(Icons.arrow_forward),
-            label: Text(s.text('projects')),
-          ),
-        ],
-      ),
-    ),
-  );
-  Widget _projectDetail() => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      _title(
-        'OPEN SOURCE / FLUTTER × RUST',
-        'Segmeris',
-        s.text('projectSummary'),
-      ),
-      _art(height: 280, variant: 2),
-      const SizedBox(height: 24),
-      Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 780),
-          child: SelectionArea(
-            child: Text(s.text('projectDetails'), style: t.bodyLarge),
-          ),
-        ),
-      ),
-      const SizedBox(height: 28),
-      Wrap(
-        spacing: 16,
-        runSpacing: 12,
-        children: [
-          ExternalLink(
-            url: 'https://github.com/blueokanna/Segmeris',
-            label: s.text('source'),
-          ),
-          ExternalLink(
-            url: 'https://github.com/blueokanna/Segmeris/releases',
-            label: s.text('releases'),
-          ),
-          FilledButton.tonal(
-            onPressed: () => go('/posts/segmeris-guide'),
-            child: Text(s.text('read')),
-          ),
-        ],
-      ),
-    ],
-  );
+  Widget _projectDetail() {
+    final matches = widget.projects.where(
+      (project) => project.id == widget.slug,
+    );
+    if (matches.isEmpty) return _title('404', s.text('notFound'), '');
+    return ProjectDetail(project: matches.single, strings: s);
+  }
+
   Widget _projects() => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       _title('OPEN SOURCE', s.text('projects'), s.text('projectIntro')),
-      _featured(),
-      const SizedBox(height: 36),
-      Text(s.text('otherProjects'), style: t.titleLarge),
-      const SizedBox(height: 20),
-      FutureBuilder<List<Repository>>(
-        future: _repos,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return LinearProgressIndicator(semanticsLabel: s.text('loading'));
-          }
-          if (snapshot.hasError) {
-            return Card.outlined(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(s.text('offlineProjects')),
-                    TextButton.icon(
-                      onPressed: () =>
-                          setState(() => _repos = _service.load(refresh: true)),
-                      icon: const Icon(Icons.refresh),
-                      label: Text(s.text('retry')),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-          final repos = snapshot.data ?? [];
-          return ResponsiveColumns(
-            minWidth: 300,
-            children: repos
-                .where((p) => p.name != 'Segmeris')
-                .map(
-                  (repo) => Card.outlined(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(repo.name, style: t.titleLarge),
-                          const SizedBox(height: 12),
-                          if (repo.description.isNotEmpty)
-                            Text(repo.description),
-                          const SizedBox(height: 20),
-                          Text('${repo.language} · ☆ ${repo.stars}'),
-                          ExternalLink(url: repo.url, label: s.text('source')),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-                .toList(),
-          );
-        },
+      const SizedBox(height: 16),
+      ProjectCollection(projects: widget.projects, strings: s),
+      const SizedBox(height: 40),
+      const Align(
+        alignment: Alignment.centerLeft,
+        child: ExternalLink(
+          url: 'https://github.com/blueokanna?tab=repositories',
+          label: 'GitHub ↗',
+        ),
       ),
     ],
   );
@@ -641,12 +585,15 @@ class _BlogPageState extends State<BlogPage> {
         label: Text(_comments ? s.text('close') : s.text('loadComments')),
       ),
       if (_comments)
-        EmbeddedComments(
-          postId: 'guestbook',
-          language: s.tag,
-          dark: c.brightness == Brightness.dark,
-          unavailableLabel: s.text('commentUnavailable'),
-          linkLabel: s.text('openDiscussion'),
+        Padding(
+          padding: const EdgeInsets.only(top: 24),
+          child: EmbeddedComments(
+            postId: 'guestbook',
+            language: s.tag,
+            dark: c.brightness == Brightness.dark,
+            unavailableLabel: s.text('commentUnavailable'),
+            linkLabel: s.text('openDiscussion'),
+          ),
         ),
     ],
   );

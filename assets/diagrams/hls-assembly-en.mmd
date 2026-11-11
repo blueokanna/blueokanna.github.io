@@ -1,0 +1,8 @@
+flowchart TD
+  A("Playlist")
+  B("Resolve URIs / timeline")
+  C("Initialization when required + media segments")
+  D("Assemble by timestamps")
+  E("Mux into a container")
+  F("Check tracks / duration / sync")
+  A --> B --> C --> D --> E --> F

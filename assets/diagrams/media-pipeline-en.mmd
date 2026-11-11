@@ -1,0 +1,13 @@
+flowchart TD
+  A("Request media")
+  B("Transfer bytes")
+  C("Compressed audio/video packets")
+  D("Stream copy")
+  E("Decode")
+  F("Encode")
+  G("Remux")
+  H("Validate exported file")
+  A --> B --> C
+  C --> D --> G
+  C --> E --> F --> G
+  G --> H
