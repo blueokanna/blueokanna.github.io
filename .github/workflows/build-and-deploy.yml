@@ -1,76 +1,45 @@
 name: Build and deploy Flutter Web
-
 on:
   push:
-    branches: [ "main" ]
-    paths-ignore:
-      - '**.md'
-      - 'LICENSE'
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
-
+permissions:
+  contents: read
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  build-and-deploy:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: dart format --output=none --set-exit-if-changed lib test
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build web --release --base-href / --no-web-resources-cdn
+      - run: cp CNAME build/web/CNAME
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.29.3'
-          channel: 'stable'
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Run tests
-        run: flutter test
-
-      - name: Verify ZHIPU key presence
-        env:
-          ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
-        run: |
-          if [ -z "$ZHIPU_API_KEY" ]; then
-            echo "::warning::ZHIPU_API_KEY secret is empty — AI blog features will be disabled."
-          else
-            echo "ZHIPU_API_KEY is set (length=${#ZHIPU_API_KEY})"
-          fi
-
-      - name: Write dart-define file (avoids shell escaping issues with dots)
-        env:
-          ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
-        run: |
-          python3 -c "
-          import json, os
-          with open('dart_defines.json', 'w') as f:
-              json.dump({'ZHIPU_API_KEY': os.environ.get('ZHIPU_API_KEY', '')}, f)
-          "
-
-      - name: Build release web
-        run: |
-          flutter clean
-          flutter pub get
-          flutter build web --release \
-            --base-href / \
-            --dart-define-from-file=dart_defines.json
-          rm -f dart_defines.json
-
-      - name: Copy CNAME into build output
-        run: cp CNAME build/web/CNAME
-
-      - name: Deploy to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: build/web
-          publish_branch: gh-pages
-          cname: www.pulselink.top
-          force_orphan: true
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: 'deploy: ${{ github.sha }}'
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

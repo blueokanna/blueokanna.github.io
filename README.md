@@ -1,136 +1,51 @@
-# Blue的PulseLink博客
+# PulseLink
 
-基于 **Flutter Web** 和 **Material Design 3 Expressive** 完全重建的个人博客，部署在 GitHub Pages。
+Blue 的个人博客，使用 Flutter Web，发布到 GitHub Pages。
 
-在线访问：[https://www.pulselink.top/](https://www.pulselink.top/)
+## 本地运行
 
-## 概述
+项目使用 Flutter **3.47.9 stable**。CI 固定相同版本，并提交 pubspec.lock。
 
-本仓库使用 Flutter Web 作为唯一渲染层，设计风格深度参考 Wise 平台的产品级美学。
-
-核心目标：
-
-- **纯 Flutter Web 架构** — 不依赖 HTML/CSS/JS 手写页面
-- **Material Design 3 Expressive** — 全面使用 M3 设计系统，包括 squircle 形状、弹性动画、自适应色彩
-- **中英双语** — 一键切换中文与英文
-- **实时博客/快讯聚合** — 多源拉取最新技术内容（DEV/HN/GitHub Release/GitHub Activity），含缓存与兜底
-- **AI 对话助手** — 内嵌 AI 聊天面板，支持实时问答
-- **响应式布局** — 手机、平板、桌面完美适配，参考 Wise 的断点设计
-- **丝滑动画** — 弹性曲线（easeOutBack）、MD3 图标轨道浮动、渐入动效
-- **天气感知** — 基于 IP 定位自动获取当前城市天气
-- **节日主题** — 自动识别春节、圣诞、中秋等节日并调整色调
-- **MD3 图标系统** — 统一 Material Design 3 图标语言与表达性动效
-
-## 功能亮点
-
-| 功能 | 描述 |
-| --- | --- |
-| 🌐 双语切换 | 顶栏一键切换中/英文，所有文案同步更新 |
-| 📰 实时博客快讯 | 自动聚合多源最新技术内容，支持刷新与异常兜底 |
-| 💬 AI 助手 | 侧边 AI 对话面板，支持多轮对话 |
-| 🎨 M3 Expressive | squircle 卡片、弹性动画、自适应色彩 |
-| 📱 完美响应式 | 手机/平板/桌面三档适配 |
-| 🌤️ 天气感知 | 自动获取地理位置和实时天气 |
-| 🎄 节日主题 | 自动识别节日并切换色调和图标 |
-| 🧩 MD3 图标 | 统一 Material Design 3 图标系统 |
-| ⭐ GitHub 数据 | 实时拉取仓库和 Star 数据 |
-| 🔐 API 安全 | API 密钥通过构建参数注入，不存储在代码中 |
-
-## 技术栈
-
-- **Flutter** 3.43 beta (Dart 3.12)
-- **Material Design 3** (Expressive)
-- **智谱清言 GLM-4-Flash** — AI 内容生成与对话
-- **http** — 网络请求
-- **url_launcher** — 外部链接
-- **Open-Meteo API** — 天气数据
-- **GitHub API** — 仓库数据
-- **ipapi.co** — IP 地理位置
-
-## 项目结构
-
-```text
-├── lib/
-│   ├── main.dart         # 入口
-│   ├── app.dart          # 主应用 UI、动画、布局
-│   ├── l10n.dart         # 中英双语本地化
-│   └── services.dart     # 服务层（天气/GitHub/实时博客聚合）+ 数据模型
-├── web/
-│   └── index.html        # Flutter Web 宿主页（M3 Expressive 加载动画）
-├── test/
-│   └── widget_test.dart  # 基础渲染测试
-├── assets/
-│   └── icon.png          # 应用图标唯一源文件（自动生成 web/icons 与 favicon）
-├── CNAME                 # 自定义域名 (www.pulselink.top)
-└── pubspec.yaml          # 包配置
-```
-
-## 智谱 AI 配置
-
-API 密钥 **不存储在代码中**，而是通过构建参数注入：
-
-```bash
-# 本地开发
-flutter run -d chrome --dart-define=ZHIPU_API_KEY=你的密钥
-
-# 发布构建
-flutter build web --release --base-href / --dart-define=ZHIPU_API_KEY=你的密钥
-```
-
-### GitHub Actions 配置
-
-1. 在仓库 Settings → Secrets → Actions 中添加 `ZHIPU_API_KEY`
-2. 在工作流中使用：
-
-```yaml
-- run: flutter build web --release --base-href / --dart-define=ZHIPU_API_KEY=${{ secrets.ZHIPU_API_KEY }}
-```
-
-## 本地开发
-
-```bash
-# 安装依赖
-flutter pub get
-
-# 静态分析
-flutter analyze
-
-# 运行测试
-flutter test
-
-# 本地调试（Chrome）
+```sh
+flutter pub get --enforce-lockfile
 flutter run -d chrome
-
-# 发布构建
-flutter build web --release --base-href /
-```
-
-## 部署模型
-
-本仓库使用 GitHub Pages 从仓库根目录提供站点服务。
-
-源码保持标准 Flutter 结构（`lib/`、`web/`、`assets/`），构建产物从 `build/web` 复制到仓库根目录。
-
-推荐发布流程：
-
-```bash
-flutter pub get
+dart format --output=none --set-exit-if-changed lib test
+flutter analyze
 flutter test
-flutter build web --release --base-href / --dart-define=ZHIPU_API_KEY=${{ secrets.ZHIPU_API_KEY }}
-Copy-Item -Path "build\web\*" -Destination "." -Recurse -Force
+flutter build web --release --base-href / --no-web-resources-cdn
 ```
 
-生产环境推荐一键发布（防止遗漏字体/资产拷贝）：
+产物位于 `build/web`。CanvasKit 随站点分发，不依赖公共渲染器 CDN。首次加载仍需下载 Flutter 引擎与字体；这不是轻量 HTML 博客，不能承诺任何网络条件下都秒开。
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/publish_web.ps1
-```
+## 内容与结构
 
-自定义域名通过 `CNAME` 文件保持：`www.pulselink.top`
+- `lib/app.dart`：响应式页面、主题、语言切换和阅读面板。
+- `lib/content.dart`：技术笔记和友链；笔记描述本站实现，不伪造发布日期。
+- `lib/motion.dart`：Aurora 动效时钟、绘制路径与统一过渡参数。
+- `lib/services.dart`：GitHub 数据读取、会话缓存、外链校验。
+- `web/`：启动页面、失败重试和资源清单。
+- `test/site_test.dart`：链接校验、缓存与错误处理、三种宽度交互、减少动画。
 
-## 设计理念
+添加友链时，在 `friends` 中追加 `FriendLink`，填写名称、HTTPS 地址、中英文简介和可选头像。已加入 Lxns Network 和陶然；陶然使用提供的 SVG 头像地址。头像不可用时显示本地图标。
 
-- **Wise 风格** — 干净、自信、大量留白、清晰的视觉层次
-- **M3 Expressive** — 有机形状（squircle）、弹性运动、表达性色彩
-- **心理学优先** — 节奏感、信任信号、渐进式信息呈现
-- **零黑点** — 移除背景画布中的点阵网格，保持纯净的渐变氛围
+技术笔记直接随应用打包，点击卡片打开阅读面板。项目列表读取 blueokanna 的公开 GitHub 仓库，筛除 fork 和 archived，展示最近更新的六个项目。请求超时或限流时明确显示重试入口；没有假统计或虚构项目兜底。M3U8 Downloader 的原有源码入口保留。
+
+## 动效与渲染
+
+Aurora 是应用层的绘制调度组件，不是修改过的 Flutter 引擎。一个 AnimationController 驱动背景与花瓣路径；CustomPainter 直接监听重绘，RepaintBoundary 隔离画布。没有全屏 BackdropFilter 或逐帧页面 setState。
+
+系统减少动画、手动暂停和后台生命周期都会停止持续动画。导航与阅读过渡共用时长及曲线。Material 控件仍使用框架自身的焦点、悬停和按压反馈，不宣称全应用只有一个 Ticker。
+
+尚未进行真实设备的 CPU/GPU、功耗或帧时间基准测试，因此不提供降低负载的百分比或稳定帧率承诺。可使用 Flutter DevTools 的 Performance 视图记录目标设备上的滚动与过渡帧时间。
+
+## 发布
+
+仓库 Settings → Pages → Source 选择 **GitHub Actions**。推送 `main` 后运行格式检查、静态分析、测试及 Release 构建，再通过官方 Pages artifact 工作流发布。PR 只构建验证，不发布。
+
+自定义域名继续读取 `CNAME` 中的 `www.pulselink.top`，DNS 需要保持指向 GitHub Pages。`scripts/publish_web.ps1` 只验证和生成产物，不覆盖仓库根目录。历史根目录构建文件不作为新工作流的发布输入。
+
+## 数据与安全边界
+
+GitHub Pages 没有私密服务端。任何编译进浏览器代码的密钥都不能视为秘密。当前构建不接收 AI 密钥，并移除未使用、没有鉴权的代理示例与不可用的 AI 占位功能。如曾将真实密钥发布到静态产物，应在提供商处撤销并轮换。
+
+外部导航仅接受无 userinfo 的 HTTPS URL。GitHub 数据与远程头像仍受第三方服务可用性影响。这里不进行 IP 定位，也不在失败时捏造天气。没有发布到线上的操作会由本地构建自动完成。

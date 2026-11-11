@@ -3,10 +3,10 @@
     "short_name": "PulseLink",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#091411",
-    "theme_color": "#0F7A65",
+    "background_color": "#f6f7ef",
+    "theme_color": "#243f34",
     "description": "PulseLink blog powered by Flutter Web and Material Design 3.",
-    "orientation": "portrait-primary",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {
