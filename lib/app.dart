@@ -11,6 +11,7 @@ import 'ui/pages.dart';
 import 'ui/page_transition.dart';
 import 'publishing.dart';
 import 'ui/studio.dart';
+import 'companion.dart';
 
 class PulseLinkApp extends StatefulWidget {
   const PulseLinkApp({
@@ -152,7 +153,7 @@ class _PulseLinkAppState extends State<PulseLinkApp> {
                 widget.preferences.paused ||
                 MediaQuery.disableAnimationsOf(context),
           ),
-          child: child!,
+          child: CompanionHost(route: '/${parts.join('/')}', child: child!),
         ),
       );
     },

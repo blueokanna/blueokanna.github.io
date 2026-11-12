@@ -59,6 +59,7 @@ void main() {
     ('home-mobile', 390.0, '/zh-CN'),
     ('mascot-wave', 1440.0, '/zh-CN'),
     ('mascot-read', 390.0, '/zh-CN'),
+    ('mascot-all', 390.0, '/zh-CN'),
     ('mobile', 390.0, '/zh-CN/posts/segmeris-guide'),
     ('projects-desktop', 1440.0, '/zh-CN/projects'),
     ('projects-mobile', 390.0, '/zh-CN/projects'),
@@ -86,6 +87,12 @@ void main() {
       );
       await tester.pumpAndSettle();
       if (sample.$3 == '/zh-CN') {
+        if (sample.$1 == 'mascot-all') {
+          final button = find.text('更多表情 · 12');
+          await tester.ensureVisible(button);
+          await tester.tap(button);
+          await tester.pumpAndSettle();
+        }
         final suffix = sample.$1 == 'mascot-wave'
             ? '-wave'
             : sample.$1 == 'mascot-read'
@@ -107,7 +114,7 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        if (suffix.isNotEmpty) {
+        if (suffix.isNotEmpty || sample.$1 == 'mascot-all') {
           await Scrollable.ensureVisible(
             tester.element(find.byType(CompanionStage)),
             alignment: .1,
@@ -115,11 +122,94 @@ void main() {
           await tester.pumpAndSettle();
         }
       }
+      for (final artwork in tester.widgetList<CompanionArtwork>(
+        find.byType(CompanionArtwork),
+      )) {
+        await tester.runAsync(
+          () => precacheImage(
+            ResizeImage(AssetImage(artwork.asset), width: artwork.decodeWidth),
+            tester.element(find.byType(PulseLinkApp)),
+          ),
+        );
+      }
+      await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       await capture(tester, key, sample.$1);
       await tester.pumpWidget(const SizedBox());
     });
   }
+  testWidgets('capture all twelve character poses', (tester) async {
+    tester.view.physicalSize = const Size(1200, 1120);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final key = GlobalKey();
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: key,
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: blogTheme(Brightness.light, const Color(0xff47734b), 'zh-CN'),
+          home: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  const Text(
+                    '蓝色大肥鱼 · 12 种表情',
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: GridView.count(
+                      crossAxisCount: 4,
+                      childAspectRatio: .86,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      children: [
+                        for (final mood in CompanionMood.actions)
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: Image.asset(
+                                      mood.asset,
+                                      cacheWidth: 320,
+                                    ),
+                                  ),
+                                  Text(
+                                    mood.label('zh-CN'),
+                                    style: const TextStyle(fontSize: 18),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.runAsync(() async {
+      for (final mood in CompanionMood.actions) {
+        await precacheImage(
+          ResizeImage(AssetImage(mood.asset), width: 320),
+          tester.element(find.byType(Scaffold)),
+        );
+      }
+    });
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await capture(tester, key, 'companion-poses');
+    await tester.pumpWidget(const SizedBox());
+  });
   for (final sample in [
     ('desktop-dark', 1440.0, ThemeMode.dark),
     ('mobile-light', 390.0, ThemeMode.light),

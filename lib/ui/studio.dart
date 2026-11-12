@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../localization.dart';
 import '../publishing.dart';
+import '../companion.dart';
 import 'components.dart';
 import 'rich_content.dart';
 
@@ -97,6 +98,7 @@ class _WritingStudioState extends State<WritingStudio> {
     _saveTimer?.cancel();
     _saveTimer = Timer(const Duration(milliseconds: 600), _save);
     if (mounted) setState(() => _draftStatus = '正在编辑');
+    if (mounted) CompanionScope.read(context)?.react(CompanionMood.write);
   }
 
   Future<void> _save() async {
@@ -112,22 +114,30 @@ class _WritingStudioState extends State<WritingStudio> {
       );
       if (mounted) {
         setState(() => _draftStatus = ok ? '草稿已保存到此浏览器' : '草稿保存失败，请复制正文备份');
+        CompanionScope.read(context)
+            ?.react(ok ? CompanionMood.saved : CompanionMood.error);
       }
     } catch (_) {
       if (mounted) setState(() => _draftStatus = '草稿保存失败，请复制正文备份');
+      if (mounted) CompanionScope.read(context)?.react(CompanionMood.error);
     }
   }
 
   Future<void> _run(Future<void> Function() action) async {
+    final actor = CompanionScope.read(context);
+    final ticket = actor?.beginWork();
     setState(() {
       _busy = true;
       _status = '';
     });
     try {
       await action();
+      if (ticket != null) actor!.completeWork(ticket, CompanionMood.celebrate);
     } on PublishingException catch (error) {
+      if (ticket != null) actor!.completeWork(ticket, CompanionMood.error);
       if (mounted) setState(() => _status = error.message);
     } catch (_) {
+      if (ticket != null) actor!.completeWork(ticket, CompanionMood.error);
       if (mounted) setState(() => _status = '操作未完成，请检查网络和文章格式后重试。');
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -141,7 +151,7 @@ class _WritingStudioState extends State<WritingStudio> {
     if (mounted) {
       setState(
         () => _status = widget.publisher.canPublish
-          ? '已确认 blueokanna 身份。提交时由 GitHub 校验令牌写权限与分支规则。'
+            ? '已确认 blueokanna 身份。提交时由 GitHub 校验令牌写权限与分支规则。'
             : '身份已验证；此账户没有站点发布权限。',
       );
     }
@@ -183,6 +193,7 @@ class _WritingStudioState extends State<WritingStudio> {
       _draft.validate();
     } on PublishingException catch (error) {
       setState(() => _status = error.message);
+      CompanionScope.read(context)?.react(CompanionMood.error, priority: 3);
       return;
     }
     final snapshot = _draft;
@@ -252,7 +263,12 @@ class _WritingStudioState extends State<WritingStudio> {
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: widget.publisher,
     builder: (context, _) => SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.fromLTRB(
+        24,
+        24,
+        24,
+        MediaQuery.sizeOf(context).width < 600 ? 24 : 144,
+      ),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1000),

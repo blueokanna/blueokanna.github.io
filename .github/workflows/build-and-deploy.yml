@@ -25,6 +25,8 @@ jobs:
           flutter --version
           dart --version
       - run: flutter pub get --enforce-lockfile
+      - name: Check Dart formatting before asset preparation
+        run: dart format --output=none --set-exit-if-changed lib test tool
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -46,7 +48,6 @@ jobs:
           fi
       - run: npm run diagrams
       - run: flutter test tool/export_comment_themes_test.dart
-      - run: dart format --output=none --set-exit-if-changed lib test tool
       - run: flutter analyze
       - run: flutter test
       - run: node --test test/comments_test.mjs

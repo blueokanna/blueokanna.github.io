@@ -6,6 +6,7 @@ import '../preferences.dart';
 import '../motion.dart';
 import 'clock_scope.dart';
 import 'mascot.dart';
+import '../companion.dart';
 
 class BlogShell extends StatelessWidget {
   const BlogShell({
@@ -17,6 +18,30 @@ class BlogShell extends StatelessWidget {
   final BlogStrings strings;
   final BlogPreferences preferences;
   final Widget child;
+  Widget _companion(
+    BuildContext context,
+    Animation<double> clock, {
+    bool inline = false,
+  }) => CompanionDock(
+    language: strings.tag,
+    clock: clock,
+    inline: inline,
+    onOpen: () => showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (context) => SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 4, 24, 28),
+          child: MotionClock(
+            clock: clock,
+            child: CompanionStage(language: strings.tag, compact: true),
+          ),
+        ),
+      ),
+    ),
+  );
   void _appearance(BuildContext context) => showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
@@ -42,7 +67,11 @@ class BlogShell extends StatelessWidget {
                     (mode) => ChoiceChip(
                       label: Text(strings.text(mode.name)),
                       selected: preferences.mode == mode,
-                      onSelected: (_) => preferences.update(theme: mode),
+                      onSelected: (_) {
+                        preferences.update(theme: mode);
+                        CompanionScope.read(context)
+                            ?.react(CompanionMood.surprised);
+                      },
                     ),
                   )
                   .toList(),
@@ -70,7 +99,11 @@ class BlogShell extends StatelessWidget {
                   ),
                   label: Text(colorPresets[i].name),
                   selected: preferences.palette == i,
-                  onSelected: (_) => preferences.update(color: i),
+                  onSelected: (_) {
+                    preferences.update(color: i);
+                    CompanionScope.read(context)
+                        ?.react(CompanionMood.surprised);
+                  },
                 ),
               ),
             ),
@@ -88,36 +121,23 @@ class BlogShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final path = GoRouterState.of(context).uri.path;
+    final showCompanion = path != '/${strings.tag}';
+    final narrow = MediaQuery.sizeOf(context).width < 600;
     return Aurora(
       paused: preferences.paused,
       builder: (context, clock) => Scaffold(
-        floatingActionButton:
-            path == '/${strings.tag}' || path.endsWith('/studio')
-            ? null
-            : FloatingActionButton.small(
-                tooltip: strings.tag.startsWith('zh')
-                    ? '叫出蓝色大肥鱼'
-                    : 'Meet 蓝色大肥鱼',
-                onPressed: () => showModalBottomSheet<void>(
-                  context: context,
-                  showDragHandle: true,
-                  isScrollControlled: true,
-                  useSafeArea: true,
-                  builder: (context) => SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 4, 24, 28),
-                      child: MotionClock(
-                        clock: clock,
-                        child: CompanionStage(
-                          language: strings.tag,
-                          compact: true,
-                        ),
-                      ),
-                    ),
-                  ),
+        floatingActionButton: showCompanion && !narrow
+            ? _companion(context, clock)
+            : null,
+        bottomNavigationBar: showCompanion && narrow
+            ? SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                  child: _companion(context, clock, inline: true),
                 ),
-                child: const Icon(Icons.waving_hand_outlined),
-              ),
+              )
+            : null,
         body: Stack(
           children: [
             Positioned.fill(

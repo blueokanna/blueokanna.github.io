@@ -1,15 +1,14 @@
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
 import '../motion.dart';
+import '../companion.dart';
+export '../companion.dart' show CompanionMood;
 import 'clock_scope.dart';
 
-enum CompanionMood { idle, wave, dance, read }
-
-/// The approved character artwork is kept intact. Aurora only animates its
+/// The bundled character artwork is kept intact. Aurora only animates its
 /// presentation; the face, costume, hair and whale details are never redrawn.
 class CompanionStage extends StatefulWidget {
   const CompanionStage({
@@ -31,9 +30,30 @@ class _CompanionStageState extends State<CompanionStage>
     duration: Motion.duration,
     value: 1,
   );
-  List<double> _from = [1, 0, 0, 0], _to = [1, 0, 0, 0];
+  List<double> _from = List.generate(
+        CompanionMood.values.length,
+        (i) => i == 0 ? 1 : 0,
+      ),
+      _to = List.generate(CompanionMood.values.length, (i) => i == 0 ? 1 : 0);
   CompanionMood _mood = CompanionMood.idle;
-  Timer? _reset;
+  CompanionController? _actor, _local;
+  bool _expanded = false;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final actor =
+        CompanionScope.maybeOf(context) ?? (_local ??= CompanionController());
+    if (_actor == actor) return;
+    _actor?.removeListener(_syncMood);
+    _actor = actor;
+    actor.addListener(_syncMood);
+    _syncMood();
+  }
+
+  void _syncMood() {
+    if (_actor!.mood != _mood) _changePose(_actor!.mood);
+  }
+
   bool get _zh => widget.language.startsWith('zh');
   String _label(String zh, String en) => _zh ? zh : en;
   void _changePose(CompanionMood mood) {
@@ -43,10 +63,13 @@ class _CompanionStageState extends State<CompanionStage>
         : Motion.spring.transform(_pose.value).clamp(0.0, 1.0);
     setState(() {
       _from = List.generate(
-        4,
+        CompanionMood.values.length,
         (i) => _from[i] * (1 - progress) + _to[i] * progress,
       );
-      _to = List.generate(4, (i) => i == mood.index ? 1.0 : 0.0);
+      _to = List.generate(
+        CompanionMood.values.length,
+        (i) => i == mood.index ? 1.0 : 0.0,
+      );
       _mood = mood;
     });
     if (reduced) {
@@ -56,18 +79,12 @@ class _CompanionStageState extends State<CompanionStage>
     }
   }
 
-  void _act(CompanionMood mood) {
-    _reset?.cancel();
-    _changePose(mood);
-    if (mood == CompanionMood.read) return;
-    _reset = Timer(const Duration(seconds: 5), () {
-      if (mounted) _changePose(CompanionMood.idle);
-    });
-  }
+  void _act(CompanionMood mood) => _actor!.select(mood);
 
   @override
   void dispose() {
-    _reset?.cancel();
+    _actor?.removeListener(_syncMood);
+    _local?.dispose();
     _gaze.dispose();
     _pose.dispose();
     super.dispose();
@@ -77,21 +94,7 @@ class _CompanionStageState extends State<CompanionStage>
   Widget build(BuildContext context) {
     final c = Theme.of(context).colorScheme;
     final reduced = MediaQuery.disableAnimationsOf(context);
-    final message = switch (_mood) {
-      CompanionMood.idle => _label('我是蓝色大肥鱼。戳戳我？', 'I’m 蓝色大肥鱼. Say hello?'),
-      CompanionMood.wave => _label(
-        '收到！今天也一起探索吧。',
-        'Hello! Let’s explore together.',
-      ),
-      CompanionMood.dance => _label(
-        '代码要严谨，快乐不用。',
-        'A little rhythm between builds.',
-      ),
-      CompanionMood.read => _label(
-        '安静模式。陪你读完这一篇。',
-        'Quiet mode. One good read at a time.',
-      ),
-    };
+    final message = _mood.message(widget.language);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -123,6 +126,7 @@ class _CompanionStageState extends State<CompanionStage>
         ),
         LayoutBuilder(
           builder: (context, box) => MouseRegion(
+            onEnter: (_) => _actor?.activity(),
             onHover: (event) {
               if (!reduced) {
                 _gaze.value = Offset(
@@ -140,6 +144,8 @@ class _CompanionStageState extends State<CompanionStage>
               ),
               child: GestureDetector(
                 onTap: () => _act(CompanionMood.wave),
+                onDoubleTap: () => _act(CompanionMood.celebrate),
+                onLongPress: () => _act(CompanionMood.shy),
                 child: RepaintBoundary(
                   child: SizedBox(
                     height: widget.compact ? 260 : 320,
@@ -159,13 +165,7 @@ class _CompanionStageState extends State<CompanionStage>
                           ),
                         ),
                         CompanionArtwork(
-                          asset: switch (_mood) {
-                            CompanionMood.wave =>
-                              'assets/mascot/blue-fat-fish-wave.png',
-                            CompanionMood.read =>
-                              'assets/mascot/blue-fat-fish-read.png',
-                            _ => 'assets/mascot/blue-fat-fish.png',
-                          },
+                          asset: _mood.asset,
                           clock: MotionClock.of(context),
                           gaze: _gaze,
                           pose: _pose,
@@ -186,27 +186,36 @@ class _CompanionStageState extends State<CompanionStage>
           spacing: 8,
           runSpacing: 8,
           children: [
-            for (final item in [
-              (
-                CompanionMood.wave,
-                Icons.waving_hand_outlined,
-                _label('打招呼', 'Hello'),
-              ),
-              (
-                CompanionMood.dance,
-                Icons.music_note_outlined,
-                _label('跳支舞', 'Dance'),
-              ),
-              (
-                CompanionMood.read,
-                Icons.auto_stories_outlined,
-                _label('陪我读', 'Read'),
-              ),
-            ])
+            for (final mood
+                in _expanded
+                    ? CompanionMood.actions
+                    : [
+                        CompanionMood.wave,
+                        CompanionMood.dance,
+                        CompanionMood.read,
+                        CompanionMood.happy,
+                        CompanionMood.think,
+                        CompanionMood.sleep,
+                      ])
               ActionChip(
-                avatar: Icon(item.$2, size: 18),
-                label: Text(item.$3),
-                onPressed: () => _act(item.$1),
+                avatar: Icon(companionIcon(mood), size: 18),
+                label: Text(mood.label(widget.language)),
+                onPressed: () => _act(mood),
+              ),
+            TextButton.icon(
+              onPressed: () => setState(() => _expanded = !_expanded),
+              icon: Icon(_expanded ? Icons.expand_less : Icons.apps),
+              label: Text(
+                _label(
+                  _expanded ? '收起表情' : '更多表情 · 12',
+                  _expanded ? 'Less' : 'All 12 expressions',
+                ),
+              ),
+            ),
+            if (_expanded)
+              TextButton(
+                onPressed: _actor!.reset,
+                child: Text(_label('跟随页面', 'Follow page')),
               ),
           ],
         ),
@@ -227,12 +236,16 @@ class CompanionArtwork extends StatefulWidget {
     required this.from,
     required this.to,
     required this.reduced,
+    this.decodeWidth = 640,
+    this.compact = false,
   });
   final String asset;
   final Animation<double> clock, pose;
   final ValueNotifier<Offset> gaze;
   final List<double> from, to;
   final bool reduced;
+  final int decodeWidth;
+  final bool compact;
   @override
   State<CompanionArtwork> createState() => _CompanionArtworkState();
 }
@@ -284,7 +297,10 @@ class _CompanionArtworkState extends State<CompanionArtwork>
 
   void _resolve() {
     // Limit decode memory independently from the artwork's original resolution.
-    final provider = ResizeImage(AssetImage(widget.asset), width: 640);
+    final provider = ResizeImage(
+      AssetImage(widget.asset),
+      width: widget.decodeWidth,
+    );
     final stream = provider.resolve(createLocalImageConfiguration(context));
     if (stream.key == _stream?.key) return;
     _stream?.removeListener(_listener);
@@ -301,7 +317,10 @@ class _CompanionArtworkState extends State<CompanionArtwork>
   @override
   void didUpdateWidget(CompanionArtwork oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.asset != widget.asset) _resolve();
+    if (oldWidget.asset != widget.asset ||
+        oldWidget.decodeWidth != widget.decodeWidth) {
+      _resolve();
+    }
     if (widget.reduced) {
       _fade.value = 1;
       _releasePrevious(AnimationStatus.completed);
@@ -347,20 +366,30 @@ class _CompanionArtworkState extends State<CompanionArtwork>
           alignment: Alignment.bottomCenter,
           child: Material(
             borderRadius: BorderRadius.circular(16),
-            child: TextButton.icon(
-              onPressed: () {
-                _stream?.removeListener(_listener);
-                _stream = null;
-                setState(() => _error = false);
-                _resolve();
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('重试角色素材'),
-            ),
+            child: widget.compact
+                ? IconButton(
+                    tooltip: '重试角色素材',
+                    icon: const Icon(Icons.refresh, size: 16),
+                    onPressed: _retry,
+                  )
+                : TextButton.icon(
+                    onPressed: () {
+                      _retry();
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('重试角色素材'),
+                  ),
           ),
         ),
     ],
   );
+
+  void _retry() {
+    _stream?.removeListener(_listener);
+    _stream = null;
+    setState(() => _error = false);
+    _resolve();
+  }
 }
 
 /// Presentation transforms leave the supplied face, hair, lace, embroidery and
@@ -393,18 +422,45 @@ class CompanionFramePainter extends CustomPainter {
         from[mood.index] * (1 - mix) + to[mood.index] * mix;
     final dance = amount(CompanionMood.dance);
     final wave = amount(CompanionMood.wave);
-    final reading = amount(CompanionMood.read);
+    final reading = amount(CompanionMood.read) + amount(CompanionMood.write);
+    final sleepy = amount(CompanionMood.sleep);
+    final joy =
+        amount(CompanionMood.happy) +
+        amount(CompanionMood.saved) +
+        amount(CompanionMood.celebrate) +
+        amount(CompanionMood.finished);
+    final thoughtful =
+        amount(CompanionMood.think) +
+        amount(CompanionMood.search) +
+        amount(CompanionMood.loading);
+    final puzzled =
+        amount(CompanionMood.confused) +
+        amount(CompanionMood.empty) +
+        amount(CompanionMood.error);
+    final shy = amount(CompanionMood.shy);
+    final surprise =
+        amount(CompanionMood.surprised) + amount(CompanionMood.explore);
+    final quiet = (1 - reading * .9 - sleepy * .7).clamp(0.0, 1.0);
     final rhythm = math.sin(t * 8);
-    final x = reduced ? 0.0 : gaze.value.dx * 3 + rhythm * dance * 7;
+    final x = reduced ? 0.0 : gaze.value.dx * 3 * quiet + rhythm * dance * 7;
     final y = reduced
         ? 0.0
-        : math.sin(t * 2) * 2 * (1 - reading) - rhythm.abs() * dance * 5;
+        : math.sin(t * 2) * 2 * quiet -
+              rhythm.abs() * dance * 5 -
+              math.sin(t * 4).abs() * joy * 3 +
+              math.sin(t) * sleepy * 1.5 +
+              shy * 2 -
+              surprise * 2;
     final angle = reduced
         ? 0.0
-        : gaze.value.dx * .015 +
+        : gaze.value.dx * .015 * quiet +
               rhythm * dance * .05 +
-              math.sin(t * 4) * wave * .018;
-    final breathe = reduced ? 1.0 : 1 + math.sin(t * 2) * .006 * (1 - reading);
+              math.sin(t * 4) * wave * .018 +
+              math.sin(t) * sleepy * .012 +
+              math.sin(t * 2) * thoughtful * .008 +
+              math.sin(t * 2) * puzzled * .018 +
+              shy * .012;
+    final breathe = reduced ? 1.0 : 1 + math.sin(t * 2) * .006 * quiet;
     canvas.save();
     canvas.translate(size.width / 2 + x, size.height * .7 + y);
     canvas.rotate(angle);
@@ -413,8 +469,8 @@ class CompanionFramePainter extends CustomPainter {
     void draw(ui.Image image, double opacity) {
       final source = Size(image.width.toDouble(), image.height.toDouble());
       final available = Size(
-        math.max(1, size.width - 28),
-        math.max(1, size.height - 16),
+        math.max(1, size.width - math.min(28, size.width * .08)),
+        math.max(1, size.height - math.min(16, size.height * .05)),
       );
       final fitted = applyBoxFit(BoxFit.contain, source, available).destination;
       final destination = Rect.fromCenter(
@@ -460,4 +516,143 @@ class CompanionFramePainter extends CustomPainter {
       old.from != from ||
       old.to != to ||
       old.reduced != reduced;
+}
+
+IconData companionIcon(CompanionMood mood) => switch (mood) {
+  CompanionMood.wave => Icons.waving_hand_outlined,
+  CompanionMood.dance => Icons.music_note_outlined,
+  CompanionMood.read => Icons.auto_stories_outlined,
+  CompanionMood.sleep => Icons.bedtime_outlined,
+  CompanionMood.write => Icons.edit_note,
+  CompanionMood.think ||
+  CompanionMood.search ||
+  CompanionMood.loading => Icons.psychology_outlined,
+  CompanionMood.celebrate ||
+  CompanionMood.finished => Icons.celebration_outlined,
+  CompanionMood.confused ||
+  CompanionMood.empty ||
+  CompanionMood.error => Icons.help_outline,
+  CompanionMood.shy => Icons.favorite_border,
+  CompanionMood.surprised ||
+  CompanionMood.explore => Icons.auto_awesome_outlined,
+  CompanionMood.saved => Icons.check_circle_outline,
+  _ => Icons.sentiment_satisfied_alt,
+};
+
+/// A small, keyboard-accessible companion stays visible outside the hero.
+class CompanionDock extends StatefulWidget {
+  const CompanionDock({
+    super.key,
+    required this.language,
+    required this.clock,
+    required this.onOpen,
+    this.inline = false,
+  });
+  final String language;
+  final Animation<double> clock;
+  final VoidCallback onOpen;
+  final bool inline;
+  @override
+  State<CompanionDock> createState() => _CompanionDockState();
+}
+
+class _CompanionDockState extends State<CompanionDock> {
+  final _gaze = ValueNotifier<Offset>(Offset.zero);
+  @override
+  void dispose() {
+    _gaze.dispose();
+    super.dispose();
+  }
+
+  Widget _portrait(CompanionMood mood) => RepaintBoundary(
+    child: CompanionArtwork(
+      asset: mood.asset,
+      clock: widget.clock,
+      gaze: _gaze,
+      pose: const AlwaysStoppedAnimation(1),
+      from: List.generate(
+        CompanionMood.values.length,
+        (i) => i == mood.index ? 1 : 0,
+      ),
+      to: List.generate(
+        CompanionMood.values.length,
+        (i) => i == mood.index ? 1 : 0,
+      ),
+      reduced: MediaQuery.disableAnimationsOf(context),
+      decodeWidth: 160,
+      compact: true,
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final actor = CompanionScope.maybeOf(context);
+    if (actor == null) return const SizedBox.shrink();
+    return ListenableBuilder(
+      listenable: actor,
+      builder: (context, _) => Tooltip(
+        message: widget.language.startsWith('zh') ? '叫出蓝色大肥鱼' : 'Meet 蓝色大肥鱼',
+        child: SizedBox(
+          width: widget.inline ? double.infinity : 88,
+          height: widget.inline ? 76 : 112,
+          child: Material(
+            elevation: 2,
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(24),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: widget.onOpen,
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: widget.inline
+                    ? Row(
+                        children: [
+                          SizedBox(width: 64, child: _portrait(actor.mood)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '蓝色大肥鱼',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.titleSmall,
+                                ),
+                                Text(
+                                  actor.mood.label(widget.language),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelMedium,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Icon(Icons.keyboard_arrow_up),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        children: [
+                          Expanded(child: _portrait(actor.mood)),
+                          Text(
+                            actor.mood.label(widget.language),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

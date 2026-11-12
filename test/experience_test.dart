@@ -19,18 +19,21 @@ void main() {
   late BlogCatalog catalog;
   setUpAll(() async => catalog = await BlogCatalog.load());
   test('all character poses are detailed transparent image assets', () async {
-    for (final name in [
-      'blue-fat-fish',
-      'blue-fat-fish-wave',
-      'blue-fat-fish-read',
-    ]) {
-      final data = await rootBundle.load('assets/mascot/$name.png');
+    for (final mood in CompanionMood.actions) {
+      final data = await rootBundle.load(mood.asset);
       final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
       final frame = await codec.getNextFrame();
       expect(frame.image.width, greaterThanOrEqualTo(1000));
       expect(frame.image.height, greaterThanOrEqualTo(1400));
       final rgba = (await frame.image.toByteData())!.buffer.asUint8List();
       expect(rgba[3], 0, reason: 'Outer background must be transparent');
+      expect(rgba[frame.image.width * 4 - 1], 0);
+      expect(rgba[rgba.length - 1], 0);
+      expect(
+        rgba[(frame.image.height - 1) * frame.image.width * 4 + 3],
+        lessThanOrEqualTo(1),
+        reason: 'Allow a single alpha quantization step at the edge',
+      );
       final center =
           ((frame.image.height ~/ 2) * frame.image.width +
               frame.image.width ~/ 2) *

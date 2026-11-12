@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../comments.dart';
+import '../companion.dart';
 import '../content.dart';
 import '../localization.dart';
 import '../motion.dart';
@@ -36,6 +37,26 @@ class _BlogPageState extends State<BlogPage> {
   final _search = TextEditingController();
   final _sectionKeys = <int, GlobalKey>{};
   bool _comments = false;
+  bool _finishedReading = false;
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_readingProgress);
+  }
+
+  void _readingProgress() {
+    if (_finishedReading ||
+        widget.page != '/posts/:slug' ||
+        !_scroll.hasClients ||
+        _scroll.position.maxScrollExtent <= 0) {
+      return;
+    }
+    if (_scroll.offset / _scroll.position.maxScrollExtent >= .92) {
+      _finishedReading = true;
+      CompanionScope.read(context)?.react(CompanionMood.finished, priority: 2);
+    }
+  }
+
   BlogStrings get s => widget.strings;
   ColorScheme get c => Theme.of(context).colorScheme;
   TextTheme get t => Theme.of(context).textTheme;
@@ -54,8 +75,12 @@ class _BlogPageState extends State<BlogPage> {
     String message = s.text('copied');
     try {
       await Clipboard.setData(ClipboardData(text: url));
+      if (mounted) CompanionScope.read(context)?.react(CompanionMood.celebrate);
     } on PlatformException {
       message = s.text('copyFailed');
+      if (mounted) {
+        CompanionScope.read(context)?.react(CompanionMood.error, priority: 3);
+      }
     }
     if (mounted) {
       ScaffoldMessenger.of(context)
@@ -125,7 +150,13 @@ class _BlogPageState extends State<BlogPage> {
                     Text(s.text('footer'), style: t.bodySmall),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(
+                  height:
+                      widget.page.isEmpty ||
+                          MediaQuery.sizeOf(context).width < 600
+                      ? 16
+                      : 120,
+                ),
               ],
             ),
           ),
@@ -327,7 +358,23 @@ class _BlogPageState extends State<BlogPage> {
           controller: _search,
           hintText: s.text('search'),
           leading: const Icon(Icons.search),
-          onChanged: (_) => setState(() {}),
+          onChanged: (value) {
+            setState(() {});
+            final query = value.trim().toLowerCase();
+            if (query.isEmpty) {
+              CompanionScope.read(context)?.reset();
+              return;
+            }
+            final found = s.posts.any(
+              (p) => '${p.title} ${p.summary} ${p.category}'
+                  .toLowerCase()
+                  .contains(query),
+            );
+            CompanionScope.read(context)?.react(
+              found ? CompanionMood.search : CompanionMood.empty,
+              duration: null,
+            );
+          },
         ),
         const SizedBox(height: 28),
         if (posts.isEmpty)

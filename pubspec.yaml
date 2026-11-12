@@ -67,6 +67,15 @@ flutter:
     - assets/mascot/blue-fat-fish.png
     - assets/mascot/blue-fat-fish-wave.png
     - assets/mascot/blue-fat-fish-read.png
+    - assets/mascot/blue-fat-fish-happy.png
+    - assets/mascot/blue-fat-fish-think.png
+    - assets/mascot/blue-fat-fish-confused.png
+    - assets/mascot/blue-fat-fish-sleep.png
+    - assets/mascot/blue-fat-fish-shy.png
+    - assets/mascot/blue-fat-fish-surprised.png
+    - assets/mascot/blue-fat-fish-write.png
+    - assets/mascot/blue-fat-fish-dance.png
+    - assets/mascot/blue-fat-fish-celebrate.png
     - assets/i18n/
     - assets/projects.json
     - assets/posts.json
