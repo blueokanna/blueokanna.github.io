@@ -9,6 +9,8 @@ import 'page_metadata.dart';
 import 'ui/shell.dart';
 import 'ui/pages.dart';
 import 'ui/page_transition.dart';
+import 'publishing.dart';
+import 'ui/studio.dart';
 
 class PulseLinkApp extends StatefulWidget {
   const PulseLinkApp({
@@ -25,6 +27,7 @@ class PulseLinkApp extends StatefulWidget {
 }
 
 class _PulseLinkAppState extends State<PulseLinkApp> {
+  final _publisher = Publisher();
   late final GoRouter _router = GoRouter(
     initialLocation: widget.initialLocation,
     redirect: (context, state) {
@@ -41,6 +44,13 @@ class _PulseLinkAppState extends State<PulseLinkApp> {
           child: child,
         ),
         routes: [
+          GoRoute(
+            path: '/:lang/studio',
+            builder: (context, state) => WritingStudio(
+              publisher: _publisher,
+              language: state.pathParameters['lang']!,
+            ),
+          ),
           for (final route in [
             '',
             '/posts',
@@ -95,6 +105,7 @@ class _PulseLinkAppState extends State<PulseLinkApp> {
   );
   @override
   void dispose() {
+    _publisher.dispose();
     _router.dispose();
     super.dispose();
   }

@@ -203,7 +203,13 @@ void main() {
     router.go('/en/posts');
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 64));
-    final title = find.text(catalog.translations['en']!.posts.first.title).last;
+    final title = find
+        .text(
+          catalog.translations['en']!.posts
+              .firstWhere((p) => p.id == 'segmeris-guide')
+              .title,
+        )
+        .last;
     await tester.tap(title, warnIfMissed: false);
     await tester.pump();
     expect(router.routeInformationProvider.value.uri.path, '/en/posts');

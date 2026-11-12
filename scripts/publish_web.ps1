@@ -6,6 +6,10 @@ flutter pub get --enforce-lockfile
 if ($LASTEXITCODE -ne 0) { throw 'Dependency resolution failed' }
 python -m pip install --upgrade --target .font-tools -r scripts/requirements-fonts.txt
 if ($LASTEXITCODE -ne 0) { throw 'Font tooling installation failed' }
+python scripts/build_posts.py
+if ($LASTEXITCODE -ne 0) { throw 'Article compilation failed' }
+python -m unittest discover -s test -p '*_test.py'
+if ($LASTEXITCODE -ne 0) { throw 'Article tests failed' }
 python scripts/prepare_fonts.py
 if ($LASTEXITCODE -ne 0) { throw 'Font preparation failed' }
 npm ci --ignore-scripts

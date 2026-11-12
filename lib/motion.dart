@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:material_ui/material_ui.dart'
     show MaterialShapes, MaterialShapeBorder;
 
@@ -8,10 +9,23 @@ abstract final class Motion {
   static const duration = Duration(milliseconds: 520);
   static const pageDuration = Duration(milliseconds: 320);
   static const curve = Curves.easeInOutCubicEmphasized;
+  static final Curve spring = _ExpressiveSpring();
   static Duration of(BuildContext context) =>
       MediaQuery.disableAnimationsOf(context) ? Duration.zero : duration;
   static Duration pageOf(BuildContext context) =>
       MediaQuery.disableAnimationsOf(context) ? Duration.zero : pageDuration;
+}
+
+class _ExpressiveSpring extends Curve {
+  final _simulation = SpringSimulation(
+    const SpringDescription(mass: 1, stiffness: 420, damping: 32),
+    0,
+    1,
+    0,
+  );
+  @override
+  double transformInternal(double t) =>
+      _simulation.x(t * .52) / _simulation.x(.52);
 }
 
 /// One clock for decorative motion. Paint listeners never rebuild the page.
@@ -118,6 +132,37 @@ class AuroraArt extends CustomPainter {
             colors: [seed.withValues(alpha: .22), Colors.transparent],
           ).createShader(Rect.fromCircle(center: center, radius: radius)),
       );
+      // Large, translucent silhouettes carry the same shape language behind
+      // every route. No blur filters or offscreen saveLayer allocations.
+      for (var i = 0; i < 4; i++) {
+        final phase = t + i * math.pi / 2;
+        final position = Offset(
+          size.width * (.12 + i * .27) + 28 * math.sin(phase),
+          size.height * (.22 + (i % 2) * .58) + 32 * math.cos(phase),
+        );
+        final extent = size.shortestSide * (.22 + i * .025);
+        final border = ShapeBorder.lerp(
+          _borders[i],
+          _borders[(i + 2) % 6],
+          (1 - math.cos(t + i)) / 2,
+        )!;
+        canvas.save();
+        canvas.translate(position.dx, position.dy);
+        canvas.rotate(phase * (i.isEven ? 1 : -1));
+        final rect = Rect.fromCircle(center: Offset.zero, radius: extent);
+        canvas.drawPath(
+          border.getOuterPath(rect),
+          Paint()..color = seed.withValues(alpha: dark ? .045 : .055),
+        );
+        canvas.drawPath(
+          border.getOuterPath(rect.deflate(12)),
+          Paint()
+            ..color = seed.withValues(alpha: .09)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1,
+        );
+        canvas.restore();
+      }
       return;
     }
     final center = size.center(Offset.zero);
@@ -131,7 +176,7 @@ class AuroraArt extends CustomPainter {
       canvas.save();
       canvas.translate(position.dx, position.dy);
       canvas.rotate(angle + .3 * math.sin(t + i));
-      final little = size.shortestSide * (.032 + .008 * math.sin(t + i));
+      final little = size.shortestSide * (.046 + .009 * math.sin(t * 2 + i));
       final paint = Paint()
         ..color = Color.lerp(
           seed,
@@ -141,7 +186,11 @@ class AuroraArt extends CustomPainter {
       canvas.scale(little * 2);
       canvas.translate(-.5, -.5);
       canvas.drawPath(
-        _borders[i].getOuterPath(const Rect.fromLTWH(0, 0, 1, 1)),
+        ShapeBorder.lerp(
+          _borders[i],
+          _borders[(i + 2) % 6],
+          (1 - math.cos(t * 3 + i)) / 2,
+        )!.getOuterPath(const Rect.fromLTWH(0, 0, 1, 1)),
         paint,
       );
       canvas.restore();

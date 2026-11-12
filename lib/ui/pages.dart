@@ -9,6 +9,7 @@ import '../localization.dart';
 import '../motion.dart';
 import '../models/project.dart';
 import 'expressive.dart';
+import 'mascot.dart';
 import 'project_views.dart';
 import 'rich_content.dart';
 import 'clock_scope.dart';
@@ -210,10 +211,16 @@ class _BlogPageState extends State<BlogPage> {
               ? Row(
                   children: [
                     Expanded(flex: 6, child: heading),
-                    Expanded(flex: 5, child: _art(height: 430)),
+                    Expanded(flex: 5, child: CompanionStage(language: s.tag)),
                   ],
                 )
-              : Column(children: [heading, _art(height: 300)]);
+              : Column(
+                  children: [
+                    heading,
+                    const SizedBox(height: 32),
+                    CompanionStage(language: s.tag),
+                  ],
+                );
         },
       ),
       const SizedBox(height: 56),
@@ -415,21 +422,22 @@ class _BlogPageState extends State<BlogPage> {
             ],
           ),
         ),
-        Card.filled(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(s.text('references'), style: t.titleMedium),
-                const SizedBox(height: 12),
-                Text(s.text('sourceNote')),
-                for (final source in post.sources)
-                  ExternalLink(url: source.url, label: source.label),
-              ],
+        if (post.sources.isNotEmpty)
+          Card.filled(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(s.text('references'), style: t.titleMedium),
+                  const SizedBox(height: 12),
+                  Text(s.text('sourceNote')),
+                  for (final source in post.sources)
+                    ExternalLink(url: source.url, label: source.label),
+                ],
+              ),
             ),
           ),
-        ),
         const SizedBox(height: 40),
         Text(s.text('discussion'), style: t.headlineMedium),
         const SizedBox(height: 12),

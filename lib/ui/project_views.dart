@@ -42,22 +42,23 @@ class ProjectCollection extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        ShapeEmblem(
-                          variant: project.variant,
-                          icon: projectIcon(project.id),
-                        ),
-                        const Spacer(),
-                        Icon(Icons.north_east, color: colors.primary),
-                      ],
+                    ProjectArtwork(
+                      variant: project.variant,
+                      icon: projectIcon(project.id),
                     ),
                     const SizedBox(height: 24),
-                    Text(
-                      project.name,
-                      style: text.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            project.name,
+                            style: text.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        Icon(Icons.north_east, color: colors.primary),
+                      ],
                     ),
                     const SizedBox(height: 14),
                     Text(

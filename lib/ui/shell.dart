@@ -5,6 +5,7 @@ import '../localization.dart';
 import '../preferences.dart';
 import '../motion.dart';
 import 'clock_scope.dart';
+import 'mascot.dart';
 
 class BlogShell extends StatelessWidget {
   const BlogShell({
@@ -90,6 +91,33 @@ class BlogShell extends StatelessWidget {
     return Aurora(
       paused: preferences.paused,
       builder: (context, clock) => Scaffold(
+        floatingActionButton:
+            path == '/${strings.tag}' || path.endsWith('/studio')
+            ? null
+            : FloatingActionButton.small(
+                tooltip: strings.tag.startsWith('zh')
+                    ? '叫出蓝色大肥鱼'
+                    : 'Meet 蓝色大肥鱼',
+                onPressed: () => showModalBottomSheet<void>(
+                  context: context,
+                  showDragHandle: true,
+                  isScrollControlled: true,
+                  useSafeArea: true,
+                  builder: (context) => SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 4, 24, 28),
+                      child: MotionClock(
+                        clock: clock,
+                        child: CompanionStage(
+                          language: strings.tag,
+                          compact: true,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                child: const Icon(Icons.waving_hand_outlined),
+              ),
         body: Stack(
           children: [
             Positioned.fill(
@@ -173,13 +201,15 @@ class BlogShell extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  IconButton.filledTonal(
-                                    tooltip: 'PulseLink',
-                                    onPressed: () =>
-                                        context.go('/${strings.tag}'),
-                                    icon: const Icon(Icons.blur_on),
-                                  ),
-                                  const SizedBox(width: 8),
+                                  if (box.maxWidth > 360)
+                                    IconButton.filledTonal(
+                                      tooltip: 'PulseLink',
+                                      onPressed: () =>
+                                          context.go('/${strings.tag}'),
+                                      icon: const Icon(Icons.blur_on),
+                                    ),
+                                  if (box.maxWidth > 360)
+                                    const SizedBox(width: 8),
                                   const Flexible(
                                     child: Text(
                                       'PulseLink',
@@ -195,6 +225,16 @@ class BlogShell extends StatelessWidget {
                                   const Spacer(),
                                   if (wide) nav,
                                   if (wide) const Spacer(),
+                                  IconButton(
+                                    tooltip: strings.tag.startsWith('zh')
+                                        ? 'GitHub 登录 / 写文章'
+                                        : 'GitHub sign in / Write',
+                                    onPressed: () =>
+                                        context.go('/${strings.tag}/studio'),
+                                    icon: const Icon(
+                                      Icons.account_circle_outlined,
+                                    ),
+                                  ),
                                   MenuAnchor(
                                     builder: (context, controller, child) =>
                                         IconButton(
@@ -224,19 +264,20 @@ class BlogShell extends StatelessWidget {
                                         )
                                         .toList(),
                                   ),
-                                  IconButton(
-                                    tooltip: strings.text('motion'),
-                                    isSelected: !preferences.paused,
-                                    onPressed: () => preferences.update(
-                                      pause: !preferences.paused,
+                                  if (box.maxWidth > 600)
+                                    IconButton(
+                                      tooltip: strings.text('motion'),
+                                      isSelected: !preferences.paused,
+                                      onPressed: () => preferences.update(
+                                        pause: !preferences.paused,
+                                      ),
+                                      icon: const Icon(
+                                        Icons.motion_photos_off_outlined,
+                                      ),
+                                      selectedIcon: const Icon(
+                                        Icons.motion_photos_on,
+                                      ),
                                     ),
-                                    icon: const Icon(
-                                      Icons.motion_photos_off_outlined,
-                                    ),
-                                    selectedIcon: const Icon(
-                                      Icons.motion_photos_on,
-                                    ),
-                                  ),
                                   IconButton.filledTonal(
                                     tooltip: strings.text('appearance'),
                                     onPressed: () => _appearance(context),

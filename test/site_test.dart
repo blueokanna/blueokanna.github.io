@@ -28,10 +28,11 @@ void main() {
       for (final translation in catalog.translations.values) {
         expect(translation.data.keys.toSet(), source.data.keys.toSet());
         expect(
-          translation.posts.map((p) => p.id),
-          source.posts.map((p) => p.id),
+          (translation.data['articles'] as List).map((p) => p['id']),
+          (source.data['articles'] as List).map((p) => p['id']),
         );
-        for (final post in translation.posts) {
+        for (final data in translation.data['articles'] as List) {
+          final post = BlogPost(data as Map<String, dynamic>);
           expect(post.title, isNotEmpty);
           expect(post.sections.length, greaterThanOrEqualTo(6));
           expect(post.sources.length, greaterThanOrEqualTo(3));
@@ -65,7 +66,11 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(
-        find.text(catalog.translations[language]!.posts.first.title),
+        find.text(
+          catalog.translations[language]!.posts
+              .firstWhere((p) => p.id == 'segmeris-guide')
+              .title,
+        ),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);

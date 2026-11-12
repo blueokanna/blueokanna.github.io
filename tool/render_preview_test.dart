@@ -12,6 +12,7 @@ import 'package:pulselink_site/app.dart';
 import 'package:pulselink_site/localization.dart';
 import 'package:pulselink_site/preferences.dart';
 import 'package:pulselink_site/ui/pages.dart';
+import 'package:pulselink_site/ui/mascot.dart';
 
 class _PreviewBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
@@ -55,6 +56,9 @@ void main() {
   });
   for (final sample in [
     ('desktop', 1440.0, '/zh-CN'),
+    ('home-mobile', 390.0, '/zh-CN'),
+    ('mascot-wave', 1440.0, '/zh-CN'),
+    ('mascot-read', 390.0, '/zh-CN'),
     ('mobile', 390.0, '/zh-CN/posts/segmeris-guide'),
     ('projects-desktop', 1440.0, '/zh-CN/projects'),
     ('projects-mobile', 390.0, '/zh-CN/projects'),
@@ -81,6 +85,36 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      if (sample.$3 == '/zh-CN') {
+        final suffix = sample.$1 == 'mascot-wave'
+            ? '-wave'
+            : sample.$1 == 'mascot-read'
+            ? '-read'
+            : '';
+        if (suffix.isNotEmpty) {
+          final button = find.text(suffix == '-wave' ? '打招呼' : '陪我读');
+          await tester.ensureVisible(button);
+          await tester.tap(button);
+          await tester.pump();
+        }
+        await tester.runAsync(
+          () => precacheImage(
+            ResizeImage(
+              AssetImage('assets/mascot/blue-fat-fish$suffix.png'),
+              width: 640,
+            ),
+            tester.element(find.byType(PulseLinkApp)),
+          ),
+        );
+        await tester.pumpAndSettle();
+        if (suffix.isNotEmpty) {
+          await Scrollable.ensureVisible(
+            tester.element(find.byType(CompanionStage)),
+            alignment: .1,
+          );
+          await tester.pumpAndSettle();
+        }
+      }
       expect(tester.takeException(), isNull);
       await capture(tester, key, sample.$1);
       await tester.pumpWidget(const SizedBox());

@@ -46,6 +46,7 @@ try {
   for (const [name, route, width] of [
     ['projects','/zh-CN/projects',1440], ['article','/zh-CN/posts/segmeris-guide',390],
     ['project-detail','/de/projects/courierust',768],
+    ['home-mobile','/zh-CN',390], ['studio-mobile','/zh-CN/studio',390],
   ]) {
     phase = `${name} deep-link refresh`;
     console.log(`Checking ${phase}`);
