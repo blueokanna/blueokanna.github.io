@@ -14,6 +14,8 @@ python scripts/prepare_fonts.py
 if ($LASTEXITCODE -ne 0) { throw 'Font preparation failed' }
 npm ci --ignore-scripts
 if ($LASTEXITCODE -ne 0) { throw 'Diagram dependencies failed' }
+npm run companion:build
+if ($LASTEXITCODE -ne 0) { throw '3D build failed' }
 npm run diagrams
 if ($LASTEXITCODE -ne 0) { throw 'Diagram preparation failed' }
 flutter test tool/export_comment_themes_test.dart
@@ -24,13 +26,17 @@ flutter analyze
 if ($LASTEXITCODE -ne 0) { throw 'Analysis failed' }
 flutter test
 if ($LASTEXITCODE -ne 0) { throw 'Tests failed' }
-node --test test/comments_test.mjs
+npm test
 if ($LASTEXITCODE -ne 0) { throw 'Comment integration tests failed' }
 flutter build web --release --base-href / --no-web-resources-cdn
 if ($LASTEXITCODE -ne 0) { throw 'Build failed' }
+python scripts/finalize_web.py
+if ($LASTEXITCODE -ne 0) { throw 'Release finalization failed' }
 npm run test:browser
 if ($LASTEXITCODE -ne 0) { throw 'Browser checks failed' }
 npm run test:browser-readiness
 if ($LASTEXITCODE -ne 0) { throw 'Browser readiness regression checks failed' }
 Copy-Item -LiteralPath (Join-Path $projectRoot 'CNAME') -Destination (Join-Path $projectRoot 'build/web/CNAME') -Force
+npm run test:companion
+if ($LASTEXITCODE -ne 0) { throw "3D browser verification failed" }
 Write-Host 'Verified output: build/web. Push main to deploy using GitHub Actions.'

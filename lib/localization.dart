@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import 'models/project.dart';
 import 'models/article.dart';
+import 'content.dart';
 export 'models/article.dart';
 
 const languages = <String, String>{
@@ -45,9 +46,10 @@ class BlogStrings {
 }
 
 class BlogCatalog {
-  BlogCatalog(this.translations, this.projects);
+  BlogCatalog(this.translations, this.projects, {this.blogroll = friends});
   final Map<String, BlogStrings> translations;
   final List<ProjectEntry> projects;
+  final List<FriendLink> blogroll;
   static Future<BlogCatalog> load() async {
     final authored =
         jsonDecode(await rootBundle.loadString('assets/posts.json')) as List;
@@ -66,11 +68,20 @@ class BlogCatalog {
     );
     final projects =
         jsonDecode(await rootBundle.loadString('assets/projects.json')) as List;
+    var blogroll = friends;
+    try {
+      blogroll = FriendLink.decode(
+        await rootBundle.loadString('content/friends.json'),
+      );
+    } catch (_) {
+      /* An invalid blogroll must not prevent articles from opening. */
+    }
     return BlogCatalog(
       Map.fromEntries(entries),
       projects
           .map((p) => ProjectEntry.fromJson(p as Map<String, dynamic>))
           .toList(),
+      blogroll: blogroll,
     );
   }
 }

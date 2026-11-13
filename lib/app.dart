@@ -12,6 +12,7 @@ import 'ui/page_transition.dart';
 import 'publishing.dart';
 import 'ui/studio.dart';
 import 'companion.dart';
+import 'friends_service.dart';
 
 class PulseLinkApp extends StatefulWidget {
   const PulseLinkApp({
@@ -31,6 +32,7 @@ class PulseLinkApp extends StatefulWidget {
 
 class _PulseLinkAppState extends State<PulseLinkApp> {
   final _publisher = Publisher();
+  late final _friends = FriendsService(initial: widget.catalog.blogroll);
   late final GoRouter _router = GoRouter(
     initialLocation: widget.initialLocation,
     redirect: (context, state) {
@@ -81,6 +83,7 @@ class _PulseLinkAppState extends State<PulseLinkApp> {
                       '${strings.tag}:$route:${state.pathParameters['slug']}',
                     ),
                     publisher: _publisher,
+                    friendsService: _friends,
                     chinesePostIds: widget.catalog.translations['zh-CN']!.posts
                         .map((post) => post.id)
                         .toSet(),
@@ -113,6 +116,7 @@ class _PulseLinkAppState extends State<PulseLinkApp> {
   @override
   void dispose() {
     _publisher.dispose();
+    _friends.dispose();
     _router.dispose();
     super.dispose();
   }

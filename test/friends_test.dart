@@ -14,6 +14,81 @@ http.Response owner() =>
 http.Response repo() =>
     http.Response('{"owner":{"id":56761243},"permissions":{"push":true}}', 200);
 void main() {
+  http.Response snapshot(List<FriendLink> links, String sha) {
+    final encoded = FriendLink.encode(links);
+    return http.Response(
+      jsonEncode({
+        'sha': sha,
+        'size': utf8.encode(encoded).length,
+        'encoding': 'base64',
+        'content': base64Encode(utf8.encode(encoded)),
+      }),
+      200,
+    );
+  }
+
+  test('save wins over in-flight reads and stale public cache', () async {
+    final pending = Completer<http.Response>();
+    var requests = 0;
+    final saved = [
+      ...friends,
+      const FriendLink(
+        name: 'New',
+        url: 'https://example.org',
+        desc: '',
+        descEn: '',
+      ),
+    ];
+    final service = FriendsService(
+      client: MockClient((_) async {
+        requests++;
+        if (requests == 1) return pending.future;
+        if (requests == 2) return snapshot(friends, 'old');
+        return snapshot(saved, 'saved');
+      }),
+    );
+    addTearDown(service.dispose);
+    final reading = service.load();
+    service.acceptSaved(saved, 'saved');
+    pending.complete(snapshot(friends, 'old'));
+    expect(
+      (await reading).map((link) => link.url),
+      saved.map((link) => link.url),
+    );
+    expect(
+      (await service.load()).map((link) => link.url),
+      saved.map((link) => link.url),
+    );
+    expect(
+      (await service.load()).map((link) => link.url),
+      saved.map((link) => link.url),
+    );
+    expect(
+      service.snapshot.map((link) => link.url),
+      saved.map((link) => link.url),
+    );
+  });
+  test('rate-limited public reads use CDN without credentials', () async {
+    final service = FriendsService(
+      client: MockClient((request) async {
+        expect(request.headers.containsKey('Authorization'), isFalse);
+        if (request.url.host == 'api.github.com') {
+          return http.Response('{}', 403);
+        }
+        expect(request.url.host, 'raw.githubusercontent.com');
+        return http.Response(
+          FriendLink.encode(friends),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      }),
+    );
+    addTearDown(service.dispose);
+    expect(
+      (await service.load()).map((link) => link.url),
+      friends.map((link) => link.url),
+    );
+  });
   test('friend data rejects executable URLs, credentials and duplicates', () {
     for (final url in [
       'javascript:alert(1)',
@@ -84,8 +159,8 @@ void main() {
           expect(data['branch'], 'main');
           expect(
             FriendLink.decode(utf8.decode(base64Decode(data['content'])))
-                .length,
-            2,
+                .map((link) => link.url),
+            friends.map((link) => link.url),
           );
           return http.Response('{"content":{"sha":"new"}}', 200);
         }),
@@ -156,7 +231,13 @@ void main() {
       }),
     );
     addTearDown(service.dispose);
-    expect((await service.load()).length, 2);
-    expect((await service.load()).length, 2);
+    expect(
+      (await service.load()).map((link) => link.url),
+      friends.map((link) => link.url),
+    );
+    expect(
+      (await service.load()).map((link) => link.url),
+      friends.map((link) => link.url),
+    );
   });
 }

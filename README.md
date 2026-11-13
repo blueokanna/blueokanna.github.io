@@ -13,14 +13,19 @@ python scripts/build_posts.py
 python -m unittest discover -s test -p "*_test.py"
 python scripts/prepare_fonts.py
 npm ci --ignore-scripts
+npm run companion:build
 npm run diagrams
 flutter test tool/export_comment_themes_test.dart
 dart format lib test tool
 dart format --output=none --set-exit-if-changed lib test tool
 flutter analyze
 flutter test
-node --test test/comments_test.mjs
+npm test
 flutter build web --release --base-href / --no-web-resources-cdn
+python scripts/finalize_web.py
+npm run test:browser-readiness
+npm run test:browser
+npm run test:companion
 ```
 
 Windows 可运行 `./scripts/publish_web.ps1`，依次检查字体、格式、分析、测试和构建。字体缓存位于 `.font-cache`，不参与部署。首次准备字体需要网络；下载内容有固定提交地址与 SHA-256 校验。
@@ -107,9 +112,11 @@ Google Sans 与 Noto Sans SC / TC / JP 来自 Google Fonts 官方仓库，OFL �
 
 界面使用 Material 3 卡片、按钮、菜单、搜索框、底部面板与胶囊式导航。装饰形状来自 `material_ui` 的 MaterialShapes 目录，通过 MaterialShapeBorder 的缓存形变匹配过渡。
 
-Aurora 是应用层调度器：一个持续动画时钟、直接监听的 CustomPainter 与独立 RepaintBoundary。后台、暂停及系统减少动画会停止持续绘制；导航、主题和交互反馈使用 Flutter 的按需动画。背景轮廓、六颗卫星和项目徽记共享 12 秒相位，各自进行连续形变。项目插画区分波形、轨道和路由，卡片提供圆角变化、按压弹簧和 Material 状态层。手机上的动效开关位于外观面板；桌面保留快捷按钮。没有修改 Flutter 引擎，也不承诺未经测量的性能提升百分比。
+Aurora 是应用层调度器：一个持续动画时钟、直接监听的 CustomPainter 与独立 RepaintBoundary。后台、暂停及系统减少动画会停止持续绘制；导航、主题和交互反馈使用 Flutter 的按需动画。全站背景轮廓和项目徽记共享 48 秒相位，各自进行连续形变。项目插画区分波形、轨道和路由，卡片提供圆角变化、按压弹簧和 Material 状态层。手机上的动效开关位于外观面板；桌面保留快捷按钮。没有修改 Flutter 引擎，也不承诺未经测量的性能提升百分比。
 
-吉祥物名称是「蓝色大肥鱼」。原有 12 张透明关键姿态保留，另增加吃饭、刷牙、伸懒腰、游戏、抱枕准备入睡和侧卧睡觉六张专用素材。素材不是逐帧动画，也不是骨骼绑定模型；运行时以关键姿态衔接、呼吸变形、头发与手部网格形变呈现连续动作。制作依据与提示词保存在 `assets/mascot/provenance.json` 和 `daily-life-provenance.json`。首页和关于页使用干净背景，角色背后没有几何卫星或原子图案。
+吉祥物使用木子恶魔制作的「蓝色小肥鱼Deepseek」VRM 1.0，来源为[作者发布页](https://www.aplaybox.com/details/model/ayXkRzVflmnd)。站主 blueokanna 于 2026-11-13 确认取得网站使用及公开分发授权，记录见 `content/companion-model.json`。原模型保留作者的网格、贴图、MToon 材质、53 根人形骨骼和 19 个表情，文件内许可信息没有改写。该模型不适用本站代码的开源许可证，本站授权也不构成对其他人的转授权。
+
+`build_companion_model.mjs` 校验原文件的 SHA-256、作者、蒙皮与内嵌资源，再生成 `web/companion/model-info.json`；它不重新生成角色。`companion_activities.mjs` 定义 17 种连续活动，`companion_vrm.mjs` 负责四元数过渡、手臂 IK、原生表情和弹簧骨骼。IK 根据真实臂长限制触达范围，动作不缩放身体或头部。道具由 `companion_props.mjs` 独立管理。动作与道具是本站实现，不是作者提供的动作包。`node scripts/companion_review.mjs` 输出正面、45 度、侧面、背面及全部活动的浏览器实拍，存放在 `build/qa/vrm/`。
 
 作息按 UTC+08:00 计算，与浏览器所在时区无关：
 
@@ -126,11 +133,13 @@ Aurora 是应用层调度器：一个持续动画时钟、直接监听的 Custom
 
 自由活动根据日期与三分钟时段确定，同一时段刷新会恢复同一活动；不同日期与时段会变化。打开页面立即计算当前状态，前台每秒校正，后台停表、恢复时重新计算，因此不靠累计定时器推算过夜时长。时间来自设备时钟，修改系统时间会影响人物作息；不将动画时钟作为权限依据。
 
-`CompanionController` 的优先级为固定作息、进行中的业务请求、短暂交互、自由活动。点击或导航不会把凌晨睡觉的人物叫醒。17 个动作入口支持鼠标、键盘与触屏，手动动作结束后回归作息；点击人物循环触发不同回应，双击庆祝、长按害羞。记忆游戏有随机顺序、逐轮输入判断和失败反馈，切到后台会中断当前演示，避免回来后漏看。搜索、草稿保存、操作失败等反馈仍由真实事件触发，旧请求票据不能覆盖新操作。
+`CompanionController` 的优先级为固定作息、进行中的业务请求、短暂交互、自由活动。点击或导航不会把凌晨睡觉的人物叫醒。页面不显示动作选择器、展开菜单或记忆游戏入口。作息与自由活动自动运行，进入页面直接恢复当前活动；点击人物仍可产生短暂回应，之后回归作息。搜索、草稿保存、操作失败等反馈仍由真实事件触发，旧请求票据不能覆盖新操作。
 
-图像按需加载，舞台解码宽度为 640px，悬浮角色为 160px；下一姿态解码前保留上一帧。姿态之间采用 480 毫秒交叠衔接，避免完全透明的闪烁；不同关键姿态的肢体位置差异仍可能在过渡中看见叠影。连续变形共用 Aurora 时钟，减少动画时停止形变并直接切换。手机陪伴栏独立占位，避免盖住正文和输入框。
+Three.js 场景运行在同源 iframe，资源随站点发布，不依赖外部模型服务或 CDN。Flutter 管理作息和业务状态，场景负责关节动画、850 毫秒动作混合、相机和输入。可拖动查看侧面与背面；消息同时验证来源窗口、同源地址、类型和长度。后台或离屏时停止绘制，系统减少动画或站点暂停时保留静止姿态。原 VRM 为 18.48 MB，首次加载受网络速度影响；请求 60 秒超时并提供独立重试，模型加载失败不会阻塞正文。首页和关于页均显示完整角色，不创建重复悬浮实例。原作者署名统一放在关于页「PulseLink / GitHub」下方的「DeepSeek模型原作者」链接，模型画面下不重复显示。手机陪伴栏独立占位，避免盖住正文和输入框。原生 Flutter 排版截图不包含 WebGL 角色；3D 效果以浏览器检查结果为准。
 
-`test/companion_test.dart` 验证跨午夜、起床洗漱、三餐边界、时钟跳变、后台恢复、请求竞态与窄屏动作入口；`test/friends_test.dart` 验证非站主、伪造同名 ID、退出竞态、SHA 冲突和公开读取不携带凭证。测试使用隔离 HTTP mock，不向真实仓库写测试数据。
+日常动作只使用检查过的 `blink`、`happy` 和 `aa` 表情，并限制叠加权重。`blink` 使用模型自带的肤色眼睑；原文件中的 `relaxed` 是白眼夸张表情，不用于困倦或睡觉。渲染脚本 URL 带构建内容摘要，避免更新动作后继续复用旧脚本缓存。
+
+`test/companion_test.dart` 验证跨午夜、起床洗漱、三餐边界、时钟跳变、后台恢复、请求竞态与窄屏自动活动界面；`test/friends_test.dart` 验证非站主、伪造同名 ID、退出竞态、SHA 冲突和公开读取不携带凭证。测试使用隔离 HTTP mock，不向真实仓库写测试数据。
 
 页面切换使用 Flutter 官方 `animations` 包的 Fade Through：320 毫秒内先退场、再入场，同时处理主动画与次级动画，避免透明页面的文字叠绘。导航栏和极光背景保留在公共外壳中；页面按 URL 路径区分身份，文章和语言切换也走同一转场。动画期间页面内容暂停点击和焦点访问，导航仍可连续切换。`test/navigation_test.dart` 逐帧检查正常切页、快速中断、返回、语言切换与减少动画设置。
 
@@ -144,7 +153,8 @@ Aurora 是应用层调度器：一个持续动画时钟、直接监听的 Custom
 - `lib/ui/project_views.dart`：项目集合与详情。
 - `lib/ui/expressive.dart`：动态形状、卡片交互和间距约定。
 - `lib/companion.dart`：蓝色大肥鱼的状态目录、事件优先级、请求票据与生命周期。
-- `lib/ui/mascot.dart`：蓝色大肥鱼的素材加载、交互面板、悬浮入口与显示过渡。
+- `lib/ui/mascot.dart` 与 `lib/ui/companion_scene*`：角色面板、悬浮入口和同源 3D 桥接。
+- `scripts/companion_scene.mjs`：Three.js 场景与动画混合；构建输出 `web/companion/scene.js`。
 - `lib/ui/studio.dart`：Markdown 编辑、草稿恢复与发布交互。
 - `lib/publishing.dart`：GitHub 身份、权限和带 SHA 的文章及友链提交。
 - `lib/friends_service.dart` 与 `lib/ui/friends.dart`：公开友链同步及站主管理。
@@ -160,7 +170,11 @@ Aurora 是应用层调度器：一个持续动画时钟、直接监听的 Custom
 
 ## 发布
 
-仓库 Settings → Pages → Source 选择 GitHub Actions。推送 main 后工作流验证并上传 `build/web`；PR 只验证，不部署。CNAME 保持 `www.pulselink.top`。根目录历史构建文件不属于新工作流的发布输入。
+仓库 Settings → Pages → Source 选择 GitHub Actions。推送 main 后工作流验证并上传 `build/web`；PR 只验证，不部署。CNAME 保持 `www.pulselink.top`。根目录历史构建文件不属于新工作流的发布输入。部署前会检查 Pages 的 `build_type`，错误地切回分支发布时直接失败。不要同时启用 Jekyll 分支发布，否则一次友链提交会让旧根目录产物和新 Flutter 产物争用同一站点。
+
+`finalize_web.py` 必须在 Flutter 构建后执行：写入友链快照、发布版本标记，并替换 SDK 自动生成的旧 Service Worker 迁移脚本。新脚本只注销旧 worker、清理 Flutter 专用缓存，不主动刷新客户端，避免编辑中途丢失内存登录状态。启动守卫提供失败提示和手动缓存恢复，保留当前 hash 路由；公开生产入口统一到 HTTPS。
+
+友链保存成功后共享当前会话快照，导航回来不会先退回内置列表；较早发出的请求不能覆盖刚保存的数据。保存后的两分钟内等待公开接口返回相同 SHA，避免 GitHub 缓存短暂回退；随后恢复接收其他会话的修改。公开接口不可用且没有会话快照时，依次尝试 GitHub Raw 和部署产物中的 `friends.json`。这些读取不携带 Token，降级快照可能滞后。
 
 提交 Dart 代码前运行 `dart format lib test tool`。CI 使用同一版本的 SDK，在生成字体与图解之前执行 `dart format --output=none --set-exit-if-changed lib test tool`；格式不一致会直接失败，不会在 CI 中自动修改源文件或跳过门禁。
 

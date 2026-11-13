@@ -85,4 +85,11 @@ const friends = [
     descEn: 'A warm clay blog',
     avatar: 'https://taoran.weppp.cyou/favicon.svg',
   ),
+  FriendLink(
+    name: 'icebear\'s blog',
+    url: 'https://sfclub.cc/~icybear',
+    desc: '一个 i4b2 的技术分享神奇小站',
+    descEn: 'A magical little website for sharing i4b2 technology',
+    avatar: 'https://sfclub.cc/~icybear/avatar.png',
+  ),
 ];

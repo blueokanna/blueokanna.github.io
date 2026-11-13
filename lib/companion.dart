@@ -138,8 +138,6 @@ enum CompanionMood {
     this.messageEn,
   );
   final String pose, zh, en, messageZh, messageEn;
-  String get asset =>
-      'assets/mascot/blue-fat-fish${pose == 'idle' ? '' : '-$pose'}.png';
   String label(String language) => language.startsWith('zh') ? zh : en;
   String message(String language) =>
       language.startsWith('zh') ? messageZh : messageEn;
@@ -392,10 +390,13 @@ class _CompanionHostState extends State<CompanionHost>
     WidgetsBinding.instance.addObserver(this);
     _controller.setRoute(widget.route);
     final state = WidgetsBinding.instance.lifecycleState;
-    _controller.setForeground(
-      state == null || state == AppLifecycleState.resumed,
-    );
+    _controller.setForeground(state == null || _visible(state));
   }
+
+  // A focused same-origin iframe makes Flutter inactive while the page is still
+  // visible. Only hidden/paused/detached states suspend the companion's life.
+  bool _visible(AppLifecycleState state) =>
+      state == AppLifecycleState.resumed || state == AppLifecycleState.inactive;
 
   @override
   void didUpdateWidget(CompanionHost oldWidget) {
@@ -410,7 +411,7 @@ class _CompanionHostState extends State<CompanionHost>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) =>
-      _controller.setForeground(state == AppLifecycleState.resumed);
+      _controller.setForeground(_visible(state));
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);

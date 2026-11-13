@@ -1,7 +1,4 @@
 import 'dart:convert';
-import 'dart:ui' as ui;
-
-import 'package:flutter/services.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,37 +10,13 @@ import 'package:pulselink_site/preferences.dart';
 import 'package:pulselink_site/publishing.dart';
 import 'package:pulselink_site/ui/clock_scope.dart';
 import 'package:pulselink_site/ui/mascot.dart';
+import 'package:pulselink_site/ui/companion_scene.dart';
 import 'package:pulselink_site/ui/studio.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late BlogCatalog catalog;
   setUpAll(() async => catalog = await BlogCatalog.load());
-  test('all character poses are detailed transparent image assets', () async {
-    for (final mood in CompanionMood.actions) {
-      final data = await rootBundle.load(mood.asset);
-      final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
-      final frame = await codec.getNextFrame();
-      expect(frame.image.width, greaterThanOrEqualTo(1000));
-      expect(frame.image.height, greaterThanOrEqualTo(1400));
-      final rgba = (await frame.image.toByteData())!.buffer.asUint8List();
-      expect(rgba[3], 0, reason: 'Outer background must be transparent');
-      expect(rgba[frame.image.width * 4 - 1], 0);
-      expect(rgba[rgba.length - 1], 0);
-      expect(
-        rgba[(frame.image.height - 1) * frame.image.width * 4 + 3],
-        lessThanOrEqualTo(1),
-        reason: 'Allow a single alpha quantization step at the edge',
-      );
-      final center =
-          ((frame.image.height ~/ 2) * frame.image.width +
-              frame.image.width ~/ 2) *
-          4;
-      expect(rgba[center + 3], greaterThan(240));
-      frame.image.dispose();
-      codec.dispose();
-    }
-  });
   testWidgets(
     'companion supports touch actions and reduced motion on small screens',
     (tester) async {
@@ -77,27 +50,21 @@ void main() {
         find.text(CompanionRoutine.activity(now).message('zh-CN')),
         findsOneWidget,
       );
-      expect(find.byType(CompanionArtwork), findsOneWidget);
+      expect(find.byType(CompanionScene), findsOneWidget);
       expect(
-        tester.widget<CompanionArtwork>(find.byType(CompanionArtwork)).asset,
-        CompanionRoutine.activity(now).asset,
+        tester.widget<CompanionScene>(find.byType(CompanionScene)).mood,
+        CompanionRoutine.activity(now),
       );
-      await tester.tap(find.text('打招呼'));
+      expect(find.byType(ActionChip), findsNothing);
+      tester.widget<CompanionScene>(find.byType(CompanionScene)).onAction!(
+        'pet',
+      );
       await tester.pump();
-      expect(find.text('收到！今天也一起探索吧。'), findsOneWidget);
       expect(
-        tester.widget<CompanionArtwork>(find.byType(CompanionArtwork)).asset,
-        'assets/mascot/blue-fat-fish-wave.png',
+        tester.widget<CompanionScene>(find.byType(CompanionScene)).mood,
+        CompanionMood.happy,
       );
-      await tester.tap(find.text('陪我读'));
-      await tester.pump();
-      expect(find.text('安静模式。陪你读完这一篇。'), findsOneWidget);
-      expect(
-        tester.widget<CompanionArtwork>(find.byType(CompanionArtwork)).asset,
-        'assets/mascot/blue-fat-fish-read.png',
-      );
-      await tester.pump(const Duration(seconds: 6));
-      expect(find.text('安静模式。陪你读完这一篇。'), findsOneWidget);
+      expect(find.text(CompanionMood.happy.message('zh-CN')), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
       actor.setForeground(false);

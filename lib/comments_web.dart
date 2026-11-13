@@ -80,7 +80,6 @@ class _EmbeddedCommentsState extends State<EmbeddedComments> {
     super.didChangeDependencies();
     _colors = Theme.of(context).colorScheme;
     final next = commentThemeId(_colors);
-    // Theme interpolation colors do not have a corresponding exported file.
     if (_theme != next && _themes.contains(next)) {
       _theme = next;
       _sendConfiguration();

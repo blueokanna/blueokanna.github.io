@@ -2,15 +2,24 @@
   "name": "pulselink-publishing",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22.13.0" },
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "scripts": {
     "diagrams": "node scripts/build_diagrams.mjs",
-    "test": "node --test test/comments_test.mjs",
+    "test": "node --test test/comments_test.mjs test/startup_test.mjs test/companion_model_test.mjs",
     "test:browser-readiness": "node --test test/browser_readiness_test.mjs",
-    "test:browser": "node scripts/browser_smoke.mjs"
+    "test:browser": "node scripts/browser_smoke.mjs",
+    "companion:build": "node scripts/build_companion_model.mjs && node scripts/build_companion_scene.mjs",
+    "test:companion": "node scripts/companion_smoke.mjs"
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "12.2.0",
+    "esbuild": "0.28.2",
     "puppeteer": "25.17.0"
+  },
+  "dependencies": {
+    "@pixiv/three-vrm": "3.5.5",
+    "three": "0.187.0"
   }
 }

@@ -38,13 +38,21 @@ try {
   phase = 'home startup';
   console.log(`Checking ${phase}`);
   await navigateToApp(page, address);
+  await page.waitForFunction(()=>Array.from(document.querySelectorAll('iframe')).some(frame=>frame.src.includes('/companion/index.html')));
+  const homeCompanions=page.frames().filter(frame=>frame.url().includes('/companion/index.html'));
+  assert.equal(homeCompanions.length,1,'Home renders the 3D model without a duplicate dock');
+  await homeCompanions[0].waitForSelector('body[data-ready="true"]',{timeout:30000});
   await page.screenshot({path:path.join(screenshots,'home.png')});
   const before = await page.screenshot();
+  const backgroundBefore = await page.screenshot({clip:{x:0,y:140,width:80,height:800}});
   await new Promise(resolve => setTimeout(resolve, 1200));
   const after = await page.screenshot();
   assert.notDeepEqual(before,after,'The visible hero must animate after loading.');
+  assert.notDeepEqual(backgroundBefore,await page.screenshot({clip:{x:0,y:140,width:80,height:800}}),
+    'The page background must animate independently of the character.');
   for (const [name, route, width] of [
     ['projects','/zh-CN/projects',1440], ['article','/zh-CN/posts/segmeris-guide',390],
+    ['about','/zh-CN/about',1440], ['friends','/zh-CN/friends',1440],
     ['project-detail','/de/projects/courierust',768],
     ['home-mobile','/zh-CN',390], ['studio-mobile','/zh-CN/studio',390],
   ]) {
@@ -55,6 +63,11 @@ try {
     await navigateToApp(page, undefined, {reload:true});
     assert.equal(new URL(page.url()).hash, '#' + route, 'Refreshing a deep link must retain its route.');
     await new Promise(resolve => setTimeout(resolve, 500));
+    if(name==='about'||name==='home-mobile'){
+      const companions=page.frames().filter(frame=>frame.url().includes('/companion/index.html'));
+      assert.equal(companions.length,1,`${name} renders one full character without a duplicate dock`);
+      await companions[0].waitForSelector('body[data-ready="true"]',{timeout:30000});
+    }
     await page.screenshot({path:path.join(screenshots,`${name}.png`)});
   }
   assert.deepEqual(diagnostics.errors,[],'Browser JavaScript errors');

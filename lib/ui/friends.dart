@@ -10,16 +10,22 @@ import '../publishing.dart';
 import 'components.dart';
 
 class FriendsView extends StatefulWidget {
-  const FriendsView({super.key, required this.language, this.publisher});
+  const FriendsView({
+    super.key,
+    required this.language,
+    this.publisher,
+    this.service,
+  });
   final String language;
   final Publisher? publisher;
+  final FriendsService? service;
   @override
   State<FriendsView> createState() => _FriendsViewState();
 }
 
 class _FriendsViewState extends State<FriendsView> with WidgetsBindingObserver {
-  final _service = FriendsService();
-  List<FriendLink> _links = friends;
+  late final _service = widget.service ?? FriendsService();
+  late List<FriendLink> _links = _service.snapshot;
   String? _error;
   bool _loading = false;
   Timer? _refresh;
@@ -80,8 +86,14 @@ class _FriendsViewState extends State<FriendsView> with WidgetsBindingObserver {
       context: context,
       builder: (_) => FriendEditor(
         publisher: publisher,
-        onSaved: (links) {
-          if (mounted) setState(() => _links = links);
+        onSaved: (links, sha) {
+          _service.acceptSaved(links, sha);
+          if (mounted) {
+            setState(() {
+              _links = links;
+              _error = null;
+            });
+          }
         },
       ),
     );
@@ -91,7 +103,7 @@ class _FriendsViewState extends State<FriendsView> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _refresh?.cancel();
-    _service.dispose();
+    if (widget.service == null) _service.dispose();
     super.dispose();
   }
 
@@ -172,7 +184,7 @@ class FriendEditor extends StatefulWidget {
     required this.onSaved,
   });
   final Publisher publisher;
-  final ValueChanged<List<FriendLink>> onSaved;
+  final void Function(List<FriendLink>, String sha) onSaved;
   @override
   State<FriendEditor> createState() => _FriendEditorState();
 }
@@ -276,7 +288,7 @@ class _FriendEditorState extends State<FriendEditor> {
         _dirty = false;
         _status = '已保存到 GitHub。其他访客会在下一次同步时看到更新。';
       });
-      widget.onSaved(List.unmodifiable(_links));
+      widget.onSaved(List.unmodifiable(_links), sha);
     } catch (e) {
       if (mounted) setState(() => _status = '$e');
     } finally {

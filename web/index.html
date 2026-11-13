@@ -3,6 +3,7 @@
 <head>
   <base href="$FLUTTER_BASE_HREF">
   <meta charset="UTF-8">
+  <script src="startup_guard.js"></script>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="description" content="Blue 的 PulseLink：技术笔记、开源项目与友链。保持好奇，持续创造。">
   <meta name="theme-color" content="#f6f7ef">
@@ -39,7 +40,7 @@
   <style>[data-paused=true] .mark,[data-paused=true] .mark span{animation:none}</style>
 </head>
 <body>
-  <main id="boot" role="status" aria-live="polite"><div class="mark" aria-hidden="true">✳<span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span><span style="--i:5"></span></div><h1>Blue · PulseLink</h1><p id="boot-message">正在打开数字花园…</p><button id="retry" hidden onclick="location.reload()">重新加载</button><p><a href="https://github.com/blueokanna">GitHub / blueokanna</a></p></main>
+  <main id="boot" role="status" aria-live="polite"><div class="mark" aria-hidden="true">✳<span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span><span style="--i:5"></span></div><h1>Blue · PulseLink</h1><p id="boot-message">正在打开数字花园…</p><button id="retry" hidden onclick="location.reload()">重新加载</button><button id="recover" hidden onclick="pulseRecover()">清理旧版缓存并重试</button><p><a href="https://github.com/blueokanna">GitHub / blueokanna</a></p></main>
   <noscript>本站使用 Flutter Web，请启用 JavaScript。你也可以访问上面的 GitHub 主页。</noscript>
   <script>
     window.addEventListener('pulselink-ready',function(){
@@ -49,7 +50,7 @@
       boot.style.opacity='0';boot.style.pointerEvents='none';
       setTimeout(()=>boot.remove(),matchMedia('(prefers-reduced-motion: reduce)').matches?0:260);
     },{once:true});
-    window.pulseBootTimer=setTimeout(function(){var m=document.getElementById('boot-message');if(m){m.textContent='加载时间较长，请检查网络后重试。';document.getElementById('retry').hidden=false;}},25000);
+    window.pulseBootTimer=setTimeout(function(){var m=document.getElementById('boot-message');if(m){window.pulseStartupFailure();}},25000);
   </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>

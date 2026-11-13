@@ -41,7 +41,7 @@ class _AuroraState extends State<Aurora>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController _clock = AnimationController(
     vsync: this,
-    duration: const Duration(seconds: 12),
+    duration: const Duration(seconds: 48),
   );
   bool _foreground = true;
   @override
@@ -49,7 +49,10 @@ class _AuroraState extends State<Aurora>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     final state = WidgetsBinding.instance.lifecycleState;
-    _foreground = state == null || state == AppLifecycleState.resumed;
+    _foreground =
+        state == null ||
+        state == AppLifecycleState.resumed ||
+        state == AppLifecycleState.inactive;
   }
 
   void _sync() {
@@ -76,7 +79,9 @@ class _AuroraState extends State<Aurora>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    _foreground = state == AppLifecycleState.resumed;
+    _foreground =
+        state == AppLifecycleState.resumed ||
+        state == AppLifecycleState.inactive;
     _sync();
   }
 

@@ -9,6 +9,7 @@ import 'package:pulselink_site/preferences.dart';
 import 'package:pulselink_site/publishing.dart';
 import 'package:pulselink_site/ui/clock_scope.dart';
 import 'package:pulselink_site/ui/mascot.dart';
+import 'package:pulselink_site/ui/companion_scene.dart';
 import 'package:pulselink_site/ui/pages.dart';
 import 'package:pulselink_site/ui/studio.dart';
 
@@ -18,6 +19,36 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late BlogCatalog catalog;
   setUpAll(() async => catalog = await BlogCatalog.load());
+
+  testWidgets('iframe focus keeps interactions active but hidden pages stop', (
+    tester,
+  ) async {
+    late CompanionController actor;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CompanionHost(
+          route: '/zh-CN',
+          now: () => awake,
+          child: Builder(
+            builder: (context) {
+              actor = CompanionScope.read(context)!;
+              return const SizedBox();
+            },
+          ),
+        ),
+      ),
+    );
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    actor.pet();
+    expect(actor.mood, CompanionMood.happy);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    actor.select(CompanionMood.dance);
+    expect(actor.mood, CompanionMood.happy);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    actor.select(CompanionMood.dance);
+    expect(actor.mood, CompanionMood.dance);
+    await tester.pumpWidget(const SizedBox());
+  });
 
   test('China schedule uses exact inclusive starts and exclusive ends', () {
     CompanionMood at(String text) =>
@@ -155,60 +186,62 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
-    'all expressions are reachable on a narrow screen with large text',
-    (tester) async {
-      tester.view.physicalSize = const Size(320, 900);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      final actor = CompanionController(now: () => awake);
-      addTearDown(actor.dispose);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MediaQuery(
-            data: const MediaQueryData(
-              disableAnimations: true,
-              textScaler: TextScaler.linear(1.4),
-            ),
-            child: Scaffold(
-              body: CompanionScope(
-                controller: actor,
-                child: const SingleChildScrollView(
-                  child: MotionClock(
-                    clock: AlwaysStoppedAnimation(0),
-                    child: CompanionStage(language: 'zh-CN'),
-                  ),
+  testWidgets('routine drives the scene without manual action controls', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var current = awake;
+    final actor = CompanionController(now: () => current);
+    addTearDown(actor.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            disableAnimations: true,
+            textScaler: TextScaler.linear(1.4),
+          ),
+          child: Scaffold(
+            body: CompanionScope(
+              controller: actor,
+              child: const SingleChildScrollView(
+                child: MotionClock(
+                  clock: AlwaysStoppedAnimation(0),
+                  child: CompanionStage(language: 'zh-CN'),
                 ),
               ),
             ),
           ),
         ),
+      ),
+    );
+    expect(find.byType(ActionChip), findsNothing);
+    expect(find.text('更多动作 · 17'), findsNothing);
+    expect(find.text('一起玩记忆游戏'), findsNothing);
+    for (final time in [
+      '23:45',
+      '08:00',
+      '08:02',
+      '08:30',
+      '08:40',
+      '12:30',
+      '12:40',
+      '18:00',
+      '18:10',
+    ]) {
+      current = DateTime.parse('2026-11-14T$time:00+08:00');
+      await tester.pump(const Duration(seconds: 1));
+      expect(
+        tester.widget<CompanionScene>(find.byType(CompanionScene)).mood,
+        CompanionRoutine.activity(current),
       );
-      await tester.ensureVisible(find.text('更多动作 · 17'));
-      await tester.tap(find.text('更多动作 · 17'));
-      await tester.pump();
-      expect(find.byType(ActionChip), findsNWidgets(17));
-      for (final mood in CompanionMood.actions) {
-        final chip = find.widgetWithText(ActionChip, mood.label('zh-CN'));
-        await tester.ensureVisible(chip);
-        await tester.tap(chip);
-        await tester.pump();
-        expect(actor.mood, mood);
-        expect(
-          tester.widget<CompanionArtwork>(find.byType(CompanionArtwork)).asset,
-          mood.asset,
-        );
-        expect(tester.takeException(), isNull);
-      }
-      await tester.ensureVisible(find.text('恢复作息'));
-      await tester.tap(find.text('恢复作息'));
-      await tester.pump();
-      expect(actor.mood, CompanionRoutine.activity(awake));
-      await tester.pumpWidget(const SizedBox());
-      actor.setForeground(false);
-    },
-  );
+      expect(tester.takeException(), isNull);
+    }
+    await tester.pumpWidget(const SizedBox());
+    actor.setForeground(false);
+  });
 
   testWidgets(
     'search, empty results, reading and completion reach the shared dock',

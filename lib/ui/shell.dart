@@ -121,7 +121,8 @@ class BlogShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final path = GoRouterState.of(context).uri.path;
-    final showCompanion = path != '/${strings.tag}';
+    final showCompanion =
+        path != '/${strings.tag}' && path != '/${strings.tag}/about';
     final narrow = MediaQuery.sizeOf(context).width < 600;
     return Aurora(
       paused: preferences.paused,
@@ -140,22 +141,21 @@ class BlogShell extends StatelessWidget {
             : null,
         body: Stack(
           children: [
-            if (path != '/${strings.tag}' && path != '/${strings.tag}/about')
-              Positioned.fill(
-                child: ExcludeSemantics(
-                  child: IgnorePointer(
-                    child: RepaintBoundary(
-                      child: CustomPaint(
-                        painter: AuroraArt(
-                          clock,
-                          dark: color.brightness == Brightness.dark,
-                          seed: color.primary,
-                        ),
+            Positioned.fill(
+              child: ExcludeSemantics(
+                child: IgnorePointer(
+                  child: RepaintBoundary(
+                    child: CustomPaint(
+                      painter: AuroraArt(
+                        clock,
+                        dark: color.brightness == Brightness.dark,
+                        seed: color.primary,
                       ),
                     ),
                   ),
                 ),
               ),
+            ),
             SafeArea(
               child: Column(
                 children: [

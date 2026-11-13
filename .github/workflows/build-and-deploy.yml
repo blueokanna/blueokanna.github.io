@@ -46,22 +46,27 @@ jobs:
           else
             npx puppeteer browsers install chrome
           fi
+      - run: npm run companion:build
       - run: npm run diagrams
       - run: flutter test tool/export_comment_themes_test.dart
       - run: flutter analyze
       - run: flutter test
-      - run: node --test test/comments_test.mjs
+      - run: npm test
       - run: flutter build web --release --base-href / --no-web-resources-cdn
+      - run: python scripts/finalize_web.py
       - name: Verify browser startup and routes
         timeout-minutes: 10
         run: |
           npm run test:browser-readiness
           npm run test:browser
+          npm run test:companion
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: browser-check-diagnostics
-          path: build/qa/browser
+          path: |
+            build/qa/browser
+            build/qa/companion
           if-no-files-found: ignore
       - run: cp CNAME build/web/CNAME
       - uses: actions/upload-pages-artifact@v3
@@ -78,6 +83,14 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Verify Pages publishing mode
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {data} = await github.rest.repos.getPages({...context.repo});
+            if (data.build_type !== 'workflow') {
+              core.setFailed('Pages is also publishing the repository root. Change Settings > Pages > Source to GitHub Actions before deploying.');
+            }
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4

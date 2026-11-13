@@ -6,6 +6,7 @@ import '../comments.dart';
 import '../companion.dart';
 import '../publishing.dart';
 import 'friends.dart';
+import '../friends_service.dart';
 import '../localization.dart';
 import '../motion.dart';
 import '../models/project.dart';
@@ -23,9 +24,11 @@ class BlogPage extends StatefulWidget {
     required this.projects,
     this.slug,
     this.publisher,
+    this.friendsService,
     this.chinesePostIds = const {},
   });
   final Publisher? publisher;
+  final FriendsService? friendsService;
   final Set<String> chinesePostIds;
   final List<ProjectEntry> projects;
   final String page;
@@ -631,7 +634,11 @@ class _BlogPageState extends State<BlogPage> {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       _title('BLOGROLL', s.text('friends'), s.text('friendsIntro')),
-      FriendsView(language: s.tag, publisher: widget.publisher),
+      FriendsView(
+        language: s.tag,
+        publisher: widget.publisher,
+        service: widget.friendsService,
+      ),
     ],
   );
   Widget _about() => Column(
@@ -647,6 +654,10 @@ class _BlogPageState extends State<BlogPage> {
       const ExternalLink(
         url: 'https://github.com/blueokanna/blueokanna.github.io',
         label: 'PulseLink / GitHub',
+      ),
+      const ExternalLink(
+        url: 'https://www.aplaybox.com/details/model/ayXkRzVflmnd',
+        label: 'DeepSeek模型原作者',
       ),
       const SizedBox(height: 32),
       Text(s.text('discussion'), style: t.headlineMedium),

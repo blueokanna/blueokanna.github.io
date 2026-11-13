@@ -1,0 +1,15 @@
+{
+  "file": "blue.vrm",
+  "sha256": "c14879ff5c42501043896aae03ce971b2c11eee2e76106d47ee98741aa842ff5",
+  "name": "蓝色小肥鱼Deepseek",
+  "author": "木子恶魔",
+  "source": "https://www.aplaybox.com/details/model/ayXkRzVflmnd",
+  "referenceDesigners": ["ZipZipPipe", "上善无形"],
+  "retrievedFrom": "https://github.com/drliuhuan/dsh-plugin-vrmpet3d/blob/main/assets/models/BlueFatFish.vrm.br",
+  "authorization": {
+    "reportedBy": "blueokanna",
+    "confirmedOn": "2026-11-13",
+    "scope": "Website use and public distribution, confirmed by the site owner in this project's conversation.",
+    "note": "The original embedded VRM metadata remains unchanged. This record documents the site owner's confirmation of separate authorization; it is not a public license for other users."
+  }
+}

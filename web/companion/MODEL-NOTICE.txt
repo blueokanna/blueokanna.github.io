@@ -1,0 +1,16 @@
+蓝色小肥鱼Deepseek / BlueFatFish
+
+模型作者：木子恶魔
+原作发布页：https://www.aplaybox.com/details/model/ayXkRzVflmnd
+参考设计署名：ZipZipPipe、上善无形
+模型文件：blue.vrm（VRM 1.0）
+SHA-256: c14879ff5c42501043896aae03ce971b2c11eee2e76106d47ee98741aa842ff5
+
+站主 blueokanna 于 2026-11-13 确认已取得网站使用及公开分发授权。
+该确认记录于 content/companion-model.json；原 VRM 文件及内嵌许可信息保持不变。
+模型不适用本站代码的开源许可证。本站使用授权不构成对其他使用者的转授权。
+后续使用请联系原作者，并以适用于你用途的作者授权为准。
+
+网站动作由本站运行时驱动；不是作者随模型提供的动作包。
+原始网格、贴图、骨骼、MToon 材质与表情来自上述 VRM。
+阅读、吃饭等道具是本站单独建立的场景对象。
