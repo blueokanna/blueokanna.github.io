@@ -1,0 +1,38 @@
+{
+  "name": "蓝色大肥鱼",
+  "method": "built-in image_gen",
+  "reference": "assets/mascot/blue-fat-fish.png",
+  "notes": "Six independently generated transparent pose edits. These are key poses for runtime animation, not a claim of hand-drawn frame-by-frame animation. Existing sleep.png is a standing nap; sleep-rest.png is a distinct curled sleeping pose. Generated alpha preserved without image processing.",
+  "actions": [
+    {
+      "action": "eat",
+      "file": "assets/mascot/blue-fat-fish-eat.png",
+      "prompt": "Use case: identity-preserve. Edit the provided local transparent character image, 蓝色大肥鱼. Preserve the EXACT same detailed anime chibi character, face proportions, huge blue gradient eyes, indigo-to-cyan long wavy hair, ahoge, white frilled lace maid headband, blue side bow, whale ear fins, navy long-sleeve maid dress, blue neck jewel, white apron with blue whale, ornate gold skirt embroidery, layered white lace, socks and navy shoes. Keep the 1024x1536 portrait framing, original character head size and ground baseline, transparent alpha background and safe padding. This is a production website character sprite. Change pose ONLY: she is sitting comfortably with knees bent, happily eating a bowl of rice with chopsticks. Left hand supports a small blue-white bowl at chest level; right hand holds a pair of chopsticks with a small bite near her mouth. Cute tiny chewing smile, eyes gently focused on her meal. Entire character visible. No chair necessary, no table, no scenery, no text or floating decorative symbols. Original detailed drawing style, no redesign or simplification. Genuine transparent background."
+    },
+    {
+      "action": "wash",
+      "file": "assets/mascot/blue-fat-fish-wash.png",
+      "prompt": "Use case: identity-preserve. Edit the provided local transparent sprite of 蓝色大肥鱼, same exact detailed anime chibi whale maid identity. Preserve face proportions, large blue eyes, indigo/cyan long curled hair, ahoge, white lace headband, blue side bow, navy maid dress, blue neck jewel, white apron with blue whale emblem, gold embroidered skirt, white lace underskirt, socks and navy shoes. Same 1024x1536 portrait canvas and full-body character head size, ground baseline and safe margins. Change only action: morning toothbrushing, standing, right hand holding a slim blue toothbrush with bristles gently at her mouth and a tiny bit of white toothpaste foam, left hand holding a simple pale-blue rinse cup near waist. Sleepy but content half-open eyes, tiny closed mouth around toothbrush. Keep face clear, hands anatomically simple and correct, all hair and shoes visible. Single character, no sink or scene or text or symbols or background glow. Genuine transparent alpha background, preserve all opaque white lace and apron."
+    },
+    {
+      "action": "wake",
+      "file": "assets/mascot/blue-fat-fish-wake.png",
+      "prompt": "Use case: identity-preserve. Edit target is the supplied transparent full-body chibi sprite 蓝色大肥鱼. Preserve EXACT anime identity and detail: blue gradient eyes, original face shape, indigo-to-cyan long wavy hair with ahoge, lace maid headband, blue bow, ear fins, navy long sleeves, blue neck jewel, white apron bearing blue whale emblem, ornate gold skirt embroidery, lace, socks, shoes. Preserve 1024x1536 portrait framing and baseline, whole character in safe margins, same head size. Change only action: waking up at 8 AM and stretching, both arms lifted beside head above shoulder level, elbows gently bent outward, little clenched fists, eyes squeezed softly closed, tiny open yawning mouth. Natural slight arch and raised shoulders, not dancing or celebrating. No pillow or extra objects. Genuine transparent alpha background. No background lighting, no aura, no scene, no text, no floating shapes. Detailed consistent original anime line art."
+    },
+    {
+      "action": "game",
+      "file": "assets/mascot/blue-fat-fish-game.png",
+      "prompt": "Use case: identity-preserve. Edit this existing transparent sprite of 蓝色大肥鱼. Keep the exact detailed anime chibi identity, huge blue eyes, indigo/cyan long curled hair and ahoge, lace maid headband, blue side bow, whale ear fins, navy dress, white apron with whale, blue neck jewel, gold scroll skirt embroidery, layered lace, socks and shoes. Preserve 1024x1536 portrait framing and whole-body scale and baseline with safe margins. Action only: relaxed gaming, standing with both hands holding a small plain navy game controller in front of her chest/upper waist, both thumbs on controls. Eyes focused gently downward, a tiny determined smile, shoulders relaxed. The controller has clear two handles, two analog sticks and small buttons, no brand text. All original outfit visible around it, entire hair and shoes in frame. No screen, no other objects, no scenery, no decoration, no lettering or background glow. Genuine transparent alpha background and original anime rendering."
+    },
+    {
+      "action": "bedtime",
+      "file": "assets/mascot/blue-fat-fish-bedtime.png",
+      "prompt": "Use case: identity-preserve. Edit the supplied full-body transparent character sprite 蓝色大肥鱼. Keep EXACT detailed anime chibi identity, original face and blue eyes, indigo-to-cyan long curled hair, ahoge, lace maid headband, blue side bow, whale ear fins, navy maid dress, blue neck jewel, white apron with blue whale emblem, gold embroidered skirt, white lace, socks, navy shoes. Same 1024x1536 portrait canvas, full body, same head size and baseline with safe margin. Action: getting ready for bed, standing with a soft small white pillow hugged against one side of her chest by the left arm, right hand politely covering a tiny yawn, eyelids heavy and half closed. Pillow should not completely obscure apron whale or costume. Drowsy affectionate expression and relaxed shoulders. ONLY added object is pillow. Transparent alpha background, no furniture, no room, no symbols or text, no background glow, no change of outfit or art style."
+    },
+    {
+      "action": "sleep-rest",
+      "file": "assets/mascot/blue-fat-fish-sleep-rest.png",
+      "prompt": "Use case: identity-preserve. Edit supplied transparent 蓝色大肥鱼 sprite into a true sleeping pose. EXACT same detailed anime chibi girl: original face proportions, long indigo-to-cyan wavy hair, ahoge, white lace maid headband, side blue bow, whale ear fins, navy long-sleeve maid dress, blue jewel, white apron with blue whale, gold scroll embroidered skirt, lace underskirt, socks and shoes. She is LYING ON HER SIDE, gently curled with knees bent, head resting on a small soft white pillow and both hands tucked under her cheek, eyes fully closed, mouth peacefully relaxed. Hair drapes naturally on the floor around her head. Full body and all hair visible. Keep original head size as close as possible, use a gentle diagonal sleeping composition fitting a 1024x1536 portrait transparent canvas with safe margins; the full silhouette centered, head upper-left and curled legs lower-right. Only one pillow; no bed, no blanket hiding costume, no floor drawn, no scene, no letters Z or decorative shapes, no backdrop, no glow. Genuine transparent alpha background. Keep original illustration detail and character identity, do not redesign."
+    }
+  ]
+}

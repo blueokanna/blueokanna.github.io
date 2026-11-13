@@ -61,7 +61,7 @@ void main() {
         'permissions': {'push': true},
       },
       {
-        'owner': {'id': 1},
+        'owner': {'id': Publisher.ownerId},
         'permissions': {'push': false},
       },
     ]) {
@@ -70,7 +70,7 @@ void main() {
           (request) async => http.Response(
             jsonEncode(
               request.url.path == '/user'
-                  ? {'login': 'blueokanna', 'id': 1}
+                  ? {'login': 'blueokanna', 'id': Publisher.ownerId}
                   : repo,
             ),
             200,
@@ -91,11 +91,11 @@ void main() {
           expect(request.url.host, 'api.github.com');
           expect(request.headers['Authorization'], 'Bearer $token');
           if (request.url.path == '/user') {
-            return http.Response('{"login":"blueokanna","id":1}', 200);
+            return http.Response('{"login":"blueokanna","id":56761243}', 200);
           }
           if (request.url.path == '/repos/${Publisher.repository}') {
             return http.Response(
-              '{"owner":{"id":1},"permissions":{"push":true}}',
+              '{"owner":{"id":56761243},"permissions":{"push":true}}',
               200,
             );
           }
@@ -147,11 +147,11 @@ void main() {
     final publisher = Publisher(
       client: MockClient((request) async {
         if (request.url.path == '/user') {
-          return http.Response('{"login":"blueokanna","id":1}', 200);
+          return http.Response('{"login":"blueokanna","id":56761243}', 200);
         }
         if (request.method == 'GET') {
           return http.Response(
-            '{"owner":{"id":1},"permissions":{"push":true}}',
+            '{"owner":{"id":56761243},"permissions":{"push":true}}',
             200,
           );
         }

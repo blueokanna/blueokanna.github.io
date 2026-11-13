@@ -1,5 +1,8 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+import 'dart:typed_data';
+
+import 'companion_play.dart';
 
 import 'package:flutter/material.dart';
 
@@ -143,7 +146,7 @@ class _CompanionStageState extends State<CompanionStage>
                 '蓝色大肥鱼, the DeepSeek chibi companion. Tap to say hello',
               ),
               child: GestureDetector(
-                onTap: () => _act(CompanionMood.wave),
+                onTap: () => _actor!.pet(),
                 onDoubleTap: () => _act(CompanionMood.celebrate),
                 onLongPress: () => _act(CompanionMood.shy),
                 child: RepaintBoundary(
@@ -153,17 +156,6 @@ class _CompanionStageState extends State<CompanionStage>
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        ExcludeSemantics(
-                          child: CustomPaint(
-                            painter: AuroraArt(
-                              MotionClock.of(context),
-                              dark: c.brightness == Brightness.dark,
-                              hero: true,
-                              seed: c.primary,
-                              variant: 2,
-                            ),
-                          ),
-                        ),
                         CompanionArtwork(
                           asset: _mood.asset,
                           clock: MotionClock.of(context),
@@ -181,6 +173,16 @@ class _CompanionStageState extends State<CompanionStage>
             ),
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Text(
+            _label(
+              '北京时间 · 自由活动随时间变化',
+              'China Standard Time ? A little life of her own',
+            ),
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+        ),
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 8,
@@ -193,9 +195,9 @@ class _CompanionStageState extends State<CompanionStage>
                         CompanionMood.wave,
                         CompanionMood.dance,
                         CompanionMood.read,
-                        CompanionMood.happy,
-                        CompanionMood.think,
-                        CompanionMood.sleep,
+                        CompanionMood.game,
+                        CompanionMood.write,
+                        CompanionMood.eat,
                       ])
               ActionChip(
                 avatar: Icon(companionIcon(mood), size: 18),
@@ -207,18 +209,39 @@ class _CompanionStageState extends State<CompanionStage>
               icon: Icon(_expanded ? Icons.expand_less : Icons.apps),
               label: Text(
                 _label(
-                  _expanded ? '收起表情' : '更多表情 · 12',
-                  _expanded ? 'Less' : 'All 12 expressions',
+                  _expanded ? '收起动作' : '更多动作 · 17',
+                  _expanded ? 'Less' : 'All 17 activities',
                 ),
               ),
+            ),
+            TextButton.icon(
+              onPressed: () => showDialog<void>(
+                context: context,
+                builder: (_) =>
+                    CompanionPlay(actor: _actor!, language: widget.language),
+              ),
+              icon: const Icon(Icons.sports_esports_outlined),
+              label: Text(_label('一起玩记忆游戏', 'Memory game')),
             ),
             if (_expanded)
               TextButton(
                 onPressed: _actor!.reset,
-                child: Text(_label('跟随页面', 'Follow page')),
+                child: Text(_label('恢复作息', 'Daily routine')),
               ),
           ],
         ),
+        if (_expanded)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              _label(
+                '23:45–08:00 睡觉 · 08:00 起床 · 08:02–08:10 洗漱\n08:30 / 12:30 / 18:00 用餐，各 10 分钟\n点击摸摸头 · 双击庆祝 · 长按害羞。作息期间会专心休息或吃饭。',
+                'Sleep 23:45–08:00 · Wake 08:00 · Wash 08:02–08:10\nMeals 08:30 / 12:30 / 18:00, ten minutes each\nTap to pet · Double tap to celebrate · Hold for a shy reaction.',
+              ),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
       ],
     );
   }
@@ -254,7 +277,7 @@ class _CompanionArtworkState extends State<CompanionArtwork>
     with SingleTickerProviderStateMixin {
   late final _fade = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 220),
+    duration: const Duration(milliseconds: 480),
     value: 1,
   )..addStatusListener(_releasePrevious);
   late final _listener = ImageStreamListener(_loaded, onError: _failed);
@@ -424,6 +447,10 @@ class CompanionFramePainter extends CustomPainter {
     final wave = amount(CompanionMood.wave);
     final reading = amount(CompanionMood.read) + amount(CompanionMood.write);
     final sleepy = amount(CompanionMood.sleep);
+    final eating = amount(CompanionMood.eat);
+    final washing = amount(CompanionMood.wash);
+    final gaming = amount(CompanionMood.game);
+    final waking = amount(CompanionMood.wake);
     final joy =
         amount(CompanionMood.happy) +
         amount(CompanionMood.saved) +
@@ -449,6 +476,10 @@ class CompanionFramePainter extends CustomPainter {
               rhythm.abs() * dance * 5 -
               math.sin(t * 4).abs() * joy * 3 +
               math.sin(t) * sleepy * 1.5 +
+              math.sin(t * 10) * eating * 1.2 +
+              math.sin(t * 14) * washing * .8 +
+              math.sin(t * 6) * gaming * 1.5 -
+              math.sin(t * 2).abs() * waking * 4 +
               shy * 2 -
               surprise * 2;
     final angle = reduced
@@ -460,7 +491,9 @@ class CompanionFramePainter extends CustomPainter {
               math.sin(t * 2) * thoughtful * .008 +
               math.sin(t * 2) * puzzled * .018 +
               shy * .012;
-    final breathe = reduced ? 1.0 : 1 + math.sin(t * 2) * .006 * quiet;
+    final breathe = reduced
+        ? 1.0
+        : 1 + math.sin(t * 2) * (.006 + sleepy * .009);
     canvas.save();
     canvas.translate(size.width / 2 + x, size.height * .7 + y);
     canvas.rotate(angle);
@@ -478,30 +511,90 @@ class CompanionFramePainter extends CustomPainter {
         width: fitted.width,
         height: fitted.height,
       );
-      canvas.drawImageRect(
-        image,
-        Offset.zero & source,
-        destination,
-        Paint()
-          ..filterQuality = FilterQuality.medium
-          ..color = Colors.white.withValues(alpha: opacity),
+      if (reduced) {
+        canvas.drawImageRect(
+          image,
+          Offset.zero & source,
+          destination,
+          Paint()
+            ..filterQuality = FilterQuality.medium
+            ..color = Colors.white.withValues(alpha: opacity),
+        );
+        return;
+      }
+      const columns = 16, rows = 24;
+      final positions = Float32List((columns + 1) * (rows + 1) * 2);
+      final texture = Float32List(positions.length);
+      final indices = Uint16List(columns * rows * 6);
+      for (var row = 0; row <= rows; row++) {
+        for (var col = 0; col <= columns; col++) {
+          final u = col / columns, v = row / rows;
+          final i = (row * (columns + 1) + col) * 2;
+          // Keep face and costume center stable; move the outer hair and hands.
+          final edge = math.pow((u - .5).abs() * 2, 1.5).toDouble();
+          final middle = math.sin(v * math.pi);
+          final hands = math.exp(-math.pow((v - .57) * 8, 2));
+          final sway =
+              math.sin(t * 3 + v * 5) * edge * middle * (1 - sleepy * .7);
+          final handMotion =
+              hands *
+              edge *
+              (math.sin(t * 12) * washing * 2 +
+                  math.sin(t * 8) * eating * 1.5 +
+                  math.sin(t * 10) * gaming +
+                  math.sin(t * 6) * wave * 2);
+          positions[i] =
+              destination.left + u * destination.width + sway * 2 + handMotion;
+          positions[i + 1] =
+              destination.top +
+              v * destination.height +
+              math.sin(t * 2) * middle * (1 - edge) * (sleepy * 2 + .5);
+          texture[i] = u * image.width;
+          texture[i + 1] = v * image.height;
+        }
+      }
+      var cursor = 0;
+      for (var row = 0; row < rows; row++) {
+        for (var col = 0; col < columns; col++) {
+          final a = row * (columns + 1) + col, b = a + columns + 1;
+          for (final index in [a, b, a + 1, a + 1, b, b + 1]) {
+            indices[cursor++] = index;
+          }
+        }
+      }
+      final vertices = ui.Vertices.raw(
+        ui.VertexMode.triangles,
+        positions,
+        textureCoordinates: texture,
+        indices: indices,
       );
+      final shader = ui.ImageShader(
+        image,
+        TileMode.clamp,
+        TileMode.clamp,
+        Float64List.fromList([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+      );
+      canvas.drawVertices(
+        vertices,
+        BlendMode.modulate,
+        Paint()
+          ..shader = shader
+          ..filterQuality = FilterQuality.medium
+          ..colorFilter = ColorFilter.mode(
+            Colors.white.withValues(alpha: opacity),
+            BlendMode.modulate,
+          ),
+      );
+      vertices.dispose();
+      shader.dispose();
     }
 
-    // Fade through, rather than superimposing two pairs of eyes and hands.
-    final progress = reduced ? 1.0 : fade.value;
-    if (previous != null && progress < .35) {
-      draw(previous!, 1 - Curves.easeOut.transform(progress / .35));
-    } else {
-      draw(
-        current,
-        previous == null
-            ? 1
-            : Curves.easeOut.transform(
-                ((progress - .35) / .65).clamp(0.0, 1.0),
-              ),
-      );
-    }
+    final progress = reduced
+        ? 1.0
+        : Curves.easeInOutCubic.transform(fade.value);
+    // Keep one fully opaque image behind the incoming frame: no blank flash.
+    if (previous != null && progress < 1) draw(previous!, 1);
+    draw(current, previous == null ? 1 : progress);
     canvas.restore();
   }
 
@@ -519,6 +612,11 @@ class CompanionFramePainter extends CustomPainter {
 }
 
 IconData companionIcon(CompanionMood mood) => switch (mood) {
+  CompanionMood.eat => Icons.ramen_dining,
+  CompanionMood.wash => Icons.water_drop_outlined,
+  CompanionMood.wake => Icons.wb_sunny_outlined,
+  CompanionMood.game => Icons.sports_esports_outlined,
+  CompanionMood.bedtime => Icons.nights_stay_outlined,
   CompanionMood.wave => Icons.waving_hand_outlined,
   CompanionMood.dance => Icons.music_note_outlined,
   CompanionMood.read => Icons.auto_stories_outlined,

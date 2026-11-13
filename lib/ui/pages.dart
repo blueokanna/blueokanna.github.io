@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../comments.dart';
 import '../companion.dart';
-import '../content.dart';
+import '../publishing.dart';
+import 'friends.dart';
 import '../localization.dart';
 import '../motion.dart';
 import '../models/project.dart';
@@ -13,7 +13,6 @@ import 'expressive.dart';
 import 'mascot.dart';
 import 'project_views.dart';
 import 'rich_content.dart';
-import 'clock_scope.dart';
 import 'components.dart';
 
 class BlogPage extends StatefulWidget {
@@ -23,7 +22,11 @@ class BlogPage extends StatefulWidget {
     required this.strings,
     required this.projects,
     this.slug,
+    this.publisher,
+    this.chinesePostIds = const {},
   });
+  final Publisher? publisher;
+  final Set<String> chinesePostIds;
   final List<ProjectEntry> projects;
   final String page;
   final String? slug;
@@ -177,23 +180,6 @@ class _BlogPageState extends State<BlogPage> {
       Text(description, style: t.bodyLarge),
       const SizedBox(height: 32),
     ],
-  );
-  Widget _art({double height = 350, int variant = 0}) => ExcludeSemantics(
-    child: RepaintBoundary(
-      child: SizedBox(
-        height: height,
-        width: double.infinity,
-        child: CustomPaint(
-          painter: AuroraArt(
-            MotionClock.of(context),
-            dark: c.brightness == Brightness.dark,
-            hero: true,
-            seed: c.primary,
-            variant: variant,
-          ),
-        ),
-      ),
-    ),
   );
   Widget _home() => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -390,7 +376,26 @@ class _BlogPageState extends State<BlogPage> {
 
   Widget _article() {
     final matches = s.posts.where((p) => p.id == widget.slug);
-    if (matches.isEmpty) return _title('404', s.text('notFound'), '');
+    if (matches.isEmpty) {
+      if (s.tag != 'zh-CN' && widget.chinesePostIds.contains(widget.slug)) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _title(
+              'LANGUAGE',
+              'This article is available in Chinese',
+              'A translation for this language has not been published yet.',
+            ),
+            FilledButton.icon(
+              onPressed: () => context.go('/zh-CN/posts/${widget.slug}'),
+              icon: const Icon(Icons.article_outlined),
+              label: const Text('阅读中文原文 · Read original'),
+            ),
+          ],
+        );
+      }
+      return _title('404', s.text('notFound'), '');
+    }
     final post = matches.single;
     final article = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -542,7 +547,26 @@ class _BlogPageState extends State<BlogPage> {
     final matches = widget.projects.where(
       (project) => project.id == widget.slug,
     );
-    if (matches.isEmpty) return _title('404', s.text('notFound'), '');
+    if (matches.isEmpty) {
+      if (s.tag != 'zh-CN' && widget.chinesePostIds.contains(widget.slug)) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _title(
+              'LANGUAGE',
+              'This article is available in Chinese',
+              'A translation for this language has not been published yet.',
+            ),
+            FilledButton.icon(
+              onPressed: () => context.go('/zh-CN/posts/${widget.slug}'),
+              icon: const Icon(Icons.article_outlined),
+              label: const Text('阅读中文原文 · Read original'),
+            ),
+          ],
+        );
+      }
+      return _title('404', s.text('notFound'), '');
+    }
     return ProjectDetail(project: matches.single, strings: s);
   }
 
@@ -551,7 +575,48 @@ class _BlogPageState extends State<BlogPage> {
     children: [
       _title('OPEN SOURCE', s.text('projects'), s.text('projectIntro')),
       const SizedBox(height: 16),
-      ProjectCollection(projects: widget.projects, strings: s),
+      SearchBar(
+        controller: _search,
+        hintText: s.tag.startsWith('zh')
+            ? '搜索项目、技术栈或关键词'
+            : 'Search projects, stack or keywords',
+        leading: const Icon(Icons.search),
+        onChanged: (_) => setState(() {}),
+        trailing: [
+          if (_search.text.isNotEmpty)
+            IconButton(
+              tooltip: s.tag.startsWith('zh') ? '清除搜索' : 'Clear search',
+              onPressed: () => setState(_search.clear),
+              icon: const Icon(Icons.close),
+            ),
+        ],
+      ),
+      const SizedBox(height: 24),
+      ProjectCollection(
+        projects: widget.projects
+            .where(
+              (project) =>
+                  '${project.name} ${project.description(s.tag)} ${project.stack.join(' ')}'
+                      .toLowerCase()
+                      .contains(_search.text.trim().toLowerCase()),
+            )
+            .toList(),
+        strings: s,
+      ),
+      if (widget.projects.every(
+        (project) =>
+            !'${project.name} ${project.description(s.tag)} ${project.stack.join(' ')}'
+                .toLowerCase()
+                .contains(_search.text.trim().toLowerCase()),
+      ))
+        Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            s.tag.startsWith('zh')
+                ? '没有匹配的项目，试试其他关键词。'
+                : 'No projects match. Try another keyword.',
+          ),
+        ),
       const SizedBox(height: 40),
       const Align(
         alignment: Alignment.centerLeft,
@@ -566,60 +631,14 @@ class _BlogPageState extends State<BlogPage> {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       _title('BLOGROLL', s.text('friends'), s.text('friendsIntro')),
-      ResponsiveColumns(
-        minWidth: 350,
-        children: friends.asMap().entries.map((entry) {
-          final friend = entry.value;
-          return Card.filled(
-            color: entry.key.isEven
-                ? c.secondaryContainer
-                : c.tertiaryContainer,
-            child: Padding(
-              padding: const EdgeInsets.all(28),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    radius: 30,
-                    child: friend.avatar == null
-                        ? const Icon(Icons.grain, size: 30)
-                        : Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: SvgPicture.network(
-                              friend.avatar!,
-                              placeholderBuilder: (_) => const Icon(Icons.spa),
-                              errorBuilder: (_, error, stack) =>
-                                  const Icon(Icons.spa),
-                            ),
-                          ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    friend.name,
-                    style: t.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(s.text(entry.key == 0 ? 'friendLxns' : 'friendTaoran')),
-                  const SizedBox(height: 18),
-                  ExternalLink(
-                    url: friend.url,
-                    label: '${Uri.parse(friend.url).host} ↗',
-                  ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
-      ),
+      FriendsView(language: s.tag, publisher: widget.publisher),
     ],
   );
   Widget _about() => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       _title('BLUE / PULSELINK', s.text('about'), s.text('aboutBody')),
-      _art(height: 300),
+      CompanionStage(language: s.tag, compact: true),
       const SizedBox(height: 24),
       const ExternalLink(
         url: 'https://github.com/blueokanna',

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'localization.dart';
+import 'content.dart';
 
 class PublishingException implements Exception {
   const PublishingException(this.message);
@@ -83,7 +84,9 @@ class Publisher extends ChangeNotifier {
   static const branch = 'main';
   final http.Client _client;
   String? _token, login;
-  bool canPublish = false;
+  bool _canPublish = false;
+  bool get canPublish => _canPublish;
+  static const ownerId = 56761243;
   int _generation = 0;
   bool _closed = false;
   Map<String, String> _headers(String token) => {
@@ -141,24 +144,24 @@ class Publisher extends ChangeNotifier {
     final generation = ++_generation;
     _token = null;
     login = null;
-    canPublish = false;
+    _canPublish = false;
     notifyListeners();
     final response = await _request('GET', '/user', token);
     _require(response, {200});
     final user = jsonDecode(response.body) as Map<String, dynamic>;
     var owner = false;
-    if ((user['login'] as String).toLowerCase() == 'blueokanna') {
+    if (user['login'] == 'blueokanna' && user['id'] == ownerId) {
       final repoResponse = await _request('GET', '/repos/$repository', token);
       _require(repoResponse, {200});
       final repo = jsonDecode(repoResponse.body) as Map<String, dynamic>;
       owner =
-          repo['owner']['id'] == user['id'] &&
+          repo['owner']['id'] == ownerId &&
           repo['permissions']?['push'] == true;
     }
     if (_closed || generation != _generation) return;
-    _token = token;
+    _token = owner ? token : null;
     login = user['login'] as String;
-    canPublish = owner;
+    _canPublish = owner;
     notifyListeners();
   }
 
@@ -196,8 +199,8 @@ class Publisher extends ChangeNotifier {
   }
 
   Future<String> publish(ArticleDraft draft, {String? sha}) async {
-    final token = _credential();
     final encoded = draft.encode();
+    final token = await _verifiedCredential();
     final response = await _request(
       'PUT',
       _path(draft.language, draft.id),
@@ -215,11 +218,66 @@ class Publisher extends ChangeNotifier {
     return json['content']['sha'] as String;
   }
 
+  Future<String> _verifiedCredential() async {
+    final token = _credential();
+    final generation = _generation;
+    final response = await _request('GET', '/user', token);
+    _require(response, {200});
+    final user = jsonDecode(response.body) as Map<String, dynamic>;
+    if (_closed ||
+        generation != _generation ||
+        user['login'] != 'blueokanna' ||
+        user['id'] != ownerId) {
+      throw const PublishingException('身份已失效，请重新验证 blueokanna 账号。');
+    }
+    return token;
+  }
+
+  Future<({List<FriendLink> links, String? sha})> readFriends() async {
+    final generation = _generation;
+    final response = await _request(
+      'GET',
+      '/repos/$repository/contents/content/friends.json',
+      _credential(),
+    );
+    if (_closed || generation != _generation) {
+      throw const PublishingException('会话已结束。');
+    }
+    if (response.statusCode == 404) return (links: List.of(friends), sha: null);
+    _require(response, {200});
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final links = FriendLink.decode(
+      utf8.decode(
+        base64Decode((data['content'] as String).replaceAll(RegExp(r'\s'), '')),
+      ),
+    );
+    return (links: links, sha: data['sha'] as String);
+  }
+
+  Future<String> publishFriends(List<FriendLink> links, {String? sha}) async {
+    final content = FriendLink.encode(links);
+    final token = await _verifiedCredential();
+    final response = await _request(
+      'PUT',
+      '/repos/$repository/contents/content/friends.json',
+      token,
+      body: {
+        'message': 'Update blogroll',
+        'branch': branch,
+        'content': base64Encode(utf8.encode(content)),
+        if (sha != null) 'sha': sha,
+      },
+    );
+    _require(response, {200, 201});
+    return (jsonDecode(response.body) as Map<String, dynamic>)['content']['sha']
+        as String;
+  }
+
   void disconnect() {
     _generation++;
     _token = null;
     login = null;
-    canPublish = false;
+    _canPublish = false;
     if (!_closed) notifyListeners();
   }
 

@@ -35,11 +35,11 @@ enum CompanionMood {
     'There is something to figure out.',
   ),
   sleep(
-    'sleep',
-    '打盹',
-    'Nap',
-    '眯一会儿。回来时叫我。',
-    'Taking a little nap. Wake me when you return.',
+    'sleep-rest',
+    '睡觉',
+    'Sleeping',
+    '呼……今晚也要睡个好觉，早上八点见。',
+    'Zzz… See you at eight in the morning.',
   ),
   shy('shy', '害羞', 'Shy', '被你发现啦。', 'Oh, you noticed me.'),
   surprised(
@@ -62,6 +62,23 @@ enum CompanionMood {
     'Celebrate',
     '值得庆祝的一小步！',
     'A small step worth celebrating!',
+  ),
+  eat('eat', '吃饭', 'Meal', '认真吃饭，十分钟后再一起玩。', 'Time for a ten-minute meal.'),
+  wash(
+    'wash',
+    '洗漱',
+    'Freshen up',
+    '刷刷牙、洗洗脸，清清爽爽开始新一天。',
+    'Brushing teeth and getting ready for the day.',
+  ),
+  wake('wake', '起床', 'Wake up', '伸个懒腰，早安！', 'A big stretch. Good morning!'),
+  game('game', '玩游戏', 'Gaming', '这一关，让我再试一次！', 'One more try at this level!'),
+  bedtime(
+    'bedtime',
+    '准备睡觉',
+    'Wind down',
+    '收好今天的小心事，准备睡觉。',
+    'Putting the day away. Bedtime soon.',
   ),
   search(
     'think',
@@ -139,21 +156,75 @@ enum CompanionMood {
     surprised,
     write,
     celebrate,
+    eat,
+    wash,
+    wake,
+    game,
+    bedtime,
   ];
 }
 
-/// One scene, one temporary reaction and one inactivity timer. Request tickets
-/// prevent late network responses from overwriting a newer route or operation.
+/// A wall-clock schedule, independent of browser locale and elapsed timers.
+/// UTC+08:00 is China Standard Time; it has no seasonal clock changes.
+class CompanionRoutine {
+  static DateTime chinaTime(DateTime instant) =>
+      instant.toUtc().add(const Duration(hours: 8));
+
+  static CompanionMood? appointment(DateTime instant) {
+    final time = chinaTime(instant);
+    final minute = time.hour * 60 + time.minute;
+    if (minute >= 23 * 60 + 45 || minute < 8 * 60) return CompanionMood.sleep;
+    if (minute < 8 * 60 + 2) return CompanionMood.wake;
+    if (minute < 8 * 60 + 10) return CompanionMood.wash;
+    for (final start in [8 * 60 + 30, 12 * 60 + 30, 18 * 60]) {
+      if (minute >= start && minute < start + 10) return CompanionMood.eat;
+    }
+    if (minute >= 23 * 60 + 40) return CompanionMood.bedtime;
+    return null;
+  }
+
+  static CompanionMood activity(DateTime instant) {
+    final scheduled = appointment(instant);
+    if (scheduled != null) return scheduled;
+    // Seeded time slots: refresh resumes the same activity, every day differs.
+    final slot = instant.toUtc().millisecondsSinceEpoch ~/ 180000;
+    var seed = (slot ^ (slot >> 16)) & 0x7fffffff;
+    seed = (seed * 1664525 + 1013904223) & 0x7fffffff;
+    const choices = [
+      CompanionMood.idle,
+      CompanionMood.read,
+      CompanionMood.game,
+      CompanionMood.write,
+      CompanionMood.think,
+      CompanionMood.dance,
+      CompanionMood.happy,
+      CompanionMood.shy,
+    ];
+    return choices[(seed ^ (seed >> 13)) % choices.length];
+  }
+}
+
+/// Schedule > in-flight work > temporary interaction > autonomous activity.
+/// Request generations isolate late callbacks from navigation and disposal.
 class CompanionController extends ChangeNotifier {
-  CompanionController({this.idleAfter = const Duration(seconds: 45)}) {
-    _armIdle();
+  CompanionController({
+    this.idleAfter = const Duration(seconds: 45),
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now {
+    _mood = CompanionRoutine.activity(_now());
+    _scheduled = CompanionRoutine.appointment(_now());
+    _armClock();
   }
   final Duration idleAfter;
-  CompanionMood _mood = CompanionMood.idle, _scene = CompanionMood.idle;
+  final DateTime Function() _now;
+  late CompanionMood _mood;
+  CompanionMood? _scheduled;
   CompanionMood get mood => _mood;
-  Timer? _reaction, _idle;
-  bool _foreground = true, _disposed = false, _manual = false, _working = false;
-  int _priority = 0, _ticket = 0;
+  bool get scheduled => CompanionRoutine.appointment(_now()) != null;
+  DateTime get chinaTime => CompanionRoutine.chinaTime(_now());
+  Timer? _reaction, _clock;
+  bool _foreground = true, _disposed = false, _working = false;
+  int _priority = 0, _ticket = 0, _interactions = 0;
   String _route = '';
   void _set(CompanionMood value) {
     if (_disposed || value == _mood) return;
@@ -161,73 +232,62 @@ class CompanionController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _armIdle() {
-    _idle?.cancel();
-    if (!_foreground ||
-        _disposed ||
-        _priority > 0 ||
-        _scene != CompanionMood.idle) {
-      return;
+  CompanionMood get _baseline => CompanionRoutine.activity(_now());
+  void _armClock() {
+    _clock?.cancel();
+    if (!_foreground || _disposed) return;
+    _clock = Timer.periodic(const Duration(seconds: 1), (_) => synchronize());
+  }
+
+  void synchronize() {
+    if (_disposed || !_foreground) return;
+    final appointment = CompanionRoutine.appointment(_now());
+    if (appointment != _scheduled) {
+      _scheduled = appointment;
+      _reaction?.cancel();
+      _priority = 0;
+      _set(appointment ?? (_working ? CompanionMood.loading : _baseline));
+    } else if (appointment != null) {
+      _set(appointment);
+    } else if (_priority == 0 && !_working) {
+      _set(_baseline);
     }
-    _idle = Timer(idleAfter, () => _set(CompanionMood.sleep));
   }
 
   void activity() {
-    if (!_foreground || _disposed) return;
-    if (!_manual && _mood == CompanionMood.sleep) _set(_scene);
-    _armIdle();
+    // Reading/scrolling does not repeatedly restart the character's day.
+    if (_foreground && !_disposed) synchronize();
   }
 
   void setRoute(String route) {
     if (route == _route || _disposed) return;
     _route = route;
     _ticket++;
-    _reaction?.cancel();
-    _idle?.cancel();
-    _priority = 0;
-    _manual = false;
     _working = false;
-    final parts = Uri.parse(route).pathSegments;
-    _scene = parts.length < 2
-        ? CompanionMood.idle
-        : switch (parts[1]) {
-            'posts' =>
-              parts.length > 2 ? CompanionMood.read : CompanionMood.think,
-            'projects' => CompanionMood.explore,
-            'studio' => CompanionMood.write,
-            'friends' || 'about' => CompanionMood.wave,
-            _ => CompanionMood.idle,
-          };
-    _set(_scene);
-    _armIdle();
+    reset();
   }
 
   void select(CompanionMood mood) {
     if (!_foreground || _disposed || _working) return;
-    _priority = 0;
-    _manual = true;
-    react(
-      mood,
-      priority: 2,
-      duration:
-          {
-            CompanionMood.read,
-            CompanionMood.sleep,
-            CompanionMood.write,
-            CompanionMood.idle,
-          }.contains(mood)
-          ? null
-          : const Duration(seconds: 7),
-    );
+    react(mood, priority: 2, duration: const Duration(seconds: 18));
+  }
+
+  void pet() {
+    const reactions = [
+      CompanionMood.happy,
+      CompanionMood.shy,
+      CompanionMood.wave,
+      CompanionMood.celebrate,
+      CompanionMood.surprised,
+    ];
+    select(reactions[_interactions++ % reactions.length]);
   }
 
   void reset() {
     if (_disposed || _working) return;
     _reaction?.cancel();
     _priority = 0;
-    _manual = false;
-    _set(_scene);
-    _armIdle();
+    _set(_baseline);
   }
 
   void react(
@@ -236,42 +296,37 @@ class CompanionController extends ChangeNotifier {
     Duration? duration = const Duration(seconds: 5),
   }) {
     if (_disposed || !_foreground || _working || priority < _priority) return;
+    synchronize();
+    if (scheduled) return;
     _reaction?.cancel();
-    _idle?.cancel();
     _priority = priority;
     _set(mood);
-    if (duration != null) {
-      _reaction = Timer(duration, () {
-        _priority = 0;
-        _manual = false;
-        _set(_scene);
-        _armIdle();
-      });
-    }
+    // Every interaction eventually returns to daily life.
+    _reaction = Timer(duration ?? idleAfter, () {
+      _priority = 0;
+      _set(_baseline);
+    });
   }
 
   int beginWork() {
     final ticket = ++_ticket;
     if (_disposed) return ticket;
     _working = true;
-    _manual = false;
     _priority = 3;
     _reaction?.cancel();
-    _idle?.cancel();
-    _set(CompanionMood.loading);
+    _set(CompanionRoutine.appointment(_now()) ?? CompanionMood.loading);
     return ticket;
   }
 
   void completeWork(int ticket, CompanionMood result) {
     if (_disposed || !_working || ticket != _ticket) return;
-    // Also release the busy lock if the operation finishes in the background.
     _ticket++;
     _working = false;
     _priority = 0;
     if (_foreground) {
       react(result, priority: 3);
     } else {
-      _set(_scene);
+      _set(_baseline);
     }
   }
 
@@ -279,14 +334,12 @@ class CompanionController extends ChangeNotifier {
     if (_foreground == value || _disposed) return;
     _foreground = value;
     _reaction?.cancel();
-    _idle?.cancel();
+    _clock?.cancel();
     if (value) {
-      if (!_working) {
-        _priority = 0;
-        _manual = false;
-        _set(_scene);
-        _armIdle();
-      }
+      _priority = 0;
+      _scheduled = CompanionRoutine.appointment(_now());
+      _set(_scheduled ?? (_working ? CompanionMood.loading : _baseline));
+      _armClock();
     }
   }
 
@@ -295,7 +348,7 @@ class CompanionController extends ChangeNotifier {
     _disposed = true;
     _ticket++;
     _reaction?.cancel();
-    _idle?.cancel();
+    _clock?.cancel();
     super.dispose();
   }
 }
@@ -317,8 +370,14 @@ class CompanionScope extends InheritedWidget {
 }
 
 class CompanionHost extends StatefulWidget {
-  const CompanionHost({super.key, required this.route, required this.child});
+  const CompanionHost({
+    super.key,
+    required this.route,
+    required this.child,
+    this.now,
+  });
   final String route;
+  final DateTime Function()? now;
   final Widget child;
   @override
   State<CompanionHost> createState() => _CompanionHostState();
@@ -326,7 +385,7 @@ class CompanionHost extends StatefulWidget {
 
 class _CompanionHostState extends State<CompanionHost>
     with WidgetsBindingObserver {
-  final _controller = CompanionController();
+  late final _controller = CompanionController(now: widget.now);
   @override
   void initState() {
     super.initState();

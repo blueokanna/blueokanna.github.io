@@ -1,0 +1,208 @@
+{
+  "checkedOn": "2026-11-13",
+  "scope": "Public repositories returned by GitHub search user:blueokanna fork:false",
+  "owner": {
+    "login": "blueokanna",
+    "id": 56761243
+  },
+  "repositories": [
+    {
+      "name": "ESP32-ChatGLM",
+      "branch": "main",
+      "commit": "3a2b6c14fc7c70211dba445d22f2f05fa0bfb8b0",
+      "readme": true
+    },
+    {
+      "name": "ArcadiaPlus",
+      "branch": "main",
+      "commit": "dcfc0b383fb9997e5753495a65460f842d454193",
+      "readme": true
+    },
+    {
+      "name": "Segmeris",
+      "branch": "main",
+      "commit": "fe69043aa9d9f9b9be473dab429130122b0a0e4f",
+      "readme": true
+    },
+    {
+      "name": "HexWallet",
+      "branch": "main",
+      "commit": "edbb9a9eb9a0b367616783b6ed5a46884085782f",
+      "readme": true
+    },
+    {
+      "name": "Corduit",
+      "branch": "main",
+      "commit": "1d02621ca51e6d65d4c5ec6f2faf7f5d05669729",
+      "readme": true
+    },
+    {
+      "name": "Courierust",
+      "branch": "main",
+      "commit": "e0eea1ee948c428884d679b014e3cb416286c8ba",
+      "readme": true
+    },
+    {
+      "name": "Talk2u",
+      "branch": "main",
+      "commit": "a0108b9dda57bf2d5c6f6612b961ecdc044b546f",
+      "readme": true
+    },
+    {
+      "name": "RustGLM",
+      "branch": "main",
+      "commit": "bd9c662324cfcf2a4c17dd1fdb4ed89a4542c1a6",
+      "readme": true
+    },
+    {
+      "name": "reveler",
+      "branch": "main",
+      "commit": "d630a4001b6c742dd486a379381aacf2f99c8735",
+      "readme": true
+    },
+    {
+      "name": "OnePlus_Beast",
+      "branch": "main",
+      "commit": "3b1c74859bce3665d7e6f21979b398008cf0d569",
+      "readme": true
+    },
+    {
+      "name": "blueokanna.github.io",
+      "branch": "main",
+      "commit": "5164bb3eec31822daf80a8200006fa7bdd411dcf",
+      "readme": true
+    },
+    {
+      "name": "Velora",
+      "branch": "main",
+      "commit": "9a9d5181e1fc1d8c5b3f50e849b9d199e9815650",
+      "readme": true
+    },
+    {
+      "name": "TypeBit",
+      "branch": "main",
+      "commit": "9d3a1798ee8d12041cfc21807b9e88fb22104834",
+      "readme": true
+    },
+    {
+      "name": "NextJson",
+      "branch": "main",
+      "commit": "ce09ccb0d4919bfe64ed5cd5d66481f5c3268837",
+      "readme": true
+    },
+    {
+      "name": "RockZeroOS-Service",
+      "branch": "main",
+      "commit": "0e244c0328247515be1e62069030c4e947d50332",
+      "readme": true
+    },
+    {
+      "name": "RustBinary",
+      "branch": "main",
+      "commit": "4299aeb4def2a4d2c13536ad75878baec20a1006",
+      "readme": true
+    },
+    {
+      "name": "WaveLinks",
+      "branch": "main",
+      "commit": "e6813bebb748aa9dbb3a6327e1207b0535b0d887",
+      "readme": true
+    },
+    {
+      "name": "Tzcraft",
+      "branch": "main",
+      "commit": "87052622f817218f7bf7f119af0303e7cdd0988a",
+      "readme": true
+    },
+    {
+      "name": "Silovent",
+      "branch": "main",
+      "commit": "f3fc92686f89f8b9198760a3ae735adead4d7a76",
+      "readme": true
+    },
+    {
+      "name": "TypeBitTorrent",
+      "branch": "main",
+      "commit": "aab7bb9d163a3eba3a4396562708f03238fac72b",
+      "readme": true
+    },
+    {
+      "name": "BFSRC",
+      "branch": "main",
+      "commit": "65e3ccab0b0375c772e0658327edaf1249790206",
+      "readme": true
+    },
+    {
+      "name": "ResiClock",
+      "branch": "main",
+      "commit": "354a9a060252bd061fdef0ee10d62c78e921fc57",
+      "readme": true
+    },
+    {
+      "name": "RockZeroOS-UI",
+      "branch": "main",
+      "commit": "9390e1db68bf56bf13dc56a0fbf1df3fe0074894",
+      "readme": true
+    },
+    {
+      "name": "flipper_zero_wallet",
+      "branch": "main",
+      "commit": "8e1fd82458c3ead7db4a8a03f934dcd530444c0b",
+      "readme": true
+    },
+    {
+      "name": "BlueHash",
+      "branch": "main",
+      "commit": "01a33d4747f949792eb908701cb141a1e8d98954",
+      "readme": true
+    },
+    {
+      "name": "BitCalculations",
+      "branch": "master",
+      "commit": "3f46656ef958f033b3963d34380bc959e3ae1f3a",
+      "readme": false
+    },
+    {
+      "name": "KineweaveCore",
+      "branch": "main",
+      "commit": "c4cb8d75aab938943a018cd64c094b1935772eda",
+      "readme": true
+    },
+    {
+      "name": "PQC",
+      "branch": "main",
+      "commit": "216ee491a69de3116035a62fd2e0ca649aa65a1e",
+      "readme": true
+    },
+    {
+      "name": "RecurseX",
+      "branch": "main",
+      "commit": "299967e51fccdf2557ad5aa09b56adfe6926d690",
+      "readme": true
+    },
+    {
+      "name": "OnePlus_Battery",
+      "branch": "main",
+      "commit": "fa5a5b5bfb1434eb08415c19ce5d12f0a01f3e3a",
+      "readme": true
+    },
+    {
+      "name": "blueokanna",
+      "branch": "main",
+      "commit": "73e50c985ab57385abfc6d68f1e6c3a40ccf1ce5",
+      "readme": true
+    },
+    {
+      "name": "CardCalulatorSimulator",
+      "branch": "main",
+      "commit": "d94b5aa7267680cd3abfb5bdc50bbc7b0a30d7e7",
+      "readme": true
+    },
+    {
+      "name": "RustMacro",
+      "branch": "main",
+      "commit": "a8260f9121cb9d34b663d0d1d739614dbe2f9932",
+      "readme": true
+    }
+  ]
+}

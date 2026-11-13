@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pulselink_site/app.dart';
+import 'package:pulselink_site/companion.dart';
 import 'package:pulselink_site/localization.dart';
 import 'package:pulselink_site/preferences.dart';
 import 'package:pulselink_site/publishing.dart';
@@ -50,8 +51,11 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
+      final now = DateTime.utc(2026, 11, 13, 6);
+      final actor = CompanionController(now: () => now);
+      addTearDown(actor.dispose);
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: MediaQuery(
             data: MediaQueryData(
               disableAnimations: true,
@@ -60,17 +64,23 @@ void main() {
             child: Scaffold(
               body: MotionClock(
                 clock: AlwaysStoppedAnimation(0),
-                child: CompanionStage(language: 'zh-CN'),
+                child: CompanionScope(
+                  controller: actor,
+                  child: const CompanionStage(language: 'zh-CN'),
+                ),
               ),
             ),
           ),
         ),
       );
-      expect(find.text('我是蓝色大肥鱼。戳戳我？'), findsOneWidget);
+      expect(
+        find.text(CompanionRoutine.activity(now).message('zh-CN')),
+        findsOneWidget,
+      );
       expect(find.byType(CompanionArtwork), findsOneWidget);
       expect(
         tester.widget<CompanionArtwork>(find.byType(CompanionArtwork)).asset,
-        'assets/mascot/blue-fat-fish.png',
+        CompanionRoutine.activity(now).asset,
       );
       await tester.tap(find.text('打招呼'));
       await tester.pump();
@@ -90,6 +100,7 @@ void main() {
       expect(find.text('安静模式。陪你读完这一篇。'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
+      actor.setForeground(false);
     },
   );
   testWidgets(

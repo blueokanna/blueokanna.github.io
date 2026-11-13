@@ -140,21 +140,22 @@ class BlogShell extends StatelessWidget {
             : null,
         body: Stack(
           children: [
-            Positioned.fill(
-              child: ExcludeSemantics(
-                child: IgnorePointer(
-                  child: RepaintBoundary(
-                    child: CustomPaint(
-                      painter: AuroraArt(
-                        clock,
-                        dark: color.brightness == Brightness.dark,
-                        seed: color.primary,
+            if (path != '/${strings.tag}' && path != '/${strings.tag}/about')
+              Positioned.fill(
+                child: ExcludeSemantics(
+                  child: IgnorePointer(
+                    child: RepaintBoundary(
+                      child: CustomPaint(
+                        painter: AuroraArt(
+                          clock,
+                          dark: color.brightness == Brightness.dark,
+                          seed: color.primary,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
             SafeArea(
               child: Column(
                 children: [

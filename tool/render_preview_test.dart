@@ -80,6 +80,7 @@ void main() {
           key: key,
           child: PulseLinkApp(
             catalog: catalog,
+            companionNow: () => DateTime.utc(2026, 11, 13, 6),
             preferences: preferences,
             initialLocation: sample.$3,
           ),
@@ -88,7 +89,7 @@ void main() {
       await tester.pumpAndSettle();
       if (sample.$3 == '/zh-CN') {
         if (sample.$1 == 'mascot-all') {
-          final button = find.text('更多表情 · 12');
+          final button = find.text('更多动作 · 17');
           await tester.ensureVisible(button);
           await tester.tap(button);
           await tester.pumpAndSettle();
@@ -227,6 +228,7 @@ void main() {
           key: key,
           child: PulseLinkApp(
             catalog: catalog,
+            companionNow: () => DateTime.utc(2026, 11, 13, 6),
             preferences: preferences,
             initialLocation: '/zh-CN',
           ),

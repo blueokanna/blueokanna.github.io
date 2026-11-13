@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../localization.dart';
@@ -342,6 +343,17 @@ class _WritingStudioState extends State<WritingStudio> {
                 ),
               ),
               const SizedBox(height: 24),
+              if (widget.publisher.canPublish)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: OutlinedButton.icon(
+                    onPressed: _busy
+                        ? null
+                        : () => context.go('/${widget.language}/friends'),
+                    icon: const Icon(Icons.link),
+                    label: const Text('管理友链'),
+                  ),
+                ),
               if (_busy) const LinearProgressIndicator(),
               if (_status.isNotEmpty)
                 Padding(

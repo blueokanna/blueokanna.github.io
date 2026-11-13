@@ -350,7 +350,8 @@
         "label": "Flutter / Rust bridge",
         "url": "https://github.com/blueokanna/ArcadiaPlus/blob/b7f00898553d416fee7f071f2347fddf91e470cd/rust/src/lib.rs"
       }
-    ]
+    ],
+    "articleId": "arcadiaplus-observable-routing"
   },
   {
     "id": "recursex",
@@ -525,7 +526,8 @@
         "label": "Configuration and cache settings",
         "url": "https://github.com/blueokanna/RecurseX/blob/299967e51fccdf2557ad5aa09b56adfe6926d690/src/config.rs"
       }
-    ]
+    ],
+    "articleId": "recursex-cache-and-trust"
   },
   {
     "id": "corduit",
@@ -701,7 +703,8 @@
         "label": "Configuration validator",
         "url": "https://github.com/blueokanna/Corduit/blob/d479373dc80ebafd3e324e2cad6450d5519eee3c/src/engine/config/validator.rs"
       }
-    ]
+    ],
+    "articleId": "corduit-config-to-connection"
   },
   {
     "id": "courierust",
@@ -878,7 +881,8 @@
         "label": "Protocol and runtime modules",
         "url": "https://github.com/blueokanna/Courierust/blob/3853d1dabbcb9ef3c23de76960fa0fcb5c0026a8/src/lib.rs"
       }
-    ]
+    ],
+    "articleId": "courierust-protocol-and-runtime"
   },
   {
     "id": "pulselink",
@@ -1057,6 +1061,1162 @@
       {
         "label": "Build and deployment workflow",
         "url": "https://github.com/blueokanna/blueokanna.github.io/blob/4bd6b83e8859475cd0b24a1056cd45878540dda9/.github/workflows/build-and-deploy.yml"
+      }
+    ],
+    "articleId": "pulselink-static-publishing"
+  },
+  {
+    "id": "talk2u",
+    "name": "Talk2u",
+    "repository": "https://github.com/blueokanna/Talk2u",
+    "stack": [
+      "Flutter",
+      "Rust",
+      "Live2D",
+      "QNN"
+    ],
+    "variant": 0,
+    "articleId": "talk2u-local-conversation",
+    "description": {
+      "zh-CN": "本地角色聊天、分层记忆与 Live2D；联网模型和 Android 端侧推理共用会话。",
+      "en": "Local character conversations, memory and Live2D with optional Android inference."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "Talk2U 将聊天记录、角色与知识保存在本机。Flutter 承担会话交互，Rust 组织上下文与模型请求；Android、Windows、Linux 的 Live2D 宿主各有实现，模型自身的参数决定可用表情和动作。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "联网供应商通过统一传输与 SSE 解析输出文本；Android 端侧 Qwen、SenseVoice 识别与 MOSS-TTS-Nano 合成需要对应模型。语音幅度驱动口型，通话状态机根据实际 AEC 能力选择全双工或半双工。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "本地保存不等于请求永不离开设备：使用联网供应商时，发送的上下文会交给该供应商。QNN 部署包有芯片条件，Cubism Core 需要外部 SDK；iOS/macOS Live2D 与 Discord Gateway 尚未实现。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · a0108b9",
+        "url": "https://github.com/blueokanna/Talk2u/blob/a0108b9dda57bf2d5c6f6612b961ecdc044b546f/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/Talk2u/tree/a0108b9dda57bf2d5c6f6612b961ecdc044b546f"
+      }
+    ]
+  },
+  {
+    "id": "velora",
+    "name": "Velora",
+    "repository": "https://github.com/blueokanna/Velora",
+    "stack": [
+      "Flutter",
+      "Rust",
+      "EPUB",
+      "Markdown"
+    ],
+    "variant": 1,
+    "articleId": "velora-reading-pipeline",
+    "description": {
+      "zh-CN": "从本地书籍到在线规则源的阅读器，统一书架与进度，保留各格式的实际边界。",
+      "en": "A local and online reader with format-aware rendering and persistent reading progress."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "Velora 的 Flutter 层负责书架与阅读交互，Rust 层负责解析、章节索引、书源规则与持久化。文本、Markdown、漫画和音频各用适合的阅读界面，避免把不同媒体硬塞进一种分页模型。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "Android 文档先流式复制到应用私有目录，解析器访问稳定路径。大 TXT 使用稀疏章节锚点和范围读取；漫画按页惰性解压；在线规则源经过超时、取消、并发限制与健康状态管理。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "MOBI/AZW3 只覆盖部分未加密格式；EPUB 不支持 DRM。Legado 兼容范围是常见静态规则，不能执行任意 JavaScript 或绕过登录验证。Markdown 数学排版也不等于完整 TeX 文档编译。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 9a9d518",
+        "url": "https://github.com/blueokanna/Velora/blob/9a9d5181e1fc1d8c5b3f50e849b9d199e9815650/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/Velora/tree/9a9d5181e1fc1d8c5b3f50e849b9d199e9815650"
+      }
+    ]
+  },
+  {
+    "id": "typebit",
+    "name": "TypeBit",
+    "repository": "https://github.com/blueokanna/TypeBit",
+    "stack": [
+      "Rust",
+      "no_std",
+      "BitTorrent",
+      "Host"
+    ],
+    "variant": 2,
+    "articleId": "typebit-engine-and-client",
+    "description": {
+      "zh-CN": "通过 Host 接口嵌入的下载引擎，分离协议状态机与平台网络、磁盘能力。",
+      "en": "An embeddable download engine separating protocol state from host networking and storage."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "TypeBit 是库，没有图形界面。协议、分片选择、校验、DHT 和会话状态位于 no_std + alloc 核心；宿主实现 Host，提供套接字、时钟、存储等操作系统能力，再由客户端呈现任务。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "BitTorrent 路径处理元数据、peer 发现、分片请求与哈希验证。统一链接解析器可识别 magnet、HTTP(S)、eD2k 等多种格式；链接能被解析只说明得到结构化输入，实际下载还取决于宿主与协议实现。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "评价下载器应分别验证数据完整性、路径限制、取消与恢复，而不是只看下载速率。签名收据需要结合具体威胁模型理解；网盘类地址仍需宿主凭据和服务授权，解析链接不会凭空获得访问权。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 9d3a179",
+        "url": "https://github.com/blueokanna/TypeBit/blob/9d3a1798ee8d12041cfc21807b9e88fb22104834/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/TypeBit/tree/9d3a1798ee8d12041cfc21807b9e88fb22104834"
+      }
+    ]
+  },
+  {
+    "id": "typebittorrent",
+    "name": "TypeBitTorrent",
+    "repository": "https://github.com/blueokanna/TypeBitTorrent",
+    "stack": [
+      "Kotlin",
+      "Compose",
+      "Rust",
+      "JNI"
+    ],
+    "variant": 0,
+    "articleId": "typebit-engine-and-client",
+    "description": {
+      "zh-CN": "TypeBit 的桌面与 Android 客户端，通过命令和状态快照连接界面与下载引擎。",
+      "en": "A desktop and Android client for TypeBit, connected through commands and snapshots."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "Kotlin/Compose 管理列表、详情、设置和任务操作。Rust JNI 层持有引擎线程与宿主适配；命令通道传入操作，事件和 JSON 快照传回任务状态。UI 不负责协议调度，也不直接操作引擎的内部可变状态。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "NativeHost 对接 TCP/UDP、DNS、HTTP worker 与文件系统，下载数据先进入暂存文件。DHT、Tracker、peer 和校验进度分别进入可观察状态，任务完成应以校验与文件落盘为准。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "桌面和 Android 共用业务并不代表运行环境相同：入站端口、系统后台策略、存储权限和 LAN 发现各受平台约束。公开 README 中还提供 NAS/WebUI 部署入口，具体配置应跟随对应版本文档。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · aab7bb9",
+        "url": "https://github.com/blueokanna/TypeBitTorrent/blob/aab7bb9d163a3eba3a4396562708f03238fac72b/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/TypeBitTorrent/tree/aab7bb9d163a3eba3a4396562708f03238fac72b"
+      }
+    ]
+  },
+  {
+    "id": "rustglm",
+    "name": "RustGLM",
+    "repository": "https://github.com/blueokanna/RustGLM",
+    "stack": [
+      "Rust",
+      "Tokio",
+      "SSE",
+      "MCP"
+    ],
+    "variant": 1,
+    "articleId": "rustglm-api-contracts",
+    "description": {
+      "zh-CN": "智谱平台 Rust SDK，覆盖多种对话协议、流式响应与显式管理的客户端生命周期。",
+      "en": "A Rust SDK for Zhipu with multiple chat protocols, streaming and explicit client ownership."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "RustGLM 从一个客户端接入 Chat Completions、Responses 与 Anthropic-compatible Messages，并提供文件、批处理、语音、Realtime 和 MCP 等模块。接口范围与账号可调用的模型范围是两回事。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "凭据通过构造参数提供；请求在调用者 await 端点时发生。传输集中到 Courierust，流式数据再由具体协议解析。默认不做 HTTP 自动重试，显式开启后也不会盲目重放可能产生副作用的 POST。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "SDK 不隐式读取配置、写入持久化或发送遥测；代理工具与环境密钥解析器需要显式选择。业务仍需设置超时、输出预算和错误处理，不能把 SDK 接口存在视为第三方服务可用性承诺。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · bd9c662",
+        "url": "https://github.com/blueokanna/RustGLM/blob/bd9c662324cfcf2a4c17dd1fdb4ed89a4542c1a6/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/RustGLM/tree/bd9c662324cfcf2a4c17dd1fdb4ed89a4542c1a6"
+      }
+    ]
+  },
+  {
+    "id": "nextjson",
+    "name": "NextJson",
+    "repository": "https://github.com/blueokanna/NextJson",
+    "stack": [
+      "Rust",
+      "no_std",
+      "Schema",
+      "Codec"
+    ],
+    "variant": 2,
+    "articleId": "rust-data-contracts",
+    "description": {
+      "zh-CN": "以类型契约连接多种格式、模式检查和可复用解码的 Rust 数据层。",
+      "en": "Schema-first data contracts, multiple codecs and reusable decoding for Rust."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "NextJson 让类型同时描述数据结构和编解码行为。派生元数据可用于 JSON Schema、输入校验和版本差异检查；格式中立的序列化接口让同一类型适配多个 wire format，核心使用 no_std + alloc。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "解码可直接进入受检查的字段状态；没有转义的字符串可借用输入缓冲。事件流支持格式间转发，避免为每次转换建立完整中间树。借用值的生命周期仍然受输入缓冲限制。跨线程保存结果时，应先明确是否需要转换为拥有数据。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "多格式接口不会自动解决版本兼容。字段变更、缺省值、数值范围和未知字段策略仍需双方约定；实际分配量、吞吐和输出大小应使用业务载荷验证，不能从零外部依赖推导性能结论。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · ce09ccb",
+        "url": "https://github.com/blueokanna/NextJson/blob/ce09ccb0d4919bfe64ed5cd5d66481f5c3268837/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/NextJson/tree/ce09ccb0d4919bfe64ed5cd5d66481f5c3268837"
+      }
+    ]
+  },
+  {
+    "id": "rustbinary",
+    "name": "RustBinary",
+    "repository": "https://github.com/blueokanna/RustBinary",
+    "stack": [
+      "Rust",
+      "no_std",
+      "Binary",
+      "Archive"
+    ],
+    "variant": 0,
+    "articleId": "rust-data-contracts",
+    "description": {
+      "zh-CN": "建立在 NextJson 契约上的二进制编解码，区分动态流、紧凑布局与归档存储。",
+      "en": "Binary codecs with separate tagged, compact and archive representations."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "RustBinary 的动态流带类型标签，支持自描述值；静态类型可选择 schema-guided compact profile。archive 是单独版本化的只读存储格式，不是打开 feature 后悄悄改变原有流格式。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "解析器限制控制输入规模，压缩、认证帧与 Merkle 证明属于可选择层。默认 std 增加 I/O 和平台能力，no_std + alloc 保留核心。不同布局之间应通过明确的格式标识进行选择。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "动态与 CBOR 表示中的 null 无法区分所有嵌套 Option 情况，紧凑格式使用显式标签。解析上限不是进程内存沙箱；内置 LZ77 也不是 Zstandard。自研密码实现仍需要独立审查与互操作验证。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 4299aeb",
+        "url": "https://github.com/blueokanna/RustBinary/blob/4299aeb4def2a4d2c13536ad75878baec20a1006/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/RustBinary/tree/4299aeb4def2a4d2c13536ad75878baec20a1006"
+      }
+    ]
+  },
+  {
+    "id": "tzcraft",
+    "name": "Tzcraft",
+    "repository": "https://github.com/blueokanna/Tzcraft",
+    "stack": [
+      "Rust",
+      "no_std",
+      "Time",
+      "Codec"
+    ],
+    "variant": 1,
+    "articleId": "rust-data-contracts",
+    "description": {
+      "zh-CN": "以 i128 纳秒时间轴统一日期、固定偏移与文本/二进制时间表示。",
+      "en": "A single nanosecond timeline with calendar projections and fixed offsets."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "Tzcraft 用 Ticks 表示 Unix epoch 起的有符号纳秒数，Duration 表示跨度；日期、星期与 ISO 周是时间轴上的投影。Zone 支持 UTC 与固定偏移，不持有全局可变时区。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "关闭默认 feature 后，解析、运算和向调用方缓冲写出的格式化可不依赖分配器。启用相应 feature 后，NextJson 和 RustBinary 共享类型契约，分别选择可读文本或紧凑二进制形态。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "固定 +08:00 适合当前中国标准时间，但不能替代带夏令时和历史规则的 IANA 时区库。月份加法和固定时长加法也具有不同语义；跨月、闰日、负时间与溢出都应作为调用方的边界测试。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 8705262",
+        "url": "https://github.com/blueokanna/Tzcraft/blob/87052622f817218f7bf7f119af0303e7cdd0988a/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/Tzcraft/tree/87052622f817218f7bf7f119af0303e7cdd0988a"
+      }
+    ]
+  },
+  {
+    "id": "rustmacro",
+    "name": "RustMacro",
+    "repository": "https://github.com/blueokanna/RustMacro",
+    "stack": [
+      "Rust",
+      "proc_macro",
+      "Diagnostics"
+    ],
+    "variant": 2,
+    "articleId": "rust-data-contracts",
+    "description": {
+      "zh-CN": "直接基于 proc_macro 的诊断工具，让宏错误指向真正有问题的输入。",
+      "en": "Procedural-macro diagnostics built directly on the compiler's proc_macro API."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "RustMacro 负责生成 compile_error!、保存 span 范围并组织多条诊断。独立属性宏包装入口，运行库提供 Diagnostic、abort 和 emit 系列接口，调用方可以先收集多个输入错误再统一退出。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "单个 TokenTree、TokenStream 或显式 SpanRange 都可成为错误位置；必要时追加 dummy 实现，减少后续类型检查产生的连锁错误。项目将诊断机制与业务宏自己的语法分析分开。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "诊断库不会替调用方验证宏语义。应使用真实编译失败样例检查错误位置、信息与补全实现，尤其避免为了抑制后续报错而让错误输入被当作合法实现；API 使用范围仍由宏入口包装约束。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · a8260f9",
+        "url": "https://github.com/blueokanna/RustMacro/blob/a8260f9121cb9d34b663d0d1d739614dbe2f9932/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/RustMacro/tree/a8260f9121cb9d34b663d0d1d739614dbe2f9932"
+      }
+    ]
+  },
+  {
+    "id": "silovent",
+    "name": "Silovent",
+    "repository": "https://github.com/blueokanna/Silovent",
+    "stack": [
+      "Kotlin",
+      "Rust",
+      "JNI",
+      "AES-GCM"
+    ],
+    "variant": 0,
+    "articleId": "silovent-keys-and-files",
+    "description": {
+      "zh-CN": "Android 本地文件保险库，将密钥操作集中在 Rust 句柄边界内。",
+      "en": "An offline Android vault with Rust-owned key handles and chunked authenticated files."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "Silovent 未声明网络权限，文件和加密处理留在手机。Kotlin 负责交互与编排，Rust SPU 保存密钥并以不透明句柄暴露能力；这里的 SPU 是软件组件名，不代表独立硬件安全处理器。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "文件按块使用 AES-GCM，密钥派生、完整性和容器职责分开。JNI 传递句柄，锁定时释放密钥注册表；流式会话采用受校验 ID，拒绝过期、重复关闭或类型不匹配的句柄。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "应用无法保证已 root 的设备永远读不到原生堆；StrongBox 也可能回退到 TEE。闪存擦除受控制器与磨损均衡影响，删除或覆写不能自动等同于可证明的物理消除。使用前应验证备份与恢复路径。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · f3fc926",
+        "url": "https://github.com/blueokanna/Silovent/blob/f3fc92686f89f8b9198760a3ae735adead4d7a76/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/Silovent/tree/f3fc92686f89f8b9198760a3ae735adead4d7a76"
+      }
+    ]
+  },
+  {
+    "id": "resiclock",
+    "name": "ResiClock",
+    "repository": "https://github.com/blueokanna/ResiClock",
+    "stack": [
+      "Kotlin",
+      "Compose",
+      "Rust",
+      "AlarmManager"
+    ],
+    "variant": 1,
+    "articleId": "android-state-and-lifecycle",
+    "description": {
+      "zh-CN": "以系统闹钟服务触发、Rust 计算规则的 Android 闹钟与本地日历。",
+      "en": "An Android alarm and local calendar app using OS scheduling and Rust business rules."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "ResiClock 面向 Android 8.0 及以上。Compose 处理界面和权限入口，Rust 保存闹钟、日程与重复规则，计算下一次触发；JNI 使用命令与快照，Kotlin 不直接写业务持久化文件。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "AlarmManager.setAlarmClock、Direct Boot Receiver 和前台响铃 Service 组成唤醒链路。状态使用 Protobuf、CRC32 与原子替换保存；响铃页处理音频焦点、循环、振动、稍后提醒和关闭。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "精确闹钟、通知、全屏提醒各有系统授权条件。用户强制停止应用后，系统会阻止相关后台启动；第三方 APK 也不能提供真正关机闹钟。需要把重启、时区变化、权限撤回和省电状态纳入真机验收。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 354a9a0",
+        "url": "https://github.com/blueokanna/ResiClock/blob/354a9a060252bd061fdef0ee10d62c78e921fc57/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/ResiClock/tree/354a9a060252bd061fdef0ee10d62c78e921fc57"
+      }
+    ]
+  },
+  {
+    "id": "oneplus-beast",
+    "name": "OnePlus_Beast",
+    "repository": "https://github.com/blueokanna/OnePlus_Beast",
+    "stack": [
+      "Shell",
+      "Android",
+      "Wi-Fi",
+      "Systemless"
+    ],
+    "variant": 2,
+    "articleId": "android-state-and-lifecycle",
+    "description": {
+      "zh-CN": "OnePlus/OPlus Wi-Fi 脚本模块，区分驱动能力、观测状态与主动修复。",
+      "en": "A systemless Wi-Fi module separating observed state from explicit driver repair."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "模块通过配置覆盖与运行时策略适配 Wi-Fi，仓库记录了特定 OnePlus 设备上的验证。当前 v2.5 后台优先保留连接，不因弱信号、低速或扫描缓存缺少 6GHz 就主动切网。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "监测把查询失败和过期缓存记为未知；需要驱动重新初始化时走独立手动入口。设备识别、PHY 状态、服务命令可用性与连接结果分别记录，避免一项属性写入成功就把整个链路判为成功。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "特定设备上的验证不能外推到全部机型、ROM 与 OTA。硬件能力、热点客户端连接和 MLO 聚合是不同验收项。本文介绍工程状态，不提供调整地区监管域或发射功率的操作教程。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 3b1c748",
+        "url": "https://github.com/blueokanna/OnePlus_Beast/blob/3b1c74859bce3665d7e6f21979b398008cf0d569/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/OnePlus_Beast/tree/3b1c74859bce3665d7e6f21979b398008cf0d569"
+      }
+    ]
+  },
+  {
+    "id": "oneplus-battery",
+    "name": "OnePlus_Battery",
+    "repository": "https://github.com/blueokanna/OnePlus_Battery",
+    "stack": [
+      "Shell",
+      "Android",
+      "USB",
+      "Systemless"
+    ],
+    "variant": 0,
+    "articleId": "android-state-and-lifecycle",
+    "description": {
+      "zh-CN": "围绕 USB 类型、充电电流与屏幕状态设计防抖的 OPlus 充电兼容模块。",
+      "en": "A systemless OPlus charging compatibility module with port-aware debounce."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "OnePlus_Battery 通过启动脚本和运行期策略处理部分 OPlus 设备充电协商问题，分别适配 oplus/oppo 属性空间。实现按机型和电脑端口类型选择策略，避免把所有不充电现象归为同一原因。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "守护逻辑观察 USB 在线、类型、角色、电流与屏幕状态；异常累计后才触发有限修复，并设冷却时间。锁屏反复连接进入保护状态，屏幕切换重置异常计数，减少状态抖动引发的循环修复。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "README 的版本段与后续功能版本标记并不完全一致，实际行为应以所用提交的脚本为准。系统属性不能替代电池、线材和控制器诊断；本文不提供强推电流、温控或充电协议参数的建议。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · fa5a5b5",
+        "url": "https://github.com/blueokanna/OnePlus_Battery/blob/fa5a5b5bfb1434eb08415c19ce5d12f0a01f3e3a/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/OnePlus_Battery/tree/fa5a5b5bfb1434eb08415c19ce5d12f0a01f3e3a"
+      }
+    ]
+  },
+  {
+    "id": "rockzeroos-service",
+    "name": "RockZeroOS-Service",
+    "repository": "https://github.com/blueokanna/RockZeroOS-Service",
+    "stack": [
+      "Rust",
+      "Actix-web",
+      "NAS",
+      "FFmpeg"
+    ],
+    "variant": 1,
+    "articleId": "rockzeroos-service-and-ui",
+    "description": {
+      "zh-CN": "RockZeroOS 的 NAS 服务端，集中处理文件、存储、媒体与认证接口。",
+      "en": "The NAS service backend for storage, media and authenticated APIs."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "服务端使用 Rust workspace 将公共类型、数据库、密码模块、媒体处理和 API 服务拆开。NAS 的文件与磁盘操作运行在服务器，Flutter 客户端通过接口读取状态和提交操作，客户端界面不是权限边界。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "媒体链路使用 FFmpeg 处理转码和 HLS，文件服务管理上传下载，系统接口提供磁盘与监控数据。认证和会话机制跨越客户端与服务端，应该连同实际请求处理代码一起阅读。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "仓库 README 的安全和性能描述属于项目自身声明，不等于独立审计。格式化、挂载与擦除需要服务端逐次验证目标和权限；验证环境应使用可丢弃磁盘，先确认恢复路径，再讨论部署。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 0e244c0",
+        "url": "https://github.com/blueokanna/RockZeroOS-Service/blob/0e244c0328247515be1e62069030c4e947d50332/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/RockZeroOS-Service/tree/0e244c0328247515be1e62069030c4e947d50332"
+      }
+    ]
+  },
+  {
+    "id": "rockzeroos-ui",
+    "name": "RockZeroOS-UI",
+    "repository": "https://github.com/blueokanna/RockZeroOS-UI",
+    "stack": [
+      "Flutter",
+      "Riverpod",
+      "NAS",
+      "media_kit"
+    ],
+    "variant": 2,
+    "articleId": "rockzeroos-service-and-ui",
+    "description": {
+      "zh-CN": "RockZeroOS 的 Flutter 客户端，将系统监控、文件和媒体操作组织成独立功能。",
+      "en": "A Flutter client for RockZeroOS system monitoring, files and media."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "UI 通过 Riverpod 组织状态，网络层集中处理 API 与拦截，功能按认证、文件、磁盘、监控和设置分组。它是服务端的控制界面，不能把隐藏按钮当作磁盘或文件操作的授权措施。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "视频使用 media_kit 与服务端媒体接口，音频有独立播放与后台面板；网络请求、播放缓冲、服务端转码和最终出声应分别显示状态。设备发现帮助定位服务，不代替后续身份验证。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "跨平台支持需要分别验收解码器、凭据存储和生命周期。播放器起始 PTS、服务端时长与客户端 seek 位置必须采用一致口径；一次画面显示正常不足以证明完整媒体会话正确。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 9390e1d",
+        "url": "https://github.com/blueokanna/RockZeroOS-UI/blob/9390e1db68bf56bf13dc56a0fbf1df3fe0074894/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/RockZeroOS-UI/tree/9390e1db68bf56bf13dc56a0fbf1df3fe0074894"
+      }
+    ]
+  },
+  {
+    "id": "bfsrc",
+    "name": "BFSRC",
+    "repository": "https://github.com/blueokanna/BFSRC",
+    "stack": [
+      "Rust",
+      "Audio",
+      "STFT",
+      "CUDA"
+    ],
+    "variant": 0,
+    "articleId": "media-resampling-and-time",
+    "description": {
+      "zh-CN": "包含 sinc、频域和学习算子路径的音频采样率转换研究与处理工具。",
+      "en": "Audio sample-rate conversion with sinc, frequency-domain and learned-operator paths."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "BFSRC 研究平稳帧表示和跨帧线性算子，同时提供可直接运行的音频处理路径。理解仓库时需要把理论章节与 CLI 默认行为分开：当前默认 run 使用 Kaiser-sinc，学习模型由 learn/process 路径消费。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "输入先解码到音频样本，再完成采样率转换与输出处理；母带链包含次声清理、限幅、量化、抖动和噪声整形。CUDA 加速的是受支持计算路径，不意味着所有解码、训练与写盘都在 GPU 上。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "上采样不会恢复原始录音中没有的信息。README 的测量数字对应其测试条件，本文不把它们改写为普遍音质结论；验收需同时记录频响、镜像、峰值、时长、声道和最终量化设置。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 65e3cca",
+        "url": "https://github.com/blueokanna/BFSRC/blob/65e3ccab0b0375c772e0658327edaf1249790206/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/BFSRC/tree/65e3ccab0b0375c772e0658327edaf1249790206"
+      }
+    ]
+  },
+  {
+    "id": "kineweavecore",
+    "name": "KineweaveCore",
+    "repository": "https://github.com/blueokanna/KineweaveCore",
+    "stack": [
+      "Rust",
+      "no_std",
+      "Video",
+      "FFmpeg"
+    ],
+    "variant": 1,
+    "articleId": "media-resampling-and-time",
+    "description": {
+      "zh-CN": "以真实帧时间戳调度的视频补帧核心，区分运动几何与时间采样问题。",
+      "en": "Frame-rate conversion driven by actual timestamps and a no_std interpolation core."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "KineweaveCore 把解码/编码交给 FFmpeg，把插帧放在独立 Rust 核心。研究路径包括运动格点修复与时间孔径恢复，CLI 按实际帧时间戳生成目标时间轴，支持非整数比例转换。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "运动较大时需要估计内容位移并控制变形，细小运动的频谱路径采用另一套假设。VFR 输入必须保留每帧时间位置，不能只改容器标称帧率；GPU 路径需要相应构建 feature。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "算法对特定模型的推导与合成样例验证不能保证所有真实画面无伪影。遮挡、快速旋转、闪光和镜头切换应单独检查；输出帧数增加还应配合时间戳、时长及新帧内容验证。解码、插帧与编码耗时也需要分开记录。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · c4cb8d7",
+        "url": "https://github.com/blueokanna/KineweaveCore/blob/c4cb8d75aab938943a018cd64c094b1935772eda/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/KineweaveCore/tree/c4cb8d75aab938943a018cd64c094b1935772eda"
+      }
+    ]
+  },
+  {
+    "id": "hexwallet",
+    "name": "HexWallet",
+    "repository": "https://github.com/blueokanna/HexWallet",
+    "stack": [
+      "C++",
+      "ESP32",
+      "Signing",
+      "SE051"
+    ],
+    "variant": 2,
+    "articleId": "embedded-wallet-boundaries",
+    "description": {
+      "zh-CN": "面向 ESP32 的签名钱包工程；安全元件托管未完成，设备构建当前拒绝钱包操作。",
+      "en": "An ESP32 signing-wallet project with incomplete custody integration and closed device gates."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "HexWallet 将派生、交易解析、设备审阅和签名放在微控制器侧，目标覆盖 ESP32-S3/P4 等板型。固件不含网络协议栈，主机提交待审阅载荷；设备显示与一次性确认应成为签名流程的一部分。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "交易进入有界审阅结构，确认与当前渲染帧绑定并消费一次。板级引脚和能力按真实原理图登记，安全元件集成包括通道、APDU 和 provisioning；这些接口存在不代表密钥已全程由硬件托管。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "仓库明确写明托管集成与硬件验收未完成：当前钱包仍在 MCU RAM 派生和签名，默认 secure-custody gate 使设备构建拒绝创建、导入与使用钱包。本文不将其描述为可保管真实资产的成品。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · edbb9a9",
+        "url": "https://github.com/blueokanna/HexWallet/blob/edbb9a9eb9a0b367616783b6ed5a46884085782f/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/HexWallet/tree/edbb9a9eb9a0b367616783b6ed5a46884085782f"
+      }
+    ]
+  },
+  {
+    "id": "esp32-chatglm",
+    "name": "ESP32-ChatGLM",
+    "repository": "https://github.com/blueokanna/ESP32-ChatGLM",
+    "stack": [
+      "Arduino",
+      "ESP32",
+      "API",
+      "TTS"
+    ],
+    "variant": 0,
+    "articleId": "embedded-wallet-boundaries",
+    "description": {
+      "zh-CN": "ESP32 上的云端对话与语音模块实验，板端负责联网、输入和播放。",
+      "en": "An ESP32 cloud-chat and audio experiment with Arduino-based device integration."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "ESP32-ChatGLM 使用 Arduino 与 ESP32 连接外部模型 API，提供网页交互及可选麦克风、语音模块集成。模型计算发生在服务端，ESP32 承担采集、请求、状态与外设控制，并非在 MCU 上运行大模型。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "仓库说明包含 Wi-Fi、JWT、时间同步、ADC 采集与串口语音输出。中文语音模块涉及 UTF-8 到 GB2312 编码转换，硬件接线和板型配置要与实际电平及器件规格对应。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "这是有具体硬件和历史 API 条件的实验，不能假定旧端点、依赖和认证方式长期有效。部署前应重新检查证书验证、凭据存放、内存上限和失败重试，避免将可连通等同于可公开部署。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 3a2b6c1",
+        "url": "https://github.com/blueokanna/ESP32-ChatGLM/blob/3a2b6c14fc7c70211dba445d22f2f05fa0bfb8b0/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/ESP32-ChatGLM/tree/3a2b6c14fc7c70211dba445d22f2f05fa0bfb8b0"
+      }
+    ]
+  },
+  {
+    "id": "flipper-zero-wallet",
+    "name": "flipper_zero_wallet",
+    "repository": "https://github.com/blueokanna/flipper_zero_wallet",
+    "stack": [
+      "Rust",
+      "no_std",
+      "Flipper Zero"
+    ],
+    "variant": 1,
+    "articleId": "embedded-wallet-boundaries",
+    "description": {
+      "zh-CN": "Flipper Zero 钱包实验源码，包含地址、派生和存储模块，README 仍保留模板说明。",
+      "en": "A Flipper Zero wallet experiment whose README still contains template instructions."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "源码以 no_std 组织地址、BIP32/BIP39、哈希、曲线、存储与 Flipper 应用模块。仓库确实包含钱包方向的实现，不能仅因 README 保留模板就认定没有业务代码；也不能据此认定它已经完成设备验收。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "阅读入口是 src/lib.rs 的模块边界，再沿 flipper_app 和 flipper_wallet_core 检查实际调用。板级运行时、分配器、持久化与输入确认应放在同一设备工作流中验证，不能只测一个派生函数。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "当前 README 主要是 Rust + Flipper 模板文档，没有完整钱包安全契约或可核实的端到端验收说明。目录将它标记为实验工程，不提供资金托管或真实密钥导入建议。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 8e1fd82",
+        "url": "https://github.com/blueokanna/flipper_zero_wallet/blob/8e1fd82458c3ead7db4a8a03f934dcd530444c0b/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/flipper_zero_wallet/tree/8e1fd82458c3ead7db4a8a03f934dcd530444c0b"
+      }
+    ]
+  },
+  {
+    "id": "bluehash",
+    "name": "BlueHash",
+    "repository": "https://github.com/blueokanna/BlueHash",
+    "stack": [
+      "Rust",
+      "SIMD",
+      "Hash",
+      "Research"
+    ],
+    "variant": 2,
+    "articleId": "cryptography-research-evidence",
+    "description": {
+      "zh-CN": "实验性哈希与 ZK 设计研究，明确不适合保护生产数据。",
+      "en": "Experimental SIMD-oriented hash and ZK design research, not a production security primitive."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "BlueHash v2 替换了 v1 结构和摘要值，研究增量哈希、SIMD 路径和设计空间。可选 ZK 路径把有限候选搜索、模型约束与未解决分析义务记录为证书，便于复核研究结论。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "工程验证包括分块一致性、重复 finalize、向量和性能测量。有限模型中的活跃 S-box 计数可以形成可回放证据，但安全证书需要区分代数证明、理想模型条件与仍未解决的密码分析。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "仓库明确说明新结构未经独立审计，不能用于保护生产数据。雪崩、随机性和速度不是抗碰撞证明；v2 与 v1 摘要不兼容，评述或实验必须固定版本，不能混用两代结果。研究记录应同时保留参数与完整输入。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 01a33d4",
+        "url": "https://github.com/blueokanna/BlueHash/blob/01a33d4747f949792eb908701cb141a1e8d98954/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/BlueHash/tree/01a33d4747f949792eb908701cb141a1e8d98954"
+      }
+    ]
+  },
+  {
+    "id": "reveler",
+    "name": "reveler",
+    "repository": "https://github.com/blueokanna/reveler",
+    "stack": [
+      "Rust",
+      "FFT",
+      "Commitment",
+      "Research"
+    ],
+    "variant": 0,
+    "articleId": "cryptography-research-evidence",
+    "description": {
+      "zh-CN": "探索 FFT 矩阵运算与哈希组合的承诺方案实验。",
+      "en": "A commitment-scheme experiment combining FFT-based computation and hashing."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "Reveler 的 README 描述 commit 与 verify 两条流程：生成矩阵和承诺点，再计算哈希；验证端检查对应关系。代码将 FFT、错误和工具函数拆分，适合作为阅读数值运算与密码接口边界的材料。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "必须沿实际函数参数追踪消息、随机量、承诺与验证输入是否绑定，而不是只看数学示意图。频域乘法的含义还取决于填充、逆变换、舍入与模运算，不能把 FFT 自动当作任意矩阵乘法替代。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "公开仓库没有足以在本文宣称隐藏性、绑定性或抗量子安全的独立证据。BlueHash 的依赖版本和算法语义也必须单独核对；研究演示不应被改写成成熟安全承诺协议。数值误差和消息绑定应分别验证。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · d630a40",
+        "url": "https://github.com/blueokanna/reveler/blob/d630a4001b6c742dd486a379381aacf2f99c8735/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/reveler/tree/d630a4001b6c742dd486a379381aacf2f99c8735"
+      }
+    ]
+  },
+  {
+    "id": "pqc",
+    "name": "PQC",
+    "repository": "https://github.com/blueokanna/PQC",
+    "stack": [
+      "Rust",
+      "Cryptography",
+      "Research"
+    ],
+    "variant": 1,
+    "articleId": "cryptography-research-evidence",
+    "description": {
+      "zh-CN": "包含 MLWE、密钥演化等模块的早期密码实验，当前说明不足以形成安全结论。",
+      "en": "An early cryptography experiment with MLWE and key-evolution modules."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "PQC 的 README 当前仅有标题。源码公开了自动密钥演化、分形 Ricci flow、MLWE 与固定精度等模块，可以确认研究方向，但没有足够公开说明支撑稳定 API、互操作范围或生产安全等级。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "QuantumNoiseSource 的代码注释明确它是系统熵池包装与混合，名称并不表示使用量子硬件。security_reduction 中产生一个带标签的数据结构，与提供可审查的数学归约证明不是同一件事。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "本文只记录可核实模块与证据边界，不复述函数名为已经成立的安全性质。若继续研究，应先补齐构造规范、参数选择、测试向量、攻击模型与外部分析，再讨论实现性能和集成。公开测试向量应使他人能够复查行为。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 216ee49",
+        "url": "https://github.com/blueokanna/PQC/blob/216ee491a69de3116035a62fd2e0ca649aa65a1e/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/PQC/tree/216ee491a69de3116035a62fd2e0ca649aa65a1e"
+      }
+    ]
+  },
+  {
+    "id": "wavelinks",
+    "name": "WaveLinks",
+    "repository": "https://github.com/blueokanna/WaveLinks",
+    "stack": [
+      "Flutter",
+      "Rust",
+      "Ledger",
+      "Research"
+    ],
+    "variant": 2,
+    "articleId": "cryptography-research-evidence",
+    "description": {
+      "zh-CN": "分片账本、网络、虚拟机与签名模块组成的区块链系统实验。",
+      "en": "A blockchain systems experiment spanning ledgers, networking, a VM and signatures."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "WaveLinks 用 Flutter 展示账户与系统状态，Rust workspace 分离签名、哈希、分片账本、智能合约 VM、证明和网络模块。仓库的架构图能说明模块关系，不能单凭图示判断分布式运行已成熟。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "账本使用整数金额并定义地址、链标识、nonce 与过期字段；跨分片过程和网络重试需要共同保持一致性。阅读时应分别检查交易验证、状态提交和消息传播，不把客户端显示余额当作共识证据。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "自定义签名与抗量子描述需要独立密码分析；本目录不将其当作已审计资产网络。实验中应关注重放、重复提交、节点分区和重启恢复，源码中的代币参数不代表具有可交易价值。客户端显示不构成共识已经达成的证据。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · e6813be",
+        "url": "https://github.com/blueokanna/WaveLinks/blob/e6813bebb748aa9dbb3a6327e1207b0535b0d887/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/WaveLinks/tree/e6813bebb748aa9dbb3a6327e1207b0535b0d887"
+      }
+    ]
+  },
+  {
+    "id": "bitcalculations",
+    "name": "BitCalculations",
+    "repository": "https://github.com/blueokanna/BitCalculations",
+    "stack": [
+      "Rust",
+      "BIP32",
+      "Research"
+    ],
+    "variant": 0,
+    "articleId": "cryptography-research-evidence",
+    "description": {
+      "zh-CN": "地址派生与余额查询的早期 Rust 工程，缺少完整使用说明。",
+      "en": "An early Rust address-derivation and balance-query experiment without a project README."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "当前默认分支为 master，仓库没有 README。src/main.rs 可见助记词、BIP32 路径、公钥哈希、网络地址与余额查询代码；这些足以描述研究范围，不能据此承诺每条链格式正确或工程可直接运行。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "源码中的 WalletInfo 包含 private_key、address、balance 和 currency，保存函数把对象追加到 JSON 行文件。这个持久化设计直接影响密钥暴露面，阅读源码时应首先理解数据流而非运行默认流程。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "目录将其归为历史实验，不提供真实助记词、私钥或资金的使用建议。没有本轮编译与链上验证证据；地址校验、单位精度、凭据处理和文件权限均需要独立审查。验证时应使用公开测试向量与隔离环境。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "Source · 3f46656",
+        "url": "https://github.com/blueokanna/BitCalculations/blob/3f46656ef958f033b3963d34380bc959e3ae1f3a/src/main.rs"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/BitCalculations/tree/3f46656ef958f033b3963d34380bc959e3ae1f3a"
+      }
+    ]
+  },
+  {
+    "id": "card-calculator",
+    "name": "CardCalulatorSimulator",
+    "repository": "https://github.com/blueokanna/CardCalulatorSimulator",
+    "stack": [
+      "Flutter",
+      "Dart",
+      "Luhn"
+    ],
+    "variant": 1,
+    "articleId": "checksums-and-profile-pipelines",
+    "description": {
+      "zh-CN": "用于理解 Luhn 校验、模式约束与结果评分的 Flutter 工具。",
+      "en": "A Flutter tool for Luhn checksums, constrained digit patterns and result scoring."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "工具接受固定数字、同字母同值的变量和彼此独立的通配符，筛选通过 Luhn 的组合；另一个模式从起点扫描后续结果。评分规则描述尾号模式偏好，与校验和是否正确是两层逻辑。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "固定前缀对应唯一 Luhn 校验位，求解器可以直接计算末位而非枚举。求解和后续扫描共用评分器，计算放到后台 isolate；界面再展示排序、模式和中文/英文说明。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "通过 Luhn 只表示数字满足一种校验关系，不表示号码已发行、有账户或能支付。目录将它作为校验算法与约束求解练习介绍，不提供验证他人账户或绕过支付校验的用途。评分只描述项目自身的排序偏好。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · d94b5aa",
+        "url": "https://github.com/blueokanna/CardCalulatorSimulator/blob/d94b5aa7267680cd3abfb5bdc50bbc7b0a30d7e7/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/CardCalulatorSimulator/tree/d94b5aa7267680cd3abfb5bdc50bbc7b0a30d7e7"
+      }
+    ]
+  },
+  {
+    "id": "github-profile",
+    "name": "blueokanna",
+    "repository": "https://github.com/blueokanna/blueokanna",
+    "stack": [
+      "Node.js",
+      "SVG",
+      "GitHub Actions"
+    ],
+    "variant": 2,
+    "articleId": "checksums-and-profile-pipelines",
+    "description": {
+      "zh-CN": "以脚本生成 SVG 卡片的 GitHub 个人主页，统计来自实际 GitHub 数据。",
+      "en": "A GitHub profile built from generated SVG cards and actual GitHub data."
+    },
+    "sections": {
+      "zh-CN": [
+        {
+          "heading": "项目定位",
+          "body": "这是 GitHub 账号同名的个人主页仓库。README 引用生成后的 SVG，源模板与布局参数位于 scripts；日常维护应改模板，再生成资产，避免直接手改输出造成下次构建覆盖。"
+        },
+        {
+          "heading": "实现路径",
+          "body": "Node 脚本读取 GitHub 数据，组合连续背景与卡片；写出采用临时文件再 rename。工作流每天重新生成并提交变化，统计来源和更新时间应与生成结果一起理解，不能作为实时遥测。"
+        },
+        {
+          "heading": "使用边界",
+          "body": "加密保存源图片只保护仓库内的原始输入；最终发布的 SVG 仍是公开可见内容。令牌和解密密钥属于构建环境，缺少密钥时保留已有卡片；对外页面不应泄露这些凭据。统计卡片反映生成时的数据快照。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "README · 73e50c9",
+        "url": "https://github.com/blueokanna/blueokanna/blob/73e50c985ab57385abfc6d68f1e6c3a40ccf1ce5/README.md"
+      },
+      {
+        "label": "固定版本源码",
+        "url": "https://github.com/blueokanna/blueokanna/tree/73e50c985ab57385abfc6d68f1e6c3a40ccf1ce5"
       }
     ]
   }

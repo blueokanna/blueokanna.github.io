@@ -62,7 +62,7 @@ class ProjectCollection extends StatelessWidget {
                     ),
                     const SizedBox(height: 14),
                     Text(
-                      project.descriptions[strings.tag]!,
+                      project.description(strings.tag),
                       style: text.bodyMedium,
                     ),
                     const SizedBox(height: 24),
@@ -131,7 +131,7 @@ class ProjectDetail extends StatelessWidget {
               style: text.displaySmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 20),
-            Text(project.descriptions[strings.tag]!, style: text.bodyLarge),
+            Text(project.description(strings.tag), style: text.bodyLarge),
             const SizedBox(height: 24),
             Wrap(
               spacing: 8,
@@ -150,12 +150,22 @@ class ProjectDetail extends StatelessWidget {
             ),
             if (project.articleId case final String article)
               TextButton.icon(
-                onPressed: () => context.go('/${strings.tag}/posts/$article'),
+                onPressed: () => context.go(
+                  '/${strings.posts.any((post) => post.id == article) ? strings.tag : 'zh-CN'}/posts/$article',
+                ),
                 icon: const Icon(Icons.article_outlined),
                 label: Text(strings.text('read')),
               ),
             const SizedBox(height: 48),
-            for (final section in project.sections[strings.tag]!) ...[
+            if (project.contentLanguage(strings.tag) != strings.tag)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Text(
+                  'This project note is available in ${project.contentLanguage(strings.tag)}.',
+                  style: text.labelLarge,
+                ),
+              ),
+            for (final section in project.detail(strings.tag)) ...[
               Text(
                 section.heading,
                 style: text.headlineSmall?.copyWith(

@@ -12,59 +12,79 @@ import 'package:pulselink_site/ui/mascot.dart';
 import 'package:pulselink_site/ui/pages.dart';
 import 'package:pulselink_site/ui/studio.dart';
 
+final awake = DateTime.utc(2026, 11, 13, 6);
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late BlogCatalog catalog;
   setUpAll(() async => catalog = await BlogCatalog.load());
 
-  testWidgets('scenes restore after reactions and routes cancel old timers', (
+  test('China schedule uses exact inclusive starts and exclusive ends', () {
+    CompanionMood at(String text) =>
+        CompanionRoutine.activity(DateTime.parse(text));
+    expect(at('2026-11-13T23:45:00+08:00'), CompanionMood.sleep);
+    expect(at('2026-11-14T07:59:59+08:00'), CompanionMood.sleep);
+    expect(at('2026-11-14T08:00:00+08:00'), CompanionMood.wake);
+    expect(at('2026-11-14T08:02:00+08:00'), CompanionMood.wash);
+    expect(
+      CompanionRoutine.appointment(DateTime.parse('2026-11-14T08:10:00+08:00')),
+      isNull,
+    );
+    for (final start in ['08:30', '12:30', '18:00']) {
+      final time = DateTime.parse('2026-11-14T$start:00+08:00');
+      expect(
+        CompanionRoutine.appointment(time.subtract(const Duration(seconds: 1))),
+        isNull,
+      );
+      expect(CompanionRoutine.appointment(time), CompanionMood.eat);
+      expect(
+        CompanionRoutine.appointment(
+          time
+              .add(const Duration(minutes: 10))
+              .subtract(const Duration(seconds: 1)),
+        ),
+        CompanionMood.eat,
+      );
+      expect(
+        CompanionRoutine.appointment(time.add(const Duration(minutes: 10))),
+        isNull,
+      );
+      expect(CompanionRoutine.activity(time.toUtc()), CompanionMood.eat);
+    }
+  });
+  testWidgets('background, clock jumps and interactions respect appointments', (
     tester,
   ) async {
-    final actor = CompanionController();
+    var now = DateTime.parse('2026-11-13T23:44:59+08:00');
+    final actor = CompanionController(now: () => now);
     addTearDown(actor.dispose);
-    actor.setRoute('/zh-CN/posts/segmeris-guide');
-    expect(actor.mood, CompanionMood.read);
-    actor.select(CompanionMood.dance);
-    await tester.pump(const Duration(seconds: 8));
-    expect(actor.mood, CompanionMood.read);
-    actor.react(CompanionMood.finished, priority: 2);
-    actor.setRoute('/en/projects');
-    expect(actor.mood, CompanionMood.explore);
-    await tester.pump(const Duration(seconds: 8));
-    expect(actor.mood, CompanionMood.explore);
-    actor.setRoute('/zh-CN/studio');
-    expect(actor.mood, CompanionMood.write);
+    expect(actor.mood, CompanionMood.bedtime);
+    now = now.add(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(actor.mood, CompanionMood.sleep);
+    actor.select(CompanionMood.game);
+    actor.setRoute('/zh-CN/projects');
+    actor.activity();
+    expect(actor.mood, CompanionMood.sleep);
+    actor.setForeground(false);
+    now = DateTime.parse('2026-11-14T08:02:00+08:00');
+    actor.setForeground(true);
+    expect(actor.mood, CompanionMood.wash);
+    now = awake;
+    actor.synchronize();
+    final baseline = CompanionRoutine.activity(now);
+    actor.select(CompanionMood.game);
+    expect(actor.mood, CompanionMood.game);
+    await tester.pump(const Duration(seconds: 19));
+    expect(actor.mood, baseline);
+    expect(CompanionRoutine.activity(now), baseline);
+    actor.setForeground(false);
   });
-
-  testWidgets(
-    'inactivity sleeps, activity wakes, manual rest stays until reset',
-    (tester) async {
-      final actor = CompanionController(idleAfter: const Duration(seconds: 10));
-      addTearDown(actor.dispose);
-      actor.setRoute('/zh-CN');
-      await tester.pump(const Duration(seconds: 9));
-      actor.activity();
-      await tester.pump(const Duration(seconds: 9));
-      expect(actor.mood, CompanionMood.idle);
-      await tester.pump(const Duration(seconds: 2));
-      expect(actor.mood, CompanionMood.sleep);
-      actor.activity();
-      expect(actor.mood, CompanionMood.idle);
-      actor.select(CompanionMood.sleep);
-      actor.activity();
-      expect(actor.mood, CompanionMood.sleep);
-      actor.reset();
-      expect(actor.mood, CompanionMood.idle);
-      actor.setRoute('/zh-CN/posts/example');
-      await tester.pump(const Duration(minutes: 2));
-      expect(actor.mood, CompanionMood.read);
-    },
-  );
 
   testWidgets(
     'busy work wins over gestures and old responses cannot overwrite it',
     (tester) async {
-      final actor = CompanionController();
+      final actor = CompanionController(now: () => awake);
       addTearDown(actor.dispose);
       actor.setRoute('/zh-CN/studio');
       final old = actor.beginWork();
@@ -84,18 +104,19 @@ void main() {
         reason: 'A request can complete only once',
       );
       await tester.pump(const Duration(seconds: 6));
-      expect(actor.mood, CompanionMood.write);
+      expect(actor.mood, CompanionRoutine.activity(awake));
       final leaving = actor.beginWork();
       actor.setRoute('/en/projects');
       actor.completeWork(leaving, CompanionMood.error);
-      expect(actor.mood, CompanionMood.explore);
+      expect(actor.mood, CompanionRoutine.activity(awake));
+      actor.setForeground(false);
     },
   );
 
   testWidgets(
     'background completion and terminal reactions release busy state',
     (tester) async {
-      final actor = CompanionController();
+      final actor = CompanionController(now: () => awake);
       addTearDown(actor.dispose);
       actor.setRoute('/zh-CN/studio');
       final pending = actor.beginWork();
@@ -108,7 +129,7 @@ void main() {
       actor.setForeground(true);
       expect(
         actor.mood,
-        CompanionMood.write,
+        CompanionRoutine.activity(awake),
         reason: 'Error is not a permanent busy lock',
       );
       final hidden = actor.beginWork();
@@ -124,7 +145,7 @@ void main() {
   testWidgets('disposed controllers ignore delayed work without notifying', (
     tester,
   ) async {
-    final actor = CompanionController();
+    final actor = CompanionController(now: () => awake);
     final ticket = actor.beginWork();
     actor.dispose();
     actor.completeWork(ticket, CompanionMood.error);
@@ -141,7 +162,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      final actor = CompanionController();
+      final actor = CompanionController(now: () => awake);
       addTearDown(actor.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -164,10 +185,10 @@ void main() {
           ),
         ),
       );
-      await tester.ensureVisible(find.text('更多表情 · 12'));
-      await tester.tap(find.text('更多表情 · 12'));
+      await tester.ensureVisible(find.text('更多动作 · 17'));
+      await tester.tap(find.text('更多动作 · 17'));
       await tester.pump();
-      expect(find.byType(ActionChip), findsNWidgets(12));
+      expect(find.byType(ActionChip), findsNWidgets(17));
       for (final mood in CompanionMood.actions) {
         final chip = find.widgetWithText(ActionChip, mood.label('zh-CN'));
         await tester.ensureVisible(chip);
@@ -180,10 +201,10 @@ void main() {
         );
         expect(tester.takeException(), isNull);
       }
-      await tester.ensureVisible(find.text('跟随页面'));
-      await tester.tap(find.text('跟随页面'));
+      await tester.ensureVisible(find.text('恢复作息'));
+      await tester.tap(find.text('恢复作息'));
       await tester.pump();
-      expect(actor.mood, CompanionMood.idle);
+      expect(actor.mood, CompanionRoutine.activity(awake));
       await tester.pumpWidget(const SizedBox());
       actor.setForeground(false);
     },
@@ -202,6 +223,7 @@ void main() {
       await tester.pumpWidget(
         PulseLinkApp(
           catalog: catalog,
+          companionNow: () => awake,
           preferences: preferences,
           initialLocation: '/zh-CN/posts',
         ),
@@ -222,10 +244,10 @@ void main() {
       expect(actor.mood, CompanionMood.search);
       await tester.enterText(search, '');
       await tester.pump();
-      expect(actor.mood, CompanionMood.think);
+      expect(actor.mood, CompanionRoutine.activity(awake));
       router.go('/zh-CN/posts/segmeris-guide');
       await tester.pumpAndSettle();
-      expect(actor.mood, CompanionMood.read);
+      expect(actor.mood, CompanionRoutine.activity(awake));
       expect(
         tester.getRect(find.byType(CompanionDock)).top,
         greaterThanOrEqualTo(tester.getRect(find.byType(BlogPage)).bottom),
@@ -268,7 +290,8 @@ void main() {
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
-    final actor = CompanionController()..setRoute('/zh-CN/studio');
+    final actor = CompanionController(now: () => awake)
+      ..setRoute('/zh-CN/studio');
     final publisher = Publisher();
     addTearDown(actor.dispose);
     addTearDown(publisher.dispose);

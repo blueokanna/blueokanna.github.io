@@ -22,6 +22,14 @@ class ProjectEntry {
       sources = (data['sources'] as List)
           .map((s) => SourceLink.fromJson(s as Map<String, dynamic>))
           .toList();
+  String contentLanguage(String tag) => sections.containsKey(tag)
+      ? tag
+      : sections.containsKey('en')
+      ? 'en'
+      : 'zh-CN';
+  String description(String tag) =>
+      descriptions[tag] ?? descriptions['en'] ?? descriptions['zh-CN']!;
+  List<BlogSection> detail(String tag) => sections[contentLanguage(tag)]!;
   final String id, name, repository;
   final String? articleId;
   final int variant;

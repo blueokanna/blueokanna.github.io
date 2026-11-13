@@ -19,10 +19,12 @@ class PulseLinkApp extends StatefulWidget {
     required this.catalog,
     required this.preferences,
     this.initialLocation,
+    this.companionNow,
   });
   final BlogCatalog catalog;
   final BlogPreferences preferences;
   final String? initialLocation;
+  final DateTime Function()? companionNow;
   @override
   State<PulseLinkApp> createState() => _PulseLinkAppState();
 }
@@ -78,6 +80,10 @@ class _PulseLinkAppState extends State<PulseLinkApp> {
                     key: ValueKey(
                       '${strings.tag}:$route:${state.pathParameters['slug']}',
                     ),
+                    publisher: _publisher,
+                    chinesePostIds: widget.catalog.translations['zh-CN']!.posts
+                        .map((post) => post.id)
+                        .toSet(),
                     page: route,
                     slug: state.pathParameters['slug'],
                     strings: strings,
@@ -153,7 +159,11 @@ class _PulseLinkAppState extends State<PulseLinkApp> {
                 widget.preferences.paused ||
                 MediaQuery.disableAnimationsOf(context),
           ),
-          child: CompanionHost(route: '/${parts.join('/')}', child: child!),
+          child: CompanionHost(
+            route: '/${parts.join('/')}',
+            now: widget.companionNow,
+            child: child!,
+          ),
         ),
       );
     },
