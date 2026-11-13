@@ -67,7 +67,7 @@ flutter:
     - assets/i18n/
     - assets/projects.json
     - assets/posts.json
-    - content/friends.json
+    - content/
     - assets/diagrams/
     - assets/fonts/googlesans-OFL.txt
     - assets/fonts/notosanssc-OFL.txt

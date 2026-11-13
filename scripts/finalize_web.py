@@ -12,7 +12,13 @@ def finalize():
     if not (output / 'index.html').is_file():
         raise RuntimeError('Build Flutter Web before finalizing')
     shutil.copyfile(ROOT / 'web/retire_service_worker.js', output / 'flutter_service_worker.js')
-    shutil.copyfile(ROOT / 'content/friends.json', output / 'friends.json')
+    blogroll = ROOT / 'content/friends.json'
+    if blogroll.is_file():
+        shutil.copyfile(blogroll, output / 'friends.json')
+    else:
+        # Incremental builds must not publish a snapshot deleted from the source.
+        (output / 'friends.json').unlink(missing_ok=True)
+        (output / 'assets/content/friends.json').unlink(missing_ok=True)
     shutil.copyfile(ROOT / 'CNAME', output / 'CNAME')
     revision = os.environ.get('GITHUB_SHA') or subprocess.check_output(
         ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
